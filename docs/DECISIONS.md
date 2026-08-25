@@ -53,7 +53,7 @@ have a CLA-free but DCO-signed contribution flow (see CONTRIBUTING).
 
 ---
 
-## 3. Language policy (2026-08-26) — ⚠ deviates from the original ask
+## 3. Language policy (2026-08-26) — confirmed by Achraf 2026-08-26
 
 **Decision.**
 - **Japanese-first, always available in English:** README, docs site,
@@ -94,7 +94,7 @@ maintainer will help with English comments."
 After v0.1 it's a mechanical but tedious rewrite. **Decide before the first
 code commit.**
 
-**Revisit if.** Achraf disagrees after reading this — it's his project.
+**Status.** Achraf confirmed English code / Japanese-first docs on 2026-08-26. Closed.
 
 ---
 

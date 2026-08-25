@@ -6,10 +6,13 @@ Once public, this mirrors a GitHub Project board.
 
 ## Week 0 — before any feature code
 
-- [ ] Employment contract side-project clause checked
-- [ ] Decide DECISIONS.md §3 (language) and §4 (stack) — or accept as written
-- [ ] LINE Developers: create **provider** → LINE Login channel (JP) →
-      Messaging API channel → LIFF app. Apply for **email** permission now.
+- [x] Employment contract side-project clause checked (2026-08-26: not needed)
+- [x] Decide DECISIONS.md §3 (language) and §4 (stack) — confirmed 2026-08-26
+- [x] LINE Developers: provider → LINE Login channel (JP) → Messaging API
+      channel → LIFF app → OA linked to Login channel. Done 2026-08-26, see
+      DEV_SETUP.md.
+- [ ] Apply for **email** permission — needs a screenshot of a login screen;
+      do it right after the spike produces one
 - [ ] Publish placeholder `renkei@0.0.0` to npm (name squat protection)
 - [ ] Register `renkei` GitHub org (free) — transfer repo there at launch or
       keep under personal account; decide at launch
@@ -94,7 +97,7 @@ Order matters: each item is what the next needs.
 - [ ] `@renkei/next`: App Router helpers, middleware, `<LineLoginButton />`
 - [ ] Cloudflare Workers deploy target (or "token-issuer-only" mode per spike)
 - [ ] Supabase Edge Function deploy target
-- [ ] LINE Mini App specifics: service messages prerequisites, `liff.permanentLink`
+- [ ] LINE MINI App channel support (LINE is folding LIFF into MINI App; new apps should be MINI App channels under the same provider) — service messages prerequisites, `liff.permanentLink`
 - [ ] Multi-region tutorial (JP + TW channels, `line_region` routing)
 - [ ] zh-TW docs kickoff (community), post in LINE Developers TW channels
 

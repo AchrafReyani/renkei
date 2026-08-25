@@ -1,0 +1,73 @@
+# Development setup — LINE Developers Console
+
+What exists on the LINE side for renkei development, how it was created
+(2026-08-26), and the traps hit along the way. This is the raw material for
+the public 「LINE Developers Console の事前準備」 docs page.
+
+Secrets live in `.env` (gitignored). Only IDs are recorded here.
+
+## What exists
+
+| Thing | Value | Where |
+|---|---|---|
+| Business ID | achrafreyani99@gmail.com (email login, SMS-verified) | account.line.biz |
+| Provider | **renkei** — ID `2005473999` | developers.line.biz/console/provider/2005473999 |
+| LINE Login channel | **renkei-dev-jp** — ID `2011257262`, region **Japan**, status Developing, Web app enabled, 2FA on | /console/channel/2011257262 |
+| Callback URLs | `http://localhost:3000/line/callback` · `http://localhost:8787/line/callback` · `http://127.0.0.1:3000/line/callback` | LINE Login tab |
+| LIFF app | **renkei-dev** — ID `2011257262-OKRFVulZ`, Full, scopes `openid profile`, add-friend **On (Aggressive)**, endpoint placeholder `https://renkei-dev.invalid/liff` (change when the spike has an https URL) | LIFF tab |
+| LINE Official Account | display name "Achraf" (rename to "renkei dev" in OA Manager when convenient), basic ID `@360trecn`, industry 個人 | manager.line.biz/account/@360trecn |
+| Messaging API channel | ID `2011257490`, **provider renkei** ✔ | OA Manager → Settings → Messaging API; also visible in Developers Console |
+| Login ↔ OA link | renkei-dev-jp → Linked LINE Official Account = `@360trecn` ✔ | Login channel → Basic settings → Add friend option |
+| Email permission | **Not applied** — needs a screenshot of the user-facing screen explaining email use. Apply once the spike has a login page. | Login channel → Basic settings → OpenID Connect |
+| Channel access token (long-lived) | Not issued yet — needed for link tokens / push (v0.2) | Developers Console → Messaging API channel → Messaging API tab |
+
+## The order that works (and why)
+
+1. **Provider first.** Channels can never move between providers. Login, LIFF
+   and Messaging user IDs only match when all channels are under one
+   provider.
+2. **LINE Login channel** under the provider. Region is per channel and
+   permanent — this is the "one channel per country" constraint.
+3. **Messaging API channel** — can no longer be created in the Developers
+   Console. The flow is: Console → "Create a Messaging API channel" →
+   redirected to *LINE Official Account* entry form → (SMS verification of
+   the Business ID) → OA created → OA Manager → one-time 「情報利用に関する
+   同意」 consent → Settings → Messaging API → Enable → **Select provider**.
+4. **The trap:** the provider dialog defaults to **"New provider"**. Selecting
+   that silently puts the bot under a different provider and breaks user-ID
+   matching. Pick the existing provider. This should be renkei's first-run
+   check and the loudest warning in the docs.
+5. **Link the OA to the Login channel** (Login channel → Basic settings →
+   Add friend option → Linked LINE Official Account). Without this,
+   `bot_prompt` does nothing.
+6. **LIFF app** on the Login channel. Endpoint must be https (any valid URL
+   accepted at creation, can be a placeholder). Add-friend option here is
+   the LIFF-side equivalent of `bot_prompt`.
+7. **Email permission** is a separate application with a screenshot
+   requirement — do it after a login screen exists.
+
+## Things learned that belong in the public docs
+
+- `http://localhost:<port>` **is** accepted as a LINE Login callback URL
+  (validation passed). No tunnel needed for web login dev. LIFF still needs
+  https.
+- Creating an OA requires **SMS verification** of the Business ID — tell
+  people up front so they have their phone.
+- LINE says **LIFF is being rebranded into LINE MINI App** and recommends new
+  apps be created as MINI App channels (JP service area, or TW with local
+  approval). Existing LIFF apps keep working. renkei should support both:
+  LIFF apps on a Login channel *and* MINI App channels under the same
+  provider. Roadmap item added.
+- Two-factor authentication on the Login channel is **on by default** for
+  new channels; users need the smartphone LINE app on first login.
+- OA Manager is Japanese-first; the Developers Console is available in
+  English. Screenshots for the docs should be taken in Japanese.
+
+## Not done today (deliberately)
+
+- Rename OA display name → "renkei dev"
+- Issue long-lived channel access token (v0.2)
+- Set OA webhook URL / disable auto-reply (v0.2, when renkei receives webhooks)
+- Email permission application (after spike)
+- TW / TH Login channels (v0.3)
+- LINE MINI App channel (v0.3)
