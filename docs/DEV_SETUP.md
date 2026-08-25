@@ -61,7 +61,14 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
   showed the friend-add screen, `friendship_status_changed=true` came back,
   `/friendship/v1/status` agreed, id_token was HS256, local verification
   matched LINE's `/verify`, `amr=["linesso"]`. No email claim (permission not
-  applied yet).
+  applied yet). All four harness variants (`aggressive`, `normal`, no prompt,
+  `email` scope) completed.
+- **LINE silently drops the `email` scope** when the channel has no email
+  permission: the login succeeds, the token's `scope` just lacks `email` and
+  the id_token has no `email` claim. There is no error to catch at login
+  time. renkei must therefore warn at **startup/config time** ("email
+  requested but channel has no email permission") and expose the granted
+  scope, rather than rely on a runtime failure.
 
 - `http://localhost:<port>` **is** accepted as a LINE Login callback URL
   (validation passed). No tunnel needed for web login dev. LIFF still needs

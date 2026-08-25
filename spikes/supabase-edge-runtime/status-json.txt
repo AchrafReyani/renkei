@@ -1,0 +1,5 @@
+{
+  "API_URL": "http://127.0.0.1:54321",
+  "DB_URL": "postgresql://postgres:postgres@127.0.0.1:54322/postgres",
+  "FUNCTIONS_URL": "http://127.0.0.1:54321/functions/v1"
+}
