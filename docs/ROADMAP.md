@@ -11,8 +11,8 @@ Once public, this mirrors a GitHub Project board.
 - [x] LINE Developers: provider → LINE Login channel (JP) → Messaging API
       channel → LIFF app → OA linked to Login channel. Done 2026-08-26, see
       DEV_SETUP.md.
-- [ ] Apply for **email** permission — needs a screenshot of a login screen;
-      do it right after the spike produces one
+- [x] Apply for **email** permission — applied 2026-08-26, awaiting review;
+      set `requestEmail: true` on the channel once approved
 - [x] Publish placeholder `renkei@0.0.0` to npm — published 2026-08-26 (passkey 2FA; publish interactively)
 - [ ] Register `renkei` GitHub org (free) — transfer repo there at launch or
       keep under personal account; decide at launch
