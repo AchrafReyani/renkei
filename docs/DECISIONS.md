@@ -202,6 +202,7 @@ first (v0.1), KV/D1 or Hyperdrive for Workers (v0.3). workerd prints an
 "Unsupported runtime" warning; we pin versions and keep the runtime matrix
 as a CI job so upgrades can't silently break a target.
 
-**Open.** Supabase's `edge-runtime` is not verified yet (needs Docker +
-`supabase functions serve`). If it fails, Supabase users run renkei as a
-container next to Supabase instead of inside an Edge Function.
+**Resolved same day.** Supabase `edge-runtime` also works — not via
+`node:http` (inert there) but via a ~60-line fetch→(req,res) shim calling
+`provider.callback()`. That shim becomes the portable adapter for all
+non-Node runtimes. See SPIKE-oidc-provider-runtimes.md.

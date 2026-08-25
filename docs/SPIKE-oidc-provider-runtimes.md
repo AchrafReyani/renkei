@@ -46,15 +46,44 @@ paid / 3 MB free limits.
    regression shows up on upgrade, and consider contributing a workerd
    note upstream once renkei is public.
 
+## Supabase edge-runtime (verified 2026-08-26, later the same day)
+
+`supabase/edge-runtime` 1.74.3 (compatible with Deno 2.1.4), run locally via
+`supabase start -x <everything except db, kong, edge-runtime>` +
+`supabase functions serve --no-verify-jwt`. Code:
+`spikes/supabase-edge-runtime/supabase/functions/`.
+
+| Approach | Result |
+|---|---|
+| `renkei-spike`: `npm:oidc-provider` import + `new Provider()` + `provider.listen(port)` + loopback `fetch` | Import and construction **work**; `listen()` reports success but the port is **inert** — loopback connect refused. `node:http` servers are not real sockets in edge-runtime. |
+| `renkei-shim`: `Deno.serve` → hand-built `IncomingMessage`/`ServerResponse` shim (~60 lines on `node:stream` + `node:events`) → `provider.callback()(req, res)` | **Works.** Discovery 200 (22 endpoints, correct issuer), JWKS 200 (1 key), `/auth` bad client → 400 with oidc-provider's error page, `/token` no creds → 400 `invalid_request` JSON. |
+
+Gotchas found:
+- Kong requires the local **anon key** as a Bearer token even with
+  `--no-verify-jwt`; with auth excluded, `supabase status` doesn't print it —
+  mint it from `jwt_secret` (HS256, `role: anon`, `iss: supabase-demo`).
+- Koa checks `res.socket.writable` before writing a body; the fake socket
+  must set `writable: true` or every response is empty with the right status.
+- oidc-provider derives *some* URLs (`jwks_uri`) from the request `Host`
+  header, so through Kong they came out as
+  `http://supabase_edge_runtime_…:8081/jwks`. The shim must set `host` from
+  the configured issuer, or the provider must run with `proxy: true` and
+  trusted `X-Forwarded-*` headers. Trivial, but easy to miss.
+- Prints the same `oidc-provider WARNING: Unsupported runtime` as workerd.
+
+**Implication:** the shim is the portable deploy path for *every* non-Node
+runtime (edge-runtime, Deno Deploy, Workers without `httpServerHandler`).
+It belongs in `@renkei/server` as `adapters/fetch-to-node.ts` with its own
+tests, and the Workers target can choose between it and `httpServerHandler`.
+"Deploy renkei as a Supabase Edge Function" is therefore real — v0.3 as
+planned; the v0.1 Supabase tutorial can still use Docker next to Supabase.
+
 ## Residual risk
 
-- **Supabase's edge runtime is not plain Deno.** It's `supabase/edge-runtime`
-  (Deno core + custom host). `npm:` and `node:http` support there is
-  narrower than Deno CLI. **Not verified in this spike** — needs
-  `supabase functions serve` with Docker running. Added to ROADMAP week 0.
-  If it fails there, the Supabase story becomes "Docker/Node next to
-  Supabase" rather than "inside an Edge Function", which is still fine for
-  the wedge tutorial.
+- edge-runtime's `npm:` compatibility is a moving target (1.74.3 today,
+  Deno 2.1-compatible while Deno CLI is at 2.9). Pin and matrix-test.
+- Persistent adapter for oidc-provider state inside an Edge Function must
+  be Postgres (the Supabase DB itself) — no in-memory across invocations.
 - Deno's default *minimum dependency age* policy (24 h) will bite users on
   the day of any renkei release. Document it in the Deno quickstart.
 

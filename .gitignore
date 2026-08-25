@@ -17,3 +17,7 @@ spikes/**/worker-result.json
 spikes/**/.wrangler/
 spikes/supabase-edge-runtime/supabase/.temp/
 spikes/**/status.json
+spikes/**/auth.txt
+spikes/**/tok.txt
+spikes/**/status-json.txt
+spikes/supabase-edge-runtime/supabase/.branches/

@@ -18,8 +18,8 @@ Once public, this mirrors a GitHub Project board.
       keep under personal account; decide at launch
 - [x] Week-1 spike: `oidc-provider` on Deno/Workers — PASS on all three
       (2026-08-26, SPIKE-oidc-provider-runtimes.md)
-- [ ] Verify the same on Supabase `edge-runtime` (`supabase functions serve`,
-      needs Docker running)
+- [x] Verify the same on Supabase `edge-runtime` — PASS via fetch→(req,res)
+      shim (2026-08-26)
 - [x] Monorepo skeleton: pnpm, Turborepo, Biome, Vitest, Changesets, CI
       (lint + test + typecheck on PR), DCO check, Renovate — 2026-08-26
 
@@ -100,7 +100,7 @@ Order matters: each item is what the next needs.
 - [ ] `@renkei/client`: `loginUrl()`, `exchangeLiffToken()`, session helpers
 - [ ] `@renkei/next`: App Router helpers, middleware, `<LineLoginButton />`
 - [ ] Cloudflare Workers deploy target via `httpServerHandler` + KV/D1 or Hyperdrive adapter
-- [ ] Supabase Edge Function deploy target
+- [ ] Supabase Edge Function deploy target — `adapters/fetch-to-node.ts` from the spike shim (+ host-header fix, Postgres adapter)
 - [ ] LINE MINI App channel support (LINE is folding LIFF into MINI App; new apps should be MINI App channels under the same provider) — service messages prerequisites, `liff.permanentLink`
 - [ ] Multi-region tutorial (JP + TW channels, `line_region` routing)
 - [ ] zh-TW docs kickoff (community), post in LINE Developers TW channels
