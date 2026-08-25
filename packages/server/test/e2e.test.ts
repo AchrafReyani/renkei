@@ -512,4 +512,81 @@ describe('renkei end to end', () => {
       404,
     );
   });
+
+  it('synthesises a flagged placeholder email only for clients that opt in, and only when LINE gave none', async () => {
+    const noEmailLine = fakeLine({
+      userId: 'Unoemail',
+      name: 'No Mail',
+      picture: 'https://p/n',
+      friend: false,
+    });
+    const SUPA = {
+      clientId: 'supa',
+      clientSecret: 'supa-secret-0123456789abcdef',
+      redirectUris: ['http://supa.test/cb'],
+      placeholderEmailDomain: 'line-users.example.com',
+    };
+    const r = await boot(noEmailLine, { clients: [APP, SUPA] });
+    const keys = await (await r.fetch(new Request(`${ISSUER}/oidc/jwks`))).json();
+    const localJwks = createLocalJWKSet(keys);
+
+    const run = async (client: {
+      clientId: string;
+      clientSecret: string;
+      redirectUris: string[];
+    }) => {
+      const b = new Browser(r);
+      const auth = new URL('/oidc/auth', ISSUER);
+      auth.search = new URLSearchParams({
+        client_id: client.clientId,
+        response_type: 'code',
+        redirect_uri: client.redirectUris[0] as string,
+        scope: 'openid email profile',
+        state: 's',
+        nonce: 'n',
+      }).toString();
+      const toLine = await b.navigate(auth.toString());
+      noEmailLine.nonce = toLine.location?.searchParams.get('nonce') ?? '';
+      const back = await b.navigate(
+        `/line/callback?code=good-code&state=${toLine.location?.searchParams.get('state')}`,
+      );
+      const tokens = (await (
+        await r.fetch(
+          new Request(`${ISSUER}/oidc/token`, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/x-www-form-urlencoded',
+              authorization: `Basic ${btoa(`${client.clientId}:${client.clientSecret}`)}`,
+            },
+            body: new URLSearchParams({
+              grant_type: 'authorization_code',
+              code: String(back.location?.searchParams.get('code')),
+              redirect_uri: client.redirectUris[0] as string,
+            }),
+          }),
+        )
+      ).json()) as Record<string, string>;
+      const { payload } = await jwtVerify(tokens.id_token as string, localJwks, { issuer: ISSUER });
+      const me = (await (
+        await r.fetch(
+          new Request(`${ISSUER}/oidc/me`, {
+            headers: { authorization: `Bearer ${tokens.access_token}` },
+          }),
+        )
+      ).json()) as Record<string, unknown>;
+      return { payload, me };
+    };
+
+    const opted = await run(SUPA);
+    expect(opted.payload.email).toBe(
+      `${String(opted.payload.sub).toLowerCase()}@line-users.example.com`,
+    );
+    expect(opted.payload.email_verified).toBe(true);
+    expect(opted.payload.email_placeholder).toBe(true);
+    expect(opted.me.email).toBe(opted.payload.email);
+
+    const plain = await run(APP);
+    expect(plain.payload.email).toBeUndefined();
+    expect(plain.payload.email_placeholder).toBeUndefined();
+  });
 });

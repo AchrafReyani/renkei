@@ -26,6 +26,18 @@ export const oidcClientSchema = z.object({
     .default('client_secret_basic'),
   /** Pin the LINE channel (region) this client logs in through. Defaults to the first channel. */
   lineRegion: z.string().optional(),
+  /**
+   * Some downstream systems (Supabase Auth's built-in providers, for one)
+   * refuse users without an email, but LINE only supplies one when the
+   * channel has email permission *and* the user consents. When set, users
+   * without an email get `<sub>@<domain>` with `email_verified: true` and an
+   * extra `email_placeholder: true` claim so your app can tell. Use a domain
+   * you control and never deliver mail to it.
+   */
+  placeholderEmailDomain: z
+    .string()
+    .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i, 'must be a bare domain like line-users.example.com')
+    .optional(),
 });
 
 export const renkeiConfigSchema = z.object({

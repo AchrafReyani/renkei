@@ -2,6 +2,7 @@ import { buildClaims, LINE_CLAIMS, LINE_SCOPE, type Storage } from '@renkei/core
 import Provider, { type Configuration, type KoaContextWithOIDC } from 'oidc-provider';
 import type { RenkeiConfig } from '../config.js';
 import { adapterFactory } from './adapter.js';
+import { applyEmailPlaceholder, EMAIL_PLACEHOLDER_CLAIM } from './claims.js';
 
 /** Paths of the OIDC provider. Discovery is fixed by spec at the issuer root. */
 export const OIDC_ROUTES = {
@@ -25,7 +26,7 @@ export const INTERACTION_PATH = '/interaction';
 export const CLAIMS_BY_SCOPE = {
   openid: ['sub'],
   profile: ['name', 'picture'],
-  email: ['email', 'email_verified'],
+  email: ['email', 'email_verified', EMAIL_PLACEHOLDER_CLAIM],
   [LINE_SCOPE]: [LINE_CLAIMS.userId, LINE_CLAIMS.friend, LINE_CLAIMS.channelId, LINE_CLAIMS.region],
 } as const;
 
@@ -86,17 +87,17 @@ export function createProvider({ config, storage, jwks, logger }: ProviderDeps):
     interactions: {
       url: (_ctx, interaction) => `${INTERACTION_PATH}/${interaction.uid}`,
     },
-    async findAccount(_ctx, sub) {
+    async findAccount(ctx, sub) {
       const identity = await storage.identities.findIdentity(sub);
       if (!identity) return undefined;
+      const clientId = ctx.oidc.client?.clientId;
+      const client = config.clients.find((c) => c.clientId === clientId);
       return {
         accountId: sub,
         async claims(_use, _scope, _claims, _rejected) {
           const accounts = await storage.identities.listLineAccounts(sub);
-          return buildClaims(identity, accounts, { regionOf }) as { sub: string } & Record<
-            string,
-            unknown
-          >;
+          const base = buildClaims(identity, accounts, { regionOf });
+          return applyEmailPlaceholder(base, client) as { sub: string } & Record<string, unknown>;
         },
       };
     },

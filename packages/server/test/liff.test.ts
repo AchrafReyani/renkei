@@ -225,4 +225,31 @@ describe('POST /liff/exchange', () => {
     );
     expect(no.headers.get('access-control-allow-origin')).toBeNull();
   });
+
+  it('applies the client placeholder-email policy on exchange', async () => {
+    const r = await createRenkei({
+      storage: createMemoryStorage(),
+      fetch: lineFetch,
+      logger: { info() {}, warn() {}, error() {} },
+      config: {
+        issuer: ISSUER,
+        channels: [CHANNEL],
+        clients: [{ ...SPA, placeholderEmailDomain: 'line-users.example.com' }],
+        cookieKeys: ['cookie-key-0123456789abcdef'],
+      },
+    });
+    const res = await r.fetch(
+      new Request(`${ISSUER}/liff/exchange`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id_token: await liffIdToken(), client_id: SPA.clientId }),
+      }),
+    );
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Record<string, string>;
+    const keys = await (await r.fetch(new Request(`${ISSUER}/oidc/jwks`))).json();
+    const { payload } = await jwtVerify(body.id_token as string, createLocalJWKSet(keys));
+    expect(payload.email).toBe(`${String(payload.sub).toLowerCase()}@line-users.example.com`);
+    expect(payload.email_placeholder).toBe(true);
+  });
 });

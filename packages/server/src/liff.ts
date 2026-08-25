@@ -14,6 +14,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { importJWK, type JWK, SignJWT } from 'jose';
 import type { LineChannelConfig, OidcClientConfig, RenkeiConfig } from './config.js';
+import { applyEmailPlaceholder } from './oidc/claims.js';
 import { CLAIMS_BY_SCOPE } from './oidc/provider.js';
 
 export interface LiffDeps {
@@ -153,7 +154,10 @@ export function liffRoutes(deps: LiffDeps) {
         scope.flatMap((s) => CLAIMS_BY_SCOPE[s as keyof typeof CLAIMS_BY_SCOPE] ?? []),
       );
       const accounts = await storage.identities.listLineAccounts(identity.sub);
-      const all = buildClaims(identity, accounts, { regionOf, preferChannelId: channel.channelId });
+      const all = applyEmailPlaceholder(
+        buildClaims(identity, accounts, { regionOf, preferChannelId: channel.channelId }),
+        client,
+      );
       const claims = Object.fromEntries(
         Object.entries(all).filter(([k]) => k === 'sub' || allowed.has(k)),
       );
