@@ -468,9 +468,9 @@ describe('renkei end to end', () => {
       client_id: APP.clientId,
       response_type: 'code',
       redirect_uri: APP.redirectUris[0] as string,
-      scope: 'openid email profile',
+      // Exactly what Supabase's keycloak provider sends: no `openid`, no nonce.
+      scope: 'profile email',
       state: 'kc',
-      nonce: 'kn',
     }).toString();
     const toLine = await b.navigate(auth.toString());
     expect(toLine.location?.origin).toBe('https://access.line.me');

@@ -113,9 +113,22 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     revoke: '/oidc/token/revocation',
   };
   app.all('/protocol/openid-connect/:endpoint', (c) => {
-    const target = keycloakAlias[c.req.param('endpoint')];
+    const endpoint = c.req.param('endpoint');
+    const target = keycloakAlias[endpoint];
     if (!target) return c.notFound();
-    return bridge(provider.callback(), c.req.raw, { ...bridgeOpts, path: target });
+    let request = c.req.raw;
+    if (endpoint === 'auth') {
+      // Keycloak clients (Supabase among them) send `scope=profile email`
+      // without `openid`. Keycloak tolerates that; a strict OIDC provider
+      // does not. Add it so the request means what the client meant.
+      const url = new URL(request.url);
+      const scope = (url.searchParams.get('scope') ?? '').split(' ').filter(Boolean);
+      if (!scope.includes('openid')) {
+        url.searchParams.set('scope', ['openid', ...scope].join(' '));
+        request = new Request(url, request);
+      }
+    }
+    return bridge(provider.callback(), request, { ...bridgeOpts, path: target });
   });
 
   // ── Interaction: the provider needs a user → send them to LINE ──────────

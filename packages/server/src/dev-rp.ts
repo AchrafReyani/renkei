@@ -48,6 +48,19 @@ export function devRoutes({
 <p><a href="/.well-known/openid-configuration">discovery</a> · <a href="${OIDC_ROUTES.jwks}">jwks</a></p>`),
   );
 
+  // Landing page for downstream IdPs (Supabase etc.) to redirect to after login:
+  // shows whatever arrived in the query/fragment so the round trip can be inspected.
+  dev.get('/landing', (c) =>
+    c.html(`<!doctype html><meta charset="utf-8"><title>renkei dev landing</title>
+<body style="font-family:system-ui;max-width:50rem;margin:3rem auto"><h1>Landing</h1>
+<pre id="out"></pre><script>
+const q = Object.fromEntries(new URLSearchParams(location.search));
+const h = Object.fromEntries(new URLSearchParams(location.hash.replace(/^#/, '')));
+const dec = (t) => { try { return JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))); } catch { return undefined; } };
+document.getElementById('out').textContent = JSON.stringify({ query: q, fragment: Object.fromEntries(Object.entries(h).map(([k,v]) => [k, k.endsWith('token') ? '…' + v.slice(-12) : v])), access_token_claims: h.access_token ? dec(h.access_token) : undefined }, null, 2);
+</script></body>`),
+  );
+
   if (liffId && liffClient) {
     dev.get('/liff', (c) =>
       c.html(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>renkei LIFF dev</title>
