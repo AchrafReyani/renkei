@@ -13,7 +13,7 @@ Once public, this mirrors a GitHub Project board.
       DEV_SETUP.md.
 - [ ] Apply for **email** permission — needs a screenshot of a login screen;
       do it right after the spike produces one
-- [ ] Publish placeholder `renkei@0.0.0` to npm — prepared in `packages/renkei`, blocked on Achraf's OTP
+- [x] Publish placeholder `renkei@0.0.0` to npm — published 2026-08-26 (passkey 2FA; publish interactively)
 - [ ] Register `renkei` GitHub org (free) — transfer repo there at launch or
       keep under personal account; decide at launch
 - [x] Week-1 spike: `oidc-provider` on Deno/Workers — PASS on all three
