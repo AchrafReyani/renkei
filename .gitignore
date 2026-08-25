@@ -21,3 +21,5 @@ spikes/**/auth.txt
 spikes/**/tok.txt
 spikes/**/status-json.txt
 spikes/supabase-edge-runtime/supabase/.branches/
+docs/.vitepress/dist/
+docs/.vitepress/cache/

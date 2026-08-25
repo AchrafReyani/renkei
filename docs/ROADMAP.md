@@ -66,26 +66,27 @@ Order matters: each item is what the next needs.
 - [x] Dockerfile (node:22-alpine, pnpm deploy --prod, 301 MB) — verified standalone 2026-08-26;
       GHCR publish workflow written (`release.yml`, runs on `v*` tags — not exercised yet)
 - [x] `docker-compose.yml` with Postgres — verified: migrations run at boot, healthz 200
-- [ ] npm publish via Changesets on tag
+- [ ] npm publish via Changesets on tag (at launch; `renkei` CLI = `npx renkei` ready)
 - [ ] Demo instance running
 
 **docs (JA primary, EN mirror in the same PR)**
-- [ ] README: why / diagram / 5-minute quickstart / status badges
+- [x] README: why / diagram / 5-minute quickstart / comparison table (ja + en) — badges at launch
 - [x] Tutorial 1: Supabase + renkei (the wedge) — draft written ja/en; flow verified
       live 2026-08-26 (local CLI, keycloak provider, placeholder email): Supabase
       `user_signedup` + `login` events with LINE name
-- [ ] Tutorial 2: Next.js direct with session cookie
-- [ ] Reference: config, endpoints, claims, webhooks
-- [ ] LINE Developers Console prerequisites page (provider sharing, email
-      application, callback URLs, LIFF setup) — with screenshots
-- [ ] Trademark note + LINE Login button guideline compliance
-- [ ] VitePress site skeleton with `ja` default, `en` mirror
+- [x] Tutorial 2: Next.js via Auth.js as a plain OIDC client (ja/en) + `examples/nextjs`;
+      redirect chain verified, final LINE leg needs a human
+- [x] Reference: config, endpoints, claims (webhooks land with v0.2)
+- [x] LINE Developers Console prerequisites page (ja/en) — screenshots still to add
+- [x] Trademark note + button-guideline link in README; compliant button component is issue #19
+- [x] VitePress site (`pnpm docs:build`), `ja` root, `en` under /en/, local search
 
 **hygiene** — full list in LAUNCH.md §3
-- [ ] CONTRIBUTING (ja/en), CoC, SECURITY, templates, CODEOWNERS, labels
-- [ ] ≥ 10 open issues seeded from v0.2/v0.3, ≥ 5 `good first issue`
-- [ ] Social preview image, topics, description, homepage link
-- [ ] Discussions enabled with a pinned 「はじめに / Welcome」 thread
+- [x] CONTRIBUTING (ja/en), CoC, SECURITY, templates, CODEOWNERS, labels
+- [x] 20 issues seeded (#1–#20), 6 `good first issue`
+- [~] Social preview image generated (`.github/social-preview.png`) — upload is UI-only;
+      topics + description set; homepage link at launch
+- [x] Discussions enabled with a 「はじめに / Welcome」 thread
 
 **proof**
 - [ ] Dogfooded in one real app for two weeks
