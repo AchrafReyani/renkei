@@ -1,0 +1,25 @@
+{
+  "name": "@renkei/server",
+  "version": "0.0.0",
+  "description": "renkei server: Hono routes, OIDC provider, webhooks. Currently a development harness for the LINE Login flow.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AchrafReyani/renkei",
+    "directory": "packages/server"
+  },
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "node --env-file=../../.env --import tsx src/dev.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.1",
+    "@renkei/core": "workspace:*",
+    "hono": "^4.13.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.0"
+  }
+}

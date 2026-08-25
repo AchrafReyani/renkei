@@ -1,0 +1,32 @@
+{
+  "name": "renkei",
+  "version": "0.0.0",
+  "description": "renkei (連携) — self-hosted identity broker for LINE. Placeholder release; see https://github.com/AchrafReyani/renkei",
+  "license": "Apache-2.0",
+  "author": "Achraf Reyani",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AchrafReyani/renkei",
+    "directory": "packages/renkei"
+  },
+  "keywords": [
+    "line",
+    "line-login",
+    "liff",
+    "oidc",
+    "openid-connect",
+    "identity",
+    "japan"
+  ],
+  "type": "module",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

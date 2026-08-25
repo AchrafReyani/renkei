@@ -15,3 +15,5 @@ spikes/**/disc.json
 spikes/**/jwks.json
 spikes/**/worker-result.json
 spikes/**/.wrangler/
+spikes/supabase-edge-runtime/supabase/.temp/
+spikes/**/status.json
