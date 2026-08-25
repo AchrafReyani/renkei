@@ -39,6 +39,11 @@ export function devRoutes({
 <li><a href="/dev/login?bot_prompt=none">ログイン（bot_prompt なし）</a></li>
 <li><a href="/dev/login?scope=openid+profile+email+line">ログイン（email scope も要求）</a></li>
 </ul>
+<section style="border:1px solid #ddd;border-radius:8px;padding:1rem;margin:1.5rem 0;background:#fafafa">
+<h2 style="margin-top:0;font-size:1.1rem">メールアドレスの取得について / About your email address</h2>
+<p>LINEログイン時にメールアドレスの提供に同意いただいた場合、renkei はメールアドレスを<strong>アカウントの識別と本人確認、および重要なお知らせの送信</strong>のみに利用します。広告目的での利用や第三者への提供は行いません。同意しなくてもログインできます。</p>
+<p style="color:#555">If you consent to share your email address during LINE Login, renkei uses it <strong>only to identify your account, verify it is you, and send important notices</strong>. It is never used for advertising or shared with third parties. You can log in without consenting.</p>
+</section>
 <p>LIFF: ${liffId && liffClient ? `<a href="/dev/liff">/dev/liff</a> (open via <code>https://liff.line.me/${liffId}</code> on a phone, or here in a browser)` : 'set LIFF_ID and add a public client to enable /dev/liff'}</p>
 <p><a href="/.well-known/openid-configuration">discovery</a> · <a href="${OIDC_ROUTES.jwks}">jwks</a></p>`),
   );

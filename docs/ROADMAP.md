@@ -37,7 +37,8 @@ Order matters: each item is what the next needs.
       (ES256 tested with a local JWKS only — no ES256 channel yet)
 - [x] `verifyViaLine()` — `/oauth2/v2.1/verify` fallback and test oracle
 - [x] `getFriendshipStatus()` (+ `getProfile()`, `parseCallback()`)
-- [ ] `verifyLiffToken()` — id_token path and access_token path
+- [x] `verifyLiffToken()` — id_token path (`verifyIdToken`) and access_token path
+      (`verifyAccessToken` + profile); live-verified in a browser 2026-08-26
 - [ ] `parseWebhook()` + signature check for `follow`, `unfollow`
       (`accountLink` in v0.2)
 - [x] Identity mapping: upsert rules, multi-channel, `sub` stability (`upsertIdentityFromLine`, `buildClaims`)
@@ -49,7 +50,7 @@ Order matters: each item is what the next needs.
 - [x] Config loader (env, zod-validated, JA/EN error messages) — YAML later
 - [ ] First-run checks: provider sharing warning, email-permission warning
 - [~] Routes: `/interaction/:uid` (→ LINE), `/line/callback`, `/interaction/:uid/finish`,
-      `/healthz` done; `/liff/exchange`, `/webhooks/line` pending
+      `/liff/exchange`, `/healthz` done; `/webhooks/line` pending
 - [x] `oidc-provider` mounted at `/oidc`: discovery, JWKS, authorize, token,
       userinfo; `findAccount` backed by identity store; `line:*` claims;
       first-party auto-grant (no second consent screen); PKCE required for

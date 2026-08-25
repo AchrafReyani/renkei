@@ -14,7 +14,7 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
 | Provider | **renkei** — ID `2005473999` | developers.line.biz/console/provider/2005473999 |
 | LINE Login channel | **renkei-dev-jp** — ID `2011257262`, region **Japan**, status **Published** (since 2026-08-26, irreversible), Web app enabled, 2FA on | /console/channel/2011257262 |
 | Callback URLs | `http://localhost:3000/line/callback` · `http://localhost:8787/line/callback` · `http://127.0.0.1:3000/line/callback` | LINE Login tab |
-| LIFF app | **renkei-dev** — ID `2011257262-OKRFVulZ`, Full, scopes `openid profile`, add-friend **On (Aggressive)**, endpoint placeholder `https://renkei-dev.invalid/liff` (change when the spike has an https URL) | LIFF tab |
+| LIFF app | **renkei-dev** — ID `2011257262-OKRFVulZ`, Full, scopes `openid profile`, add-friend **On (Aggressive)**, endpoint currently a **Cloudflare quick-tunnel URL** (`…trycloudflare.com/dev/liff`, ephemeral — update whenever the tunnel restarts) | LIFF tab |
 | LINE Official Account | display name "Achraf" (rename to "renkei dev" in OA Manager when convenient), basic ID `@360trecn`, industry 個人 | manager.line.biz/account/@360trecn |
 | Messaging API channel | ID `2011257490`, **provider renkei** ✔ | OA Manager → Settings → Messaging API; also visible in Developers Console |
 | Login ↔ OA link | renkei-dev-jp → Linked LINE Official Account = `@360trecn` ✔ | Login channel → Basic settings → Add friend option |
@@ -63,6 +63,12 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
   matched LINE's `/verify`, `amr=["linesso"]`. No email claim (permission not
   applied yet). All four harness variants (`aggressive`, `normal`, no prompt,
   `email` scope) completed.
+- **LIFF exchange verified live (2026-08-26):** `/dev/liff` through a
+  `cloudflared` quick tunnel; `liff.init` → `liff.login` → both tokens →
+  `POST /liff/exchange` → renkei id_token with `line:*` claims. Works in an
+  external browser (`inClient: false`); in-app not yet tried.
+- **Claude in Chrome blocks `trycloudflare.com`** outright (not an approval
+  prompt), so LIFF verification through the tunnel has to be done by Achraf.
 - **LINE silently drops the `email` scope** when the channel has no email
   permission: the login succeeds, the token's `scope` just lacks `email` and
   the id_token has no `email` claim. There is no error to catch at login
