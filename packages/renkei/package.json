@@ -6,7 +6,7 @@
   "author": "Achraf Reyani",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AchrafReyani/renkei",
+    "url": "git+https://github.com/AchrafReyani/renkei.git",
     "directory": "packages/renkei"
   },
   "keywords": [
