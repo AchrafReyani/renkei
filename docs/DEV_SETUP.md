@@ -12,7 +12,7 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
 |---|---|---|
 | Business ID | achrafreyani99@gmail.com (email login, SMS-verified) | account.line.biz |
 | Provider | **renkei** — ID `2005473999` | developers.line.biz/console/provider/2005473999 |
-| LINE Login channel | **renkei-dev-jp** — ID `2011257262`, region **Japan**, status Developing, Web app enabled, 2FA on | /console/channel/2011257262 |
+| LINE Login channel | **renkei-dev-jp** — ID `2011257262`, region **Japan**, status **Published** (since 2026-08-26, irreversible), Web app enabled, 2FA on | /console/channel/2011257262 |
 | Callback URLs | `http://localhost:3000/line/callback` · `http://localhost:8787/line/callback` · `http://127.0.0.1:3000/line/callback` | LINE Login tab |
 | LIFF app | **renkei-dev** — ID `2011257262-OKRFVulZ`, Full, scopes `openid profile`, add-friend **On (Aggressive)**, endpoint placeholder `https://renkei-dev.invalid/liff` (change when the spike has an https URL) | LIFF tab |
 | LINE Official Account | display name "Achraf" (rename to "renkei dev" in OA Manager when convenient), basic ID `@360trecn`, industry 個人 | manager.line.biz/account/@360trecn |
@@ -47,6 +47,21 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
    requirement — do it after a login screen exists.
 
 ## Things learned that belong in the public docs
+
+- **Developing-status channels reject every user without a role.** The first
+  real login returned `400 Bad Request — This channel is now developing
+  status. User need to have developer role.` The Business ID that owns the
+  channel (email login) is *not* the LINE account on the phone, so even the
+  owner is rejected. Fix for a dev channel: publish it (irreversible;
+  Developing → Published only, recreate to go back). Alternative: Roles tab →
+  invite the LINE account as Tester, which requires that account to log into
+  LINE Developers once to accept. Document both; recommend Publish for
+  throwaway dev channels and Tester for real ones.
+- **First end-to-end run (2026-08-26) succeeded:** `bot_prompt=aggressive`
+  showed the friend-add screen, `friendship_status_changed=true` came back,
+  `/friendship/v1/status` agreed, id_token was HS256, local verification
+  matched LINE's `/verify`, `amr=["linesso"]`. No email claim (permission not
+  applied yet).
 
 - `http://localhost:<port>` **is** accepted as a LINE Login callback URL
   (validation passed). No tunnel needed for web login dev. LIFF still needs

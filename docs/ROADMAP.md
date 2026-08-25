@@ -13,29 +13,30 @@ Once public, this mirrors a GitHub Project board.
       DEV_SETUP.md.
 - [ ] Apply for **email** permission — needs a screenshot of a login screen;
       do it right after the spike produces one
-- [ ] Publish placeholder `renkei@0.0.0` to npm (name squat protection)
+- [ ] Publish placeholder `renkei@0.0.0` to npm — prepared in `packages/renkei`, blocked on Achraf's OTP
 - [ ] Register `renkei` GitHub org (free) — transfer repo there at launch or
       keep under personal account; decide at launch
 - [x] Week-1 spike: `oidc-provider` on Deno/Workers — PASS on all three
       (2026-08-26, SPIKE-oidc-provider-runtimes.md)
 - [ ] Verify the same on Supabase `edge-runtime` (`supabase functions serve`,
       needs Docker running)
-- [ ] Monorepo skeleton: pnpm, Turborepo, Biome, Vitest, Changesets, CI
-      (lint + test + typecheck on PR), DCO check, Dependabot/Renovate
+- [x] Monorepo skeleton: pnpm, Turborepo, Biome, Vitest, Changesets, CI
+      (lint + test + typecheck on PR), DCO check, Renovate — 2026-08-26
 
 ## v0.1 — "shareable" (launch)
 
 Order matters: each item is what the next needs.
 
 **core**
-- [ ] `buildAuthorizeUrl()` — scope, `bot_prompt`, `state`, `nonce`, PKCE,
+- [x] `buildAuthorizeUrl()` — scope, `bot_prompt`, `state`, `nonce`, PKCE,
       `ui_locales`, `initial_amr_display`, `switch_amr`, `disable_auto_login`
-      (all the LINE-specific params exposed, with docs)
-- [ ] `exchangeCode()` — token endpoint, error mapping
-- [ ] `verifyIdToken()` — HS256 (channel secret) and ES256 (JWKS with cache
+      (all the LINE-specific params exposed, with docs) — verified live 2026-08-26
+- [x] `exchangeCode()` — token endpoint, error mapping
+- [x] `verifyIdToken()` — HS256 (channel secret) and ES256 (JWKS with cache
       + rotation); `iss`/`aud`/`exp`/`nonce`; email + `amr` extraction
-- [ ] `verifyViaLine()` — `/oauth2/v2.1/verify` fallback and test oracle
-- [ ] `getFriendshipStatus()`
+      (ES256 tested with a local JWKS only — no ES256 channel yet)
+- [x] `verifyViaLine()` — `/oauth2/v2.1/verify` fallback and test oracle
+- [x] `getFriendshipStatus()` (+ `getProfile()`, `parseCallback()`)
 - [ ] `verifyLiffToken()` — id_token path and access_token path
 - [ ] `parseWebhook()` + signature check for `follow`, `unfollow`
       (`accountLink` in v0.2)
