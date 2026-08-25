@@ -36,7 +36,11 @@ importers:
         specifier: ^6.2.10
         version: 6.2.10
 
-  packages/renkei: {}
+  packages/renkei:
+    dependencies:
+      '@renkei/server':
+        specifier: workspace:*
+        version: link:../server
 
   packages/server:
     dependencies:

@@ -1,49 +1,140 @@
 # renkei（連携）
 
-> **開発中 / Under construction** — まだ動くものはありません。設計・計画は [`docs/`](docs/) を参照。
-> English: [README.en.md](README.en.md)
+> English: [README.en.md](README.en.md) · ドキュメント: [docs/](docs/) · 状況: **v0.1 開発中**（公開前）
 
 **LINEログインの「その先」を全部引き受ける、セルフホスト型IDブローカー。**
 
-LINEでログインさせるだけなら、Auth0でもClerkでもLogtoでもできます。
-できないのは、その先です。
-
-- ログイン時の**友だち追加**（`bot_prompt`）と友だち状態の追跡
-- **LIFF / LINEミニアプリ**のIDトークンをサーバー側で検証してセッションにする
-- **Messaging APIのアカウント連携**（linkToken → nonce → `accountLink` webhook）
-- LINEログイン / LIFF / Messaging API それぞれの**ユーザーIDの紐付け**
-- **国ごとに別チャネル**（日本・台湾・タイ）の扱い
-- IDトークンにしか入っていない**メールアドレス**の正しい取り出し方
-
-renkei はこれらを引き受け、反対側には**標準のOpenID Connect**を出します。
-Supabase、Firebase、Cognito、Keycloak、あるいは自前のアプリにそのまま繋げます。
+LINEでログインさせるだけなら Auth0 でも Clerk でも Logto でもできます。できないのはその先です。
+renkei は LINE 固有の面倒をすべて引き受け、反対側には**標準の OpenID Connect** を出します。
+Supabase・Firebase・Cognito・Keycloak・自前アプリに、そのまま繋がります。
 
 ```
-LINE Platform  ──▶  renkei（自分でホスト）  ──▶  Supabase / Firebase / Cognito / Keycloak / 自前アプリ
- Login・LIFF・         友だち追加・ID紐付け・             標準OIDC（+ line:* クレーム）
- Messaging API         トークン検証・アカウント連携
+LINE Platform ──────▶  renkei（自分でホスト）  ──────▶  Supabase / Keycloak / Cognito / 自前アプリ
+ LINE Login              友だち追加（bot_prompt）            標準 OIDC + line:* クレーム
+ LIFF / ミニアプリ        LIFF トークン交換                   Keycloak 互換パスも提供
+ Messaging API           ID の紐付け・友だち状態
 ```
 
-## なぜ作るのか
+## renkei がやること
 
-日本の開発者は同じものを何度も自作しています。CognitoはLINEの`bot_prompt`を渡せない。Auth0はManagement APIのハックが要る。SupabaseにはLINEプロバイダーが無い。LINE公式のTipsですら「ID連携の仕組み自体はLINEプラットフォームでは提供していないので、自分で作ってください」と書いてあります。
+| | renkei | Auth0 | Clerk | Logto | Cognito | 自作 |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|
+| LINE ログイン | ✅ | ✅ | ✅ | ✅ | OIDC 手動設定 | ✅ |
+| ログイン時の友だち追加（`bot_prompt`）と友だち状態 | ✅ | Management API のハックが必要 | ✗ | ✗ | ✗（渡せない） | 自分で |
+| LIFF / ミニアプリのトークンをサーバーで検証 → セッション | ✅ `POST /liff/exchange` | ✗ | ✗ | ✗ | ✗ | 自分で |
+| Messaging API のアカウント連携（linkToken / nonce / webhook） | v0.2 | ✗ | ✗ | ✗ | ✗ | 自分で |
+| LINE Login / LIFF / Messaging の userId を一つの `sub` に | ✅ | ✗ | ✗ | ✗ | ✗ | 自分で |
+| 国ごとのチャネル（日本・台湾・タイ） | ✅ 設定で複数 | 接続を複数作る | ✗ | ✗ | ✗ | 自分で |
+| メール（id_token にしか無い・権限が必要・黙って落ちる） | ✅ 正しく取得＋起動時に警告＋プレースホルダー | △ | △ | △ | △ | 自分で |
+| Supabase から使う | ✅ 標準の Keycloak プロバイダーで | — | — | — | — | — |
+| セルフホスト / OSS | ✅ Apache-2.0 | ✗ | ✗ | ✅ | ✗ | ✅ |
 
-有償SaaSは存在します。OSSは存在しませんでした。
+## 5分で試す
+
+前提: LINE Developers Console で **プロバイダー → LINE Login チャネル**（→ できれば Messaging API チャネルをリンク）。
+初めてなら [LINE Developers Console の準備ガイド](docs/guides/line-console.ja.md) を先に。
+
+```sh
+git clone https://github.com/AchrafReyani/renkei && cd renkei
+cp .env.example .env        # LINE_LOGIN_CHANNEL_ID / LINE_LOGIN_CHANNEL_SECRET を入れる
+docker compose up           # renkei + Postgres
+```
+
+http://localhost:3000/dev を開く → 「LINEでログイン」→ LINE の同意画面 → 友だち追加 →
+renkei が発行した id_token（`line:user_id`, `line:friend`, `line:channel_id` …）が表示されます。
+
+LINE Developers Console の Callback URL に `http://localhost:3000/line/callback` を登録しておいてください。
+
+## 使い方
+
+### 1. 自分のアプリから（標準 OIDC クライアントとして）
+
+renkei は OpenID Connect プロバイダーです。ディスカバリは `http(s)://<renkei>/.well-known/openid-configuration`。
+
+```ts
+// 例: Auth.js (next-auth) の汎用 OIDC プロバイダー
+{
+  id: 'renkei', name: 'LINE', type: 'oidc',
+  issuer: 'https://auth.example.com',
+  clientId: 'my-app', clientSecret: process.env.RENKEI_CLIENT_SECRET,
+  authorization: { params: { scope: 'openid profile email line' } },
+}
+```
+
+`line` スコープで `line:user_id` / `line:friend` / `line:channel_id` / `line:region` が id_token と userinfo に入ります。
+→ [Next.js チュートリアル](docs/tutorials/nextjs.ja.md)
+
+### 2. Supabase から
+
+Supabase Auth 標準の **Keycloak プロバイダー**に renkei の URL を入れるだけ（ローカル CLI でも動きます）。
+→ [Supabase チュートリアル](docs/tutorials/supabase.ja.md)
+
+### 3. LIFF / LINE ミニアプリから
+
+フロントは `liff.getIDToken()` / `liff.getAccessToken()` を renkei に送るだけ。プロフィール JSON は送らない。
+
+```ts
+const res = await fetch('https://auth.example.com/liff/exchange', {
+  method: 'POST', headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({ id_token: liff.getIDToken(), access_token: liff.getAccessToken(), client_id: 'my-liff-app' }),
+})
+const { id_token } = await res.json()   // renkei が署名した id_token（RS256, JWKS で検証可）
+```
+
+## 設定
+
+環境変数（`.env`）。詳細は [設定リファレンス](docs/reference/config.ja.md)。
+
+| 変数 | 内容 |
+|---|---|
+| `ISSUER` | renkei の公開 URL（= OIDC issuer） |
+| `LINE_LOGIN_CHANNEL_ID` / `LINE_LOGIN_CHANNEL_SECRET` | LINE Login チャネル |
+| `LINE_LOGIN_REGION` | `jp` / `tw` / `th` …（既定 `jp`） |
+| `RENKEI_BOT_PROMPT` | `aggressive` / `normal` / `none`（既定 `aggressive`） |
+| `RENKEI_REQUEST_EMAIL` | `true` でメールスコープを要求（チャネルにメール権限が必要） |
+| `RENKEI_CLIENTS` | 下流クライアントの JSON 配列（`clientId`, `clientSecret`, `redirectUris`, `placeholderEmailDomain` …） |
+| `RENKEI_COOKIE_KEYS` | Cookie 署名鍵（カンマ区切り、ローテーション可） |
+| `RENKEI_JWKS` | トークン署名鍵（JWK の JSON 配列）。未設定なら起動ごとに生成（開発用） |
+| `DATABASE_URL` | Postgres。未設定ならインメモリ（開発用） |
+
+## エンドポイント
+
+| パス | 役割 |
+|---|---|
+| `/.well-known/openid-configuration`, `/oidc/jwks` | ディスカバリ・公開鍵 |
+| `/oidc/auth`, `/oidc/token`, `/oidc/me`, `/oidc/token/revocation` | OIDC |
+| `/protocol/openid-connect/{auth,token,userinfo,certs}` | Keycloak 互換エイリアス（Supabase 等向け） |
+| `/liff/exchange` | LIFF / ミニアプリのトークン交換 |
+| `/line/callback` | LINE からの戻り先（Console に登録する URL） |
+| `/healthz` | ヘルスチェック |
+
+→ [エンドポイントとクレームのリファレンス](docs/reference/endpoints.ja.md)
+
+## 動作環境
+
+Node.js 22+。同じコードが **Node / Docker、Deno、Cloudflare Workers、Supabase Edge Functions** で動くことを確認済み
+（[検証記録](docs/SPIKE-oidc-provider-runtimes.md)）。v0.1 の配布物は Docker イメージと npm パッケージ、v0.3 でエッジ向けデプロイを整備します。
 
 ## やらないこと
 
-- 汎用IdPにはなりません（パスワード認証・MFA・RBACは Logto や Keycloak に任せ、renkei はその手前に立ちます）
-- マーケティング配信はしません（友だち状態を**公開**するだけで、メッセージは送りません）
+- 汎用 IdP にはなりません — パスワード認証・MFA・RBAC は Logto や Keycloak に任せ、renkei はその**手前**に立ちます
+- マーケティング配信はしません — 友だち状態を**クレームとして出す**だけで、メッセージは送りません
 - v0.x ではホスティング版を提供しません
 
-## 状況
+## ロードマップ
 
-計画段階です。ロードマップは [`docs/ROADMAP.md`](docs/ROADMAP.md)、設計は [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)、決定事項とその理由は [`docs/DECISIONS.md`](docs/DECISIONS.md)。
+[docs/ROADMAP.md](docs/ROADMAP.md)。v0.2 で Messaging API のアカウント連携、v0.3 でエッジ向けデプロイと SDK、その後に台湾・タイ向けドキュメント。
+
+## 貢献
+
+日本語で大丈夫です。[CONTRIBUTING.md](CONTRIBUTING.md) を見てください。
+設計の理由は [docs/DECISIONS.md](docs/DECISIONS.md)、構成は [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)。
 
 ## ライセンス
 
-Apache-2.0。
+Apache-2.0
 
 ---
 
-renkei は LINEヤフー株式会社とは無関係の個人プロジェクトです。「LINE」はLINEヤフー株式会社の商標です。
+renkei は LINEヤフー株式会社とは無関係の個人プロジェクトです。「LINE」は LINEヤフー株式会社の商標です。
+ログインボタンを設置する際は [LINE ログインボタン デザインガイドライン](https://developers.line.biz/ja/docs/line-login/login-button/) に従ってください。

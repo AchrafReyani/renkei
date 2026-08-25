@@ -1,2 +1,2 @@
-// Placeholder. The renkei CLI / server entry point lands here in v0.1.
-export const version = '0.0.0';
+// Programmatic entry: same as `npx renkei`, or import pieces from @renkei/server directly.
+export { createRenkei } from '@renkei/server';

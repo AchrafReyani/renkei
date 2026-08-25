@@ -1,7 +1,7 @@
 {
   "name": "renkei",
   "version": "0.0.0",
-  "description": "renkei (連携) — self-hosted identity broker for LINE. Placeholder release; see https://github.com/AchrafReyani/renkei",
+  "description": "renkei (連携) — self-hosted identity broker for LINE. `npx renkei` starts the server.",
   "license": "Apache-2.0",
   "author": "Achraf Reyani",
   "repository": {
@@ -9,24 +9,12 @@
     "url": "git+https://github.com/AchrafReyani/renkei.git",
     "directory": "packages/renkei"
   },
-  "keywords": [
-    "line",
-    "line-login",
-    "liff",
-    "oidc",
-    "openid-connect",
-    "identity",
-    "japan"
-  ],
+  "keywords": ["line", "line-login", "liff", "oidc", "openid-connect", "identity", "japan"],
   "type": "module",
-  "exports": {
-    ".": "./index.js"
-  },
-  "files": [
-    "index.js",
-    "README.md"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  "bin": { "renkei": "./bin/renkei.js" },
+  "exports": { ".": "./index.js" },
+  "files": ["bin", "index.js", "README.md"],
+  "scripts": { "typecheck": "node --check bin/renkei.js" },
+  "dependencies": { "@renkei/server": "workspace:*" },
+  "publishConfig": { "access": "public" }
 }
