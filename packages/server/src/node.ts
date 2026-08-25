@@ -10,6 +10,7 @@
  *   RENKEI_COOKIE_KEYS         comma-separated; generated for dev if absent
  *   RENKEI_CLIENTS             JSON array of { clientId, clientSecret, redirectUris, tokenEndpointAuthMethod?, lineRegion? }
  *   RENKEI_JWKS                JSON array of private JWKs; generated for dev if absent
+ *   RENKEI_CORS_ORIGINS        comma-separated browser origins allowed on /liff/exchange
  *   RENKEI_DEV                 true to mount the /dev relying party
  *   DATABASE_URL               Postgres URL; in-memory storage if absent
  */
@@ -31,6 +32,11 @@ const clients: RenkeiConfigInput['clients'] = env.RENKEI_CLIENTS
         clientSecret: 'renkei-dev-secret',
         redirectUris: [`${issuer}/dev/callback`],
       },
+      {
+        clientId: 'renkei-dev-liff',
+        redirectUris: [`${issuer}/dev/liff`],
+        tokenEndpointAuthMethod: 'none' as const,
+      },
     ];
 
 const config: RenkeiConfigInput = {
@@ -48,6 +54,7 @@ const config: RenkeiConfigInput = {
   ],
   clients,
   cookieKeys: env.RENKEI_COOKIE_KEYS ? env.RENKEI_COOKIE_KEYS.split(',') : [randomToken(32)],
+  corsOrigins: env.RENKEI_CORS_ORIGINS ? env.RENKEI_CORS_ORIGINS.split(',') : [],
   ...(env.RENKEI_JWKS ? { jwks: JSON.parse(env.RENKEI_JWKS) } : {}),
 };
 
@@ -55,7 +62,7 @@ const storage: Storage = env.DATABASE_URL
   ? createPostgresStorage({ connectionString: env.DATABASE_URL })
   : createMemoryStorage();
 
-const renkei = await createRenkei({ config, storage });
+const renkei = await createRenkei({ config, storage, liffId: env.LIFF_ID });
 const port = Number(env.PORT ?? new URL(issuer).port ?? 3000) || 3000;
 
 serve({ fetch: renkei.app.fetch, port }, () => {

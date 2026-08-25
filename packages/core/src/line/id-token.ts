@@ -1,5 +1,6 @@
 import {
   createRemoteJWKSet,
+  decodeJwt,
   decodeProtectedHeader,
   type JWTPayload,
   type JWTVerifyGetKey,
@@ -43,6 +44,20 @@ export interface VerifyIdTokenParams {
   clockTolerance?: number;
   /** Override "now" for tests. */
   currentDate?: Date;
+}
+
+/**
+ * Read the `aud` of an id_token **without verifying it** — only to pick which
+ * channel's secret/JWKS to verify with. Never trust anything else from an
+ * unverified token.
+ */
+export function decodeIdTokenAudience(idToken: string): string | undefined {
+  try {
+    const aud = decodeJwt(idToken).aud;
+    return Array.isArray(aud) ? aud[0] : aud;
+  } catch {
+    return undefined;
+  }
 }
 
 let defaultJwks: JWTVerifyGetKey | undefined;

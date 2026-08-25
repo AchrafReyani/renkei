@@ -107,3 +107,24 @@ describe('profile and friendship', () => {
     expect(await getProfile('at', { fetch: f })).toEqual({ userId: 'U1', displayName: 'Taro' });
   });
 });
+
+describe('verifyAccessToken', () => {
+  it('calls the verify endpoint with the token as a query parameter', async () => {
+    const { verifyAccessToken } = await import('../src/index.js');
+    const fetchMock = vi.fn(async (url: RequestInfo | URL) => {
+      expect(String(url)).toBe('https://api.line.me/oauth2/v2.1/verify?access_token=at');
+      return jsonResponse({ scope: 'profile openid', client_id: '2011257262', expires_in: 100 });
+    });
+    const info = await verifyAccessToken('at', { fetch: fetchMock as unknown as typeof fetch });
+    expect(info.client_id).toBe('2011257262');
+  });
+  it('maps an expired token to LineApiError', async () => {
+    const { verifyAccessToken } = await import('../src/index.js');
+    const fetchMock = vi.fn(async () =>
+      jsonResponse({ error: 'invalid_request', error_description: 'access token expired' }, 400),
+    );
+    await expect(
+      verifyAccessToken('old', { fetch: fetchMock as unknown as typeof fetch }),
+    ).rejects.toMatchObject({ name: 'LineApiError', endpoint: 'verify', status: 400 });
+  });
+});

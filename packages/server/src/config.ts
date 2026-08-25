@@ -41,6 +41,8 @@ export const renkeiConfigSchema = z.object({
   dev: z.boolean().default(false),
   /** Where LINE redirects after login: `${issuer}/line/callback` unless overridden. */
   lineCallbackPath: z.string().default('/line/callback'),
+  /** Browser origins allowed to call `/liff/exchange` (your LIFF app URLs). Empty = no CORS. */
+  corsOrigins: z.array(z.string().url()).default([]),
   /** Token lifetimes in seconds. */
   ttl: z
     .object({
@@ -73,6 +75,8 @@ export interface RenkeiOptions {
   fetch?: typeof fetch;
   /** Logger. Defaults to console. */
   logger?: Pick<Console, 'info' | 'warn' | 'error'>;
+  /** LIFF app ID used only by the /dev/liff page. */
+  liffId?: string | undefined;
 }
 
 export function parseConfig(input: RenkeiConfigInput): RenkeiConfig {

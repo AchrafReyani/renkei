@@ -1,5 +1,6 @@
 export * from './identity/claims.js';
 export * from './identity/upsert.js';
+export * from './line/access-token.js';
 export * from './line/authorize.js';
 export * from './line/callback.js';
 export * from './line/channel.js';

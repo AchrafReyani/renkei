@@ -24,6 +24,7 @@ import {
 } from './config.js';
 import { devRoutes } from './dev-rp.js';
 import { generateDevJwks } from './keys.js';
+import { liffRoutes } from './liff.js';
 import { createProvider, INTERACTION_PATH } from './oidc/provider.js';
 
 /** Short-lived login state, keyed by the OAuth `state` sent to LINE. */
@@ -243,7 +244,9 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     return done;
   });
 
-  if (config.dev) app.route('/dev', devRoutes({ config, provider }));
+  app.route('/liff', liffRoutes({ config, storage, jwks, fetch: lineFetch, logger }));
+
+  if (config.dev) app.route('/dev', devRoutes({ config, provider, liffId: options.liffId }));
 
   return {
     app,
