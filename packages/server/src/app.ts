@@ -99,6 +99,25 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
   app.all('/.well-known/*', toProvider);
   app.all('/oidc/*', toProvider);
 
+  // Keycloak-shaped aliases. Supabase Auth (hosted *and* the local CLI, every
+  // plan) ships a "keycloak" provider that only needs a base URL and calls
+  // `${url}/protocol/openid-connect/{auth,token,userinfo}`. Answering on
+  // those paths lets Supabase use renkei with zero custom-provider features.
+  // Other Keycloak-brokering clients get the same benefit.
+  const keycloakAlias: Record<string, string> = {
+    auth: '/oidc/auth',
+    token: '/oidc/token',
+    userinfo: '/oidc/me',
+    certs: '/oidc/jwks',
+    logout: '/oidc/session/end',
+    revoke: '/oidc/token/revocation',
+  };
+  app.all('/protocol/openid-connect/:endpoint', (c) => {
+    const target = keycloakAlias[c.req.param('endpoint')];
+    if (!target) return c.notFound();
+    return bridge(provider.callback(), c.req.raw, { ...bridgeOpts, path: target });
+  });
+
   // ── Interaction: the provider needs a user → send them to LINE ──────────
   app.get(`${INTERACTION_PATH}/:uid`, async (c) => {
     const { req, res } = await nodePair(c.req.raw, bridgeOpts);

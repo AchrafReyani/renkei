@@ -460,4 +460,56 @@ describe('renkei end to end', () => {
       'line:friend': false,
     });
   });
+
+  it('answers on Keycloak-shaped paths so the Supabase keycloak provider can use renkei', async () => {
+    const b = new Browser(renkei);
+    const auth = new URL('/protocol/openid-connect/auth', ISSUER);
+    auth.search = new URLSearchParams({
+      client_id: APP.clientId,
+      response_type: 'code',
+      redirect_uri: APP.redirectUris[0] as string,
+      scope: 'openid email profile',
+      state: 'kc',
+      nonce: 'kn',
+    }).toString();
+    const toLine = await b.navigate(auth.toString());
+    expect(toLine.location?.origin).toBe('https://access.line.me');
+    line.nonce = toLine.location?.searchParams.get('nonce') ?? '';
+    const back = await b.navigate(
+      `/line/callback?code=good-code&state=${toLine.location?.searchParams.get('state')}`,
+    );
+    const code = back.location?.searchParams.get('code');
+    expect(code).toBeTruthy();
+
+    const tokenRes = await renkei.fetch(
+      new Request(`${ISSUER}/protocol/openid-connect/token`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          authorization: `Basic ${btoa(`${APP.clientId}:${APP.clientSecret}`)}`,
+        },
+        body: new URLSearchParams({
+          grant_type: 'authorization_code',
+          code: String(code),
+          redirect_uri: APP.redirectUris[0] as string,
+        }),
+      }),
+    );
+    expect(tokenRes.status).toBe(200);
+    const tokens = (await tokenRes.json()) as Record<string, string>;
+    const me = await renkei.fetch(
+      new Request(`${ISSUER}/protocol/openid-connect/userinfo`, {
+        headers: { authorization: `Bearer ${tokens.access_token}` },
+      }),
+    );
+    expect(me.status).toBe(200);
+    // Exactly the shape Supabase's keycloak provider reads: sub, name, email, email_verified
+    expect(await me.json()).toMatchObject({ name: 'テスト太郎' });
+    const certs = await renkei.fetch(new Request(`${ISSUER}/protocol/openid-connect/certs`));
+    expect(certs.status).toBe(200);
+    expect(((await certs.json()) as { keys: unknown[] }).keys.length).toBeGreaterThan(0);
+    expect((await renkei.fetch(new Request(`${ISSUER}/protocol/openid-connect/nope`))).status).toBe(
+      404,
+    );
+  });
 });
