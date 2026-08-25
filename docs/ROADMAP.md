@@ -40,24 +40,26 @@ Order matters: each item is what the next needs.
 - [ ] `verifyLiffToken()` — id_token path and access_token path
 - [ ] `parseWebhook()` + signature check for `follow`, `unfollow`
       (`accountLink` in v0.2)
-- [ ] Identity mapping: upsert rules, multi-channel, `sub` stability
-- [ ] `Storage` interface + in-memory implementation for tests
+- [x] Identity mapping: upsert rules, multi-channel, `sub` stability (`upsertIdentityFromLine`, `buildClaims`)
+- [x] `Storage` interface + in-memory implementation for tests (+ shared behavioural contract test)
 - [ ] Unit tests against recorded LINE fixtures (HS256 and ES256 tokens,
       real-shaped webhook bodies)
 
 **server**
-- [ ] Config loader (env + YAML, zod-validated, JA/EN error messages)
+- [x] Config loader (env, zod-validated, JA/EN error messages) — YAML later
 - [ ] First-run checks: provider sharing warning, email-permission warning
-- [ ] Routes: `/line/login`, `/line/callback`, `/liff/exchange`,
-      `/webhooks/line`, `/healthz`
-- [ ] `oidc-provider` mounted at `/oidc`: discovery, JWKS, authorize, token,
-      userinfo; `findAccount` backed by identity store; `line:*` claims
+- [~] Routes: `/interaction/:uid` (→ LINE), `/line/callback`, `/interaction/:uid/finish`,
+      `/healthz` done; `/liff/exchange`, `/webhooks/line` pending
+- [x] `oidc-provider` mounted at `/oidc`: discovery, JWKS, authorize, token,
+      userinfo; `findAccount` backed by identity store; `line:*` claims;
+      first-party auto-grant (no second consent screen); PKCE required for
+      public clients only; RS256 dev keys; e2e test with a fake LINE
 - [ ] Session cookie mode for direct-app usage
 - [ ] Structured logs with redaction
 
 **storage**
-- [ ] `storage-postgres` (Drizzle, migrations) incl. the `oidc-provider` adapter
-- [ ] `storage-sqlite` (dev)
+- [x] `storage-postgres` (Drizzle, migrations) incl. the `oidc-provider` adapter — tested on PGlite
+- [ ] `storage-sqlite` (dev) — deprioritised: memory storage covers dev, PGlite covers tests
 
 **deploy**
 - [ ] Dockerfile (distroless), GHCR publish on tag

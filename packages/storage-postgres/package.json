@@ -1,0 +1,44 @@
+{
+  "name": "@renkei/storage-postgres",
+  "version": "0.0.0",
+  "description": "Postgres storage for renkei (Drizzle). Works with any Postgres including Supabase; tests run on PGlite.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AchrafReyani/renkei.git",
+    "directory": "packages/storage-postgres"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "migrations"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@renkei/core": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.7",
+    "drizzle-kit": "^0.31.10"
+  }
+}

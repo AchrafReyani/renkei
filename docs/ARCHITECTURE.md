@@ -145,6 +145,20 @@ renkei can be the webhook receiver itself, or your bot forwards the
 `accountLink` event. We support both because many teams already have a
 webhook handler they won't move.
 
+### 3.4 How the LINE login plugs into oidc-provider (implemented 2026-08-26)
+
+oidc-provider owns the OIDC session; renkei is its *interaction*. The
+provider redirects an unauthenticated `/oidc/auth` to `/interaction/{uid}`;
+renkei sends the browser to LINE with `state` → `{uid, nonce, pkce,
+channel}` stored in the payload store; LINE returns to `/line/callback`
+(a fixed, registered URL); renkei verifies, upserts the identity, stores a
+one-time result token and redirects to `/interaction/{uid}/finish?t=…`.
+That last hop exists because oidc-provider's interaction cookie is scoped to
+`/interaction/{uid}` and would not be sent to `/line/callback`. Errors from
+LINE (e.g. the user cancelled) travel the same route and end as a standard
+OIDC error redirect to the client. No second consent screen: `loadExistingGrant`
+auto-grants for every client because the user already consented on LINE.
+
 ## 4. Data model (v0.1)
 
 ```

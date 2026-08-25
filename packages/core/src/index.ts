@@ -1,3 +1,5 @@
+export * from './identity/claims.js';
+export * from './identity/upsert.js';
 export * from './line/authorize.js';
 export * from './line/callback.js';
 export * from './line/channel.js';
@@ -7,3 +9,5 @@ export * from './line/id-token.js';
 export * from './line/pkce.js';
 export * from './line/profile.js';
 export * from './line/token.js';
+export * from './storage/memory.js';
+export * from './storage/types.js';
