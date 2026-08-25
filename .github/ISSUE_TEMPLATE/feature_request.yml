@@ -1,0 +1,46 @@
+name: 機能要望 / Feature request
+description: こういうことができてほしい / I'd like renkei to do X
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        日本語でも英語でも大丈夫です。/ Japanese or English.
+        先に [docs/PLAN.md の「やらないこと」](../blob/main/docs/PLAN.md) をご確認ください。/ Please check the non-goals first.
+  - type: textarea
+    id: problem
+    attributes:
+      label: 困っていること / The problem
+      description: 機能ではなく、まず何に困っているかを書いてください / Describe the pain before the feature
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案 / Proposal
+  - type: textarea
+    id: workaround
+    attributes:
+      label: 今どうしているか / Current workaround
+  - type: dropdown
+    id: area
+    attributes:
+      label: 領域 / Area
+      options:
+        - LINE Login（Web）
+        - LIFF / ミニアプリ
+        - Messaging API / アカウント連携
+        - OIDC（下流連携）
+        - ストレージアダプター / Storage adapter
+        - サンプル / Example (framework)
+        - SDK / クライアント
+        - ドキュメント / Docs
+        - 他のIdP（Yahoo! JAPAN, dアカウント, Kakao…）/ Other IdP
+        - その他 / Other
+  - type: checkboxes
+    id: help
+    attributes:
+      label: 貢献 / Contribution
+      options:
+        - label: 自分で実装できます / I can implement this
+        - label: レビューやテストなら手伝えます / I can help test or review

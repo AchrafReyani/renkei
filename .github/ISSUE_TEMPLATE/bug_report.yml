@@ -1,0 +1,59 @@
+name: バグ報告 / Bug report
+description: 動作がおかしい・エラーが出る / Something isn't working
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        日本語でも英語でも大丈夫です。/ Japanese or English, either is fine.
+        **セキュリティに関わる内容はここではなく [SECURITY.md](../blob/main/SECURITY.md) の手順で報告してください。**
+  - type: textarea
+    id: what
+    attributes:
+      label: 何が起きたか / What happened
+      description: 期待した動作と実際の動作 / Expected vs actual
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 再現手順 / Steps to reproduce
+      placeholder: |
+        1. renkei.yaml を … に設定
+        2. /line/login にアクセス
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 領域 / Area
+      options:
+        - LINE Login（Web）
+        - LIFF / ミニアプリ
+        - Messaging API / アカウント連携
+        - OIDC（下流連携: Supabase, Firebase, Cognito, Keycloak…）
+        - ストレージ / Storage
+        - デプロイ / Deploy
+        - ドキュメント / Docs
+        - その他 / Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: renkei のバージョン / Version
+      placeholder: "0.1.0 / docker image tag / commit"
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: 実行環境 / Runtime
+      placeholder: "Node 22 / Bun / Deno (Supabase Edge) / Cloudflare Workers / Docker"
+  - type: textarea
+    id: logs
+    attributes:
+      label: ログ / Logs
+      description: シークレットは必ず消してください / Redact secrets
+      render: shell

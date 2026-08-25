@@ -1,0 +1,29 @@
+name: LINE API の仕様変更 / LINE API change
+description: LINE 側の仕様変更・非推奨化・障害への追従 / LINE changed or deprecated something
+labels: ["line-api-change", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: 最優先で見ます。/ Highest priority.
+  - type: input
+    id: source
+    attributes:
+      label: 情報源 / Source
+      description: LINE Developers ニュース・リリースノートの URL / URL of the LINE Developers news or release note
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: 何が変わるか / What changes
+    validations:
+      required: true
+  - type: input
+    id: deadline
+    attributes:
+      label: 期限 / Deadline
+      placeholder: "2026-12-31（非推奨終了日など）"
+  - type: textarea
+    id: impact
+    attributes:
+      label: renkei への影響 / Impact on renkei

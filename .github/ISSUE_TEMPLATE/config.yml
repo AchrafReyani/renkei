@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 質問 / Questions
+    url: https://github.com/AchrafReyani/renkei/discussions/categories/q-a
+    about: 使い方の質問は Discussions へ / Usage questions go to Discussions
+  - name: セキュリティ / Security
+    url: https://github.com/AchrafReyani/renkei/security/advisories/new
+    about: 脆弱性は非公開で報告してください / Report vulnerabilities privately
