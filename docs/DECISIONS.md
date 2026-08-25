@@ -137,10 +137,10 @@ docs/             — VitePress site, ja + en.
 - **Supporting MySQL in v0.x** — Japanese enterprises love MySQL. Adapter
   interface makes it a community contribution later; not core.
 
-**Revisit if.** Cloudflare Workers/Deno compatibility of `oidc-provider`
-turns out to be poor (it has Node-isms). Fallback: `oidc-provider` for the
-Node/Docker target, and a reduced "token-issuer-only" mode for edge targets.
-**Spike this in week 1** — it's the biggest technical unknown.
+**Revisit if.** ~~Cloudflare Workers/Deno compatibility of `oidc-provider`
+turns out to be poor.~~ **Spiked 2026-08-26 — it works on all three
+targets** (see §8 and SPIKE-oidc-provider-runtimes.md). The "token-issuer-only"
+fallback is dropped.
 
 ---
 
@@ -184,3 +184,24 @@ DCO check. No CLA.
 **Why.** CLAs deter casual contributors, especially ones whose employer's
 legal department would need to review it. DCO keeps the door open for a
 possible future relicensing conversation without paperwork up front.
+
+---
+
+## 8. Full `oidc-provider` on every runtime; state is the edge concern (2026-08-26)
+
+**Decision.** The complete OIDC provider ships on Node/Docker, Deno and
+Cloudflare Workers. Workers uses `cloudflare:node`'s `httpServerHandler`
+so Koa runs unmodified. No reduced edge mode.
+
+**Why.** Spike result (SPIKE-oidc-provider-runtimes.md): discovery, JWKS,
+`/auth`, `/token` all behave correctly on workerd; Deno works via `npm:`.
+Bundle is 224 KB gzip.
+
+**Cost.** Each target needs a persistent `oidc-provider` adapter — Postgres
+first (v0.1), KV/D1 or Hyperdrive for Workers (v0.3). workerd prints an
+"Unsupported runtime" warning; we pin versions and keep the runtime matrix
+as a CI job so upgrades can't silently break a target.
+
+**Open.** Supabase's `edge-runtime` is not verified yet (needs Docker +
+`supabase functions serve`). If it fails, Supabase users run renkei as a
+container next to Supabase instead of inside an Edge Function.

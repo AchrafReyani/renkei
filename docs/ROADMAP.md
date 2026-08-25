@@ -16,7 +16,10 @@ Once public, this mirrors a GitHub Project board.
 - [ ] Publish placeholder `renkei@0.0.0` to npm (name squat protection)
 - [ ] Register `renkei` GitHub org (free) — transfer repo there at launch or
       keep under personal account; decide at launch
-- [ ] Week-1 spike: `oidc-provider` on Deno/Workers (ARCHITECTURE.md §7.1)
+- [x] Week-1 spike: `oidc-provider` on Deno/Workers — PASS on all three
+      (2026-08-26, SPIKE-oidc-provider-runtimes.md)
+- [ ] Verify the same on Supabase `edge-runtime` (`supabase functions serve`,
+      needs Docker running)
 - [ ] Monorepo skeleton: pnpm, Turborepo, Biome, Vitest, Changesets, CI
       (lint + test + typecheck on PR), DCO check, Dependabot/Renovate
 
@@ -52,7 +55,7 @@ Order matters: each item is what the next needs.
 - [ ] Structured logs with redaction
 
 **storage**
-- [ ] `storage-postgres` (Drizzle, migrations)
+- [ ] `storage-postgres` (Drizzle, migrations) incl. the `oidc-provider` adapter
 - [ ] `storage-sqlite` (dev)
 
 **deploy**
@@ -95,7 +98,7 @@ Order matters: each item is what the next needs.
 
 - [ ] `@renkei/client`: `loginUrl()`, `exchangeLiffToken()`, session helpers
 - [ ] `@renkei/next`: App Router helpers, middleware, `<LineLoginButton />`
-- [ ] Cloudflare Workers deploy target (or "token-issuer-only" mode per spike)
+- [ ] Cloudflare Workers deploy target via `httpServerHandler` + KV/D1 or Hyperdrive adapter
 - [ ] Supabase Edge Function deploy target
 - [ ] LINE MINI App channel support (LINE is folding LIFF into MINI App; new apps should be MINI App channels under the same provider) — service messages prerequisites, `liff.permanentLink`
 - [ ] Multi-region tutorial (JP + TW channels, `line_region` routing)

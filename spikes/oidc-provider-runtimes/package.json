@@ -1,0 +1,11 @@
+{
+  "name": "spike-oidc-provider-runtimes",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "oidc-provider": "9.11.5",
+    "hono": "4.13.4",
+    "@hono/node-server": "2.1.1",
+    "jose": "6.2.10"
+  }
+}

@@ -217,9 +217,10 @@ and English message.
 
 ## 7. Open technical questions (resolve in the week-1 spike)
 
-1. Does `oidc-provider` run under Deno / Cloudflare Workers well enough?
-   If not: Docker target gets the full provider, edge targets get
-   "token issuer only" mode.
+1. ~~Does `oidc-provider` run under Deno / Cloudflare Workers well enough?~~
+   **Resolved 2026-08-26: yes, on both** (Workers via `cloudflare:node`
+   `httpServerHandler`). See SPIKE-oidc-provider-runtimes.md. Remaining:
+   Supabase `edge-runtime` unverified.
 2. LINE JWKS caching and `kid` behaviour for ES256 — confirm against a real
    channel; docs are thin.
 3. Whether to make renkei *also* accept a LINE **access token** on

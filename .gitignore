@@ -8,3 +8,10 @@ dist/
 Thumbs.db
 coverage/
 .turbo/
+# spike scratch output
+spikes/**/dist-worker/
+spikes/**/*.log
+spikes/**/disc.json
+spikes/**/jwks.json
+spikes/**/worker-result.json
+spikes/**/.wrangler/
