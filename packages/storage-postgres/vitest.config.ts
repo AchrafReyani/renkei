@@ -1,6 +1,7 @@
 import { defineProject } from 'vitest/config';
 
 export default defineProject({
+  resolve: { conditions: ['development'] },
   test: {
     name: 'storage-postgres',
     include: ['test/**/*.test.ts'],

@@ -10,26 +10,29 @@
   },
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./node": {
+      "development": "./src/node.ts",
+      "import": "./dist/node.js"
+    }
   },
   "publishConfig": {
-    "access": "public",
-    "exports": {
-      ".": {
-        "types": "./dist/index.d.ts",
-        "import": "./dist/index.js"
-      }
-    }
+    "access": "public"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "tsup src/index.ts src/node.ts --format esm --dts --clean --sourcemap",
-    "dev": "node --env-file=../../.env --import tsx src/node.ts",
-    "dev:harness": "node --env-file=../../.env --import tsx src/dev-harness.ts",
+    "dev": "node --env-file=../../.env --conditions development --import tsx src/node.ts",
+    "dev:harness": "node --env-file=../../.env --conditions development --import tsx src/dev-harness.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "start": "node dist/node.js"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",

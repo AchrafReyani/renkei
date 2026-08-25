@@ -1,0 +1,29 @@
+# Local/self-hosted renkei with Postgres.
+#   cp .env.example .env   (fill in LINE_LOGIN_* etc.)
+#   docker compose up
+services:
+  renkei:
+    build: .
+    ports: ["3000:3000"]
+    env_file: .env
+    environment:
+      ISSUER: ${ISSUER:-http://localhost:3000}
+      DATABASE_URL: postgres://renkei:renkei@db:5432/renkei
+      RENKEI_DEV: ${RENKEI_DEV:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: renkei
+      POSTGRES_PASSWORD: renkei
+      POSTGRES_DB: renkei
+    volumes: ["renkei-db:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U renkei"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  renkei-db:

@@ -18,7 +18,7 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
 | LINE Official Account | display name "Achraf" (rename to "renkei dev" in OA Manager when convenient), basic ID `@360trecn`, industry 個人 | manager.line.biz/account/@360trecn |
 | Messaging API channel | ID `2011257490`, **provider renkei** ✔ | OA Manager → Settings → Messaging API; also visible in Developers Console |
 | Login ↔ OA link | renkei-dev-jp → Linked LINE Official Account = `@360trecn` ✔ | Login channel → Basic settings → Add friend option |
-| Email permission | **Not applied** — needs a screenshot of the user-facing screen explaining email use. Apply once the spike has a login page. | Login channel → Basic settings → OpenID Connect |
+| Email permission | **Application prepared 2026-08-26** (both attestations + screenshot of `/dev` with the JA/EN email-use notice). Submitted by Achraf by hand — Claude in Chrome loses page access when the attestation checkboxes are clicked. Awaiting LINE review. | Login channel → Basic settings → OpenID Connect |
 | Channel access token (long-lived) | Not issued yet — needed for link tokens / push (v0.2) | Developers Console → Messaging API channel → Messaging API tab |
 
 ## The order that works (and why)

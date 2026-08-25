@@ -63,8 +63,9 @@ Order matters: each item is what the next needs.
 - [ ] `storage-sqlite` (dev) — deprioritised: memory storage covers dev, PGlite covers tests
 
 **deploy**
-- [ ] Dockerfile (distroless), GHCR publish on tag
-- [ ] `docker-compose.yml` with Postgres for the quickstart
+- [x] Dockerfile (node:22-alpine, pnpm deploy --prod, 301 MB) — verified standalone 2026-08-26;
+      GHCR publish workflow written (`release.yml`, runs on `v*` tags — not exercised yet)
+- [x] `docker-compose.yml` with Postgres — verified: migrations run at boot, healthz 200
 - [ ] npm publish via Changesets on tag
 - [ ] Demo instance running
 
