@@ -71,7 +71,9 @@ Order matters: each item is what the next needs.
 
 **docs (JA primary, EN mirror in the same PR)**
 - [ ] README: why / diagram / 5-minute quickstart / status badges
-- [ ] Tutorial 1: Supabase + renkei (the wedge)
+- [x] Tutorial 1: Supabase + renkei (the wedge) — draft written ja/en; flow verified
+      live 2026-08-26 (local CLI, keycloak provider, placeholder email): Supabase
+      `user_signedup` + `login` events with LINE name
 - [ ] Tutorial 2: Next.js direct with session cookie
 - [ ] Reference: config, endpoints, claims, webhooks
 - [ ] LINE Developers Console prerequisites page (provider sharing, email

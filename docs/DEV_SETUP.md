@@ -69,6 +69,11 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
   external browser (`inClient: false`); in-app not yet tried.
 - **Claude in Chrome blocks `trycloudflare.com`** outright (not an approval
   prompt), so LIFF verification through the tunnel has to be done by Achraf.
+- **Supabase verified live (2026-08-26):** local `supabase start` with
+  `[auth.external.keycloak] url = <renkei tunnel>` → LINE login → Supabase
+  `user_signedup` with `actor_name` from LINE. First attempt failed with
+  `Error getting user email from external provider` — Supabase's built-in
+  providers require an email — which is why `placeholderEmailDomain` exists.
 - **LINE silently drops the `email` scope** when the channel has no email
   permission: the login succeeds, the token's `scope` just lacks `email` and
   the id_token has no `email` claim. There is no error to catch at login
