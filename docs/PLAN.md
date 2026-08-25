@@ -2,8 +2,7 @@
 
 Internal planning record. Written in English so we can iterate fast; everything
 public-facing is Japanese-first (see [DECISIONS.md](DECISIONS.md) §3).
-Current as of **2026-08-26**. No implementation code exists yet — this is the
-plan that precedes it.
+Written 2026-08-26 before any code; §7 status block tracks where v0.1 stands.
 
 Related: [ARCHITECTURE.md](ARCHITECTURE.md) · [ROADMAP.md](ROADMAP.md) ·
 [LAUNCH.md](LAUNCH.md) · [DECISIONS.md](DECISIONS.md)
@@ -97,41 +96,47 @@ Full source list is in the research notes at the bottom of this file.
 
 ## 7. Scope before sharing — the v0.1 bar
 
+> **Status 2026-08-26:** everything below is done except the items marked
+> *open* in ROADMAP.md: demo instance, npm publish of `@renkei/*`, two weeks
+> of dogfooding, console screenshots in the guide, social-preview upload
+> (UI-only). Human-only verifications outstanding: Next.js example final
+> LINE leg; LIFF in the LINE app (in-client) — external browser verified.
+
 Nothing gets posted anywhere until **all** of these are true. This is the
 answer to "how much do we have to build before we can start sharing it."
 
 **Functional**
-- [ ] LINE Login (auth code + PKCE) end to end, with `bot_prompt`
+- [x] LINE Login (auth code + PKCE) end to end, with `bot_prompt`
       (`normal`/`aggressive`) and `friendship_status_changed` captured
-- [ ] id_token verified locally (HS256 with channel secret *and* ES256 via
+- [x] id_token verified locally (HS256 with channel secret *and* ES256 via
       LINE JWKS), `nonce`/`state` enforced, email pulled from id_token
-- [ ] LIFF token exchange: `POST /liff/exchange` takes a LIFF id_token or
+- [x] LIFF token exchange: `POST /liff/exchange` takes a LIFF id_token or
       access token → verified → renkei session / OIDC tokens
-- [ ] Identity store: stable renkei `sub` ↔ LINE userId, per channel;
+- [x] Identity store: stable renkei `sub` ↔ LINE userId, per channel;
       multi-channel config (JP/TW/TH) with routing by channel ID
-- [ ] renkei acts as an **OIDC provider**: discovery, JWKS, `/authorize`,
+- [x] renkei acts as an **OIDC provider**: discovery, JWKS, `/authorize`,
       `/token`, `/userinfo`, with LINE-specific claims
       (`line:friend`, `line:user_id`, `line:channel_id`)
-- [ ] Friendship status kept current via `follow`/`unfollow` webhooks
-- [ ] Postgres storage; SQLite for local dev
+- [~] Friendship status kept current via `follow`/`unfollow` webhooks — **moved to v0.2** (#2); friendship is captured at every login already
+- [x] Postgres storage; SQLite for local dev
 
 **Deployable**
-- [ ] `docker run` works with a `.env` in < 5 minutes from a clean machine
-- [ ] Published Docker image (GHCR) and npm packages
+- [x] `docker run` works with a `.env` in < 5 minutes from a clean machine
+- [ ] Published Docker image (GHCR) and npm packages — at launch (workflows ready)
 - [ ] A live demo instance (can be behind a "demo" LINE channel)
 
 **Documented (Japanese, with English mirror)**
-- [ ] README with the "why" in three sentences, a diagram, and a
+- [x] README with the "why" in three sentences, a diagram, and a
       copy-paste quickstart
-- [ ] **Tutorial 1: Supabase + renkei** — the wedge
-- [ ] **Tutorial 2: Next.js direct** (no downstream IdP)
-- [ ] Reference: config, endpoints, claims, webhook setup, LINE Developers
+- [x] **Tutorial 1: Supabase + renkei** — the wedge
+- [x] **Tutorial 2: Next.js direct** (no downstream IdP)
+- [x] Reference: config, endpoints, claims, webhook setup, LINE Developers
       Console prerequisites (provider sharing, email permission application)
-- [ ] LINE brand-guideline-compliant login button assets and a note on
+- [x] LINE brand-guideline-compliant login button assets and a note on
       trademark
 
 **Project hygiene** (see LAUNCH.md checklist)
-- [ ] CONTRIBUTING, CoC, SECURITY, issue/PR templates, CI green, release
+- [x] CONTRIBUTING, CoC, SECURITY, issue/PR templates, CI green, release
       automation, ≥ 10 open issues that show a living roadmap,
       ≥ 5 labelled `good first issue`
 
