@@ -40,6 +40,10 @@ Then on **Basic settings**:
 - Note **Channel ID** and **Channel secret** → `LINE_LOGIN_CHANNEL_ID` / `LINE_LOGIN_CHANNEL_SECRET`
 - **LINE Login** tab → add `https://<renkei>/line/callback` to **Callback URL**. During development `http://localhost:3000/line/callback` is fine (plain http is allowed for localhost)
 
+![Basic settings: status, Channel ID, tabs](../images/console/login-channel-basic.png)
+
+![LINE Login tab → Callback URL; plain-http localhost is accepted](../images/console/callback-url.png)
+
 ## 3. Create a LINE Official Account (Messaging API channel)
 
 Needed for friend-add (`bot_prompt`) and account linking. You can skip it for login-only, but most of the reason to use renkei lives here.
@@ -57,6 +61,8 @@ Login channel → **Basic settings** → **Add friend option / Linked LINE Offic
 
 Without this, `bot_prompt` is ignored and the friendship API returns 4xx.
 
+![Add friend option (linked Official Account) and OpenID Connect (email permission shown as Applied)](../images/console/linked-oa-and-email.png)
+
 ## 5. LIFF app (if you build a Mini App / LIFF)
 
 Login channel → **LIFF** tab → **Add**.
@@ -69,6 +75,10 @@ Login channel → **LIFF** tab → **Add**.
 | Add friend option | On (aggressive) |
 
 The LIFF ID (`<channelId>-xxxxxxxx`) goes in `LIFF_ID`.
+
+![LIFF tab: app list (LIFF ID, LIFF URL, size)](../images/console/liff-list.png)
+
+![LIFF app detail: Endpoint URL (an https tunnel), Scope, Add friend option](../images/console/liff-app-settings.png)
 
 > LINE is folding LIFF into **LINE MINI App** and recommends new apps be created as MINI App channels (Japan, and Taiwan with local approval). Existing LIFF apps keep working. renkei will support both.
 

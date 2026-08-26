@@ -23,6 +23,10 @@ it and will need a fresh one if you redo those checks.
   Achraf opens http://localhost:3400 → 「LINEでログイン」→ LINE → back with his
   name and the `line` object. Claude can drive localhost:3400 in Chrome but
   not `access.line.me`. Record the result in DEV_SETUP.md.
+  *2026-08-26: Claude drove it as far as the LINE login page — Auth.js →
+  renkei `/authorize` → `access.line.me` with PKCE, `scope=openid profile`,
+  `bot_prompt=aggressive`. LINE did not auto-SSO in that tab; the login
+  itself is still Achraf's.*
 - [ ] **LIFF inside the LINE app** (external-browser path already verified).
   Needs a fresh tunnel: `pnpm dlx cloudflared tunnel --url http://localhost:3000`,
   restart renkei with `ISSUER=<tunnel>`, update the LIFF endpoint URL in the
@@ -49,8 +53,11 @@ it and will need a fresh one if you redo those checks.
 - [ ] **npm publish** of the four packages — Achraf runs it (passkey 2FA):
   `pnpm -r publish --access public` from the repo root after `pnpm build`.
   Verify with `npm view @renkei/server version`.
-- [ ] **Console screenshots** for docs/guides/line-console.{ja,en}.md — take
-  them in Japanese UI; Claude can screenshot developers.line.biz in Chrome.
+- [x] **Console screenshots** for docs/guides/line-console.{ja,en}.md — done
+  2026-08-26 in Japanese UI: `docs/images/console/*.png` (basic settings,
+  callback URL, linked OA + email permission, LIFF list, LIFF app detail).
+  Not captured: the Developing → Publish button (channel is already
+  Published) and the email-permission application form (already submitted).
 - [ ] **Flip public.** Only after everything above and item 4. Then run
   LAUNCH.md §2 (Zenn article first).
 
@@ -63,6 +70,7 @@ it and will need a fresh one if you redo those checks.
 ## 5. LINE email permission
 
 - [ ] Check the channel's status (Basic settings → Email address permission).
+  *Checked 2026-08-26: still 申請済み (Applied).*
   When **Approved**: set `RENKEI_REQUEST_EMAIL=true`, log in once with the
   email consent, confirm `email` appears in the id_token, and note in
   DEV_SETUP.md. Until then Supabase-style downstreams rely on

@@ -40,6 +40,10 @@ renkei を動かす前に LINE 側で作るものと、その順番。**順番�
 - **Channel ID** と **Channel secret** を控える → `LINE_LOGIN_CHANNEL_ID` / `LINE_LOGIN_CHANNEL_SECRET`
 - **LINE Login** タブ → **Callback URL** に `https://<renkei>/line/callback` を登録。開発中は `http://localhost:3000/line/callback` で OK（localhost は http が許可されています）
 
+![チャネル基本設定: ステータス・チャネル ID・タブ](../images/console/login-channel-basic.png)
+
+![LINE ログイン設定 → コールバック URL。localhost の http も登録できる](../images/console/callback-url.png)
+
 ## 3. LINE 公式アカウント（Messaging API チャネル）を作る
 
 友だち追加（`bot_prompt`）とアカウント連携に必要です。ログインだけなら飛ばせますが、renkei を使う理由の大半はここにあります。
@@ -57,6 +61,8 @@ Login チャネル → **Basic settings** → **Add friend option / Linked LINE 
 
 これをしないと `bot_prompt` は無視され、友だち状態 API は 4xx を返します。
 
+![友だち追加オプション（リンク済み公式アカウント）と OpenID Connect（メールアドレス取得権限は「申請済み」）](../images/console/linked-oa-and-email.png)
+
 ## 5. LIFF アプリ（ミニアプリ / LIFF を使う場合）
 
 Login チャネル → **LIFF** タブ → **Add**。
@@ -69,6 +75,10 @@ Login チャネル → **LIFF** タブ → **Add**。
 | Add friend option | On (aggressive) |
 
 LIFF ID（`<channelId>-xxxxxxxx`）を `LIFF_ID` に。
+
+![LIFF タブ: アプリ一覧（LIFF ID・LIFF URL・サイズ）](../images/console/liff-list.png)
+
+![LIFF アプリ詳細: エンドポイント URL（https のトンネル）・Scope・友だち追加オプション](../images/console/liff-app-settings.png)
 
 > LINE は LIFF を **LINE ミニアプリ**に統合中で、新規は「LINE MINI App チャネル」を推奨しています（日本、および審査済みの台湾）。既存の LIFF は使い続けられます。renkei は両方に対応予定です。
 
