@@ -39,8 +39,9 @@ Order matters: each item is what the next needs.
 - [x] `getFriendshipStatus()` (+ `getProfile()`, `parseCallback()`)
 - [x] `verifyLiffToken()` — id_token path (`verifyIdToken`) and access_token path
       (`verifyAccessToken` + profile); live-verified in a browser 2026-08-26
-- [ ] `parseWebhook()` + signature check for `follow`, `unfollow`
-      (`accountLink` in v0.2)
+- [x] `parseWebhook()` + signature check for `follow`, `unfollow`,
+      `accountLink` (HMAC-SHA256 via Web Crypto; renkei-core, 2026-08-26).
+      Next: a server webhook route that updates friendship state.
 - [x] Identity mapping: upsert rules, multi-channel, `sub` stability (`upsertIdentityFromLine`, `buildClaims`)
 - [x] `Storage` interface + in-memory implementation for tests (+ shared behavioural contract test)
 - [ ] Unit tests against recorded LINE fixtures (HS256 and ES256 tokens,

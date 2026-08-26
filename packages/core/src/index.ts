@@ -10,5 +10,6 @@ export * from './line/id-token.js';
 export * from './line/pkce.js';
 export * from './line/profile.js';
 export * from './line/token.js';
+export * from './line/webhook.js';
 export * from './storage/memory.js';
 export * from './storage/types.js';
