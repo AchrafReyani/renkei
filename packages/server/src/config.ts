@@ -45,6 +45,25 @@ export const messagingChannelSchema = z.object({
   accountLinkForwardSecret: z.string().optional(),
 });
 
+export const sessionCookieSchema = z.object({
+  /** Mount `/login`, `/session`, `/logout` and issue a first-party session cookie. */
+  enabled: z.boolean().default(true),
+  /** Cookie name. */
+  cookieName: z.string().default('renkei_session'),
+  /** Session lifetime in seconds. Default 14 days. */
+  ttl: z
+    .number()
+    .int()
+    .positive()
+    .default(14 * 24 * 3600),
+  /**
+   * Absolute `return_to` URLs allowed after login, matched by origin. Same-origin
+   * relative paths (starting with a single `/`) are always allowed; anything else
+   * must match one of these, or it falls back to `/`.
+   */
+  returnUrls: z.array(z.string().url()).default([]),
+});
+
 export const oidcClientSchema = z.object({
   clientId: z.string().min(1),
   clientSecret: z.string().min(1).optional(),
@@ -87,6 +106,12 @@ export const renkeiConfigSchema = z.object({
   /** Browser origins allowed to call `/liff/exchange` (your LIFF app URLs). Empty = no CORS. */
   corsOrigins: z.array(z.string().url()).default([]),
   /**
+   * First-party session-cookie mode for apps that use renkei directly (no OIDC
+   * client of their own): `/login` runs LINE login and sets a signed cookie,
+   * `/session` returns the user's claims, `/logout` clears it. Omit to disable.
+   */
+  sessionCookie: sessionCookieSchema.optional(),
+  /**
    * Admin bearer token. When set, mounts the read-only inspection endpoints
    * under `/inspect` (identities, LINE accounts, recent webhooks), all gated
    * on this token. Unset = the inspection routes are not mounted at all. Use a
@@ -118,6 +143,7 @@ export type RenkeiConfig = z.output<typeof renkeiConfigSchema>;
 export type LineChannelConfig = z.output<typeof lineChannelSchema>;
 export type MessagingChannelConfig = z.output<typeof messagingChannelSchema>;
 export type OidcClientConfig = z.output<typeof oidcClientSchema>;
+export type SessionCookieConfig = z.output<typeof sessionCookieSchema>;
 
 export interface RenkeiOptions {
   config: RenkeiConfigInput;

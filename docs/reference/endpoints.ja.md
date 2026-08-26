@@ -85,6 +85,18 @@ LIFF SDK が持つ LINE のトークンを renkei の id_token に交換しま�
 
 **フォワード方式（アプリ主導）。** アプリが独自に連携を回す場合（nonce と紐づけ先アカウントをアプリが所有 — 例: 既存のパスワードアカウントに LINE を連携）、messaging チャネルに `accountLinkForwardUrl`（+ `accountLinkForwardSecret`）を設定します。renkei は LINE の署名を検証し、自分が所有しない nonce の `accountLink` イベントを `{ type, userId, nonce, result, timestamp }` としてその URL へ中継します。本文は base64 HMAC-SHA256 で署名され `x-renkei-signature` に付きます。アプリは nonce を自分のユーザーに突き合わせて紐づけを記録します — アプリ側に Messaging Webhook は不要です。renkei が所有する nonce（`POST /link/start` 由来）は内部で処理され、転送されません。
 
+## セッションクッキーモード
+
+renkei を**直接**使うアプリ（自前の OIDC クライアントを持たない）向け。`sessionCookie`（`RENKEI_SESSION_COOKIE=true`）で有効化します。
+
+| パス | 内容 |
+|---|---|
+| `GET /login` | LINE ログインを実行し、戻り時に署名付き HttpOnly セッションクッキーを設定して `return_to` へリダイレクト。任意で `?return_to=`（同一オリジンのパス、または許可リストの絶対 URL。それ以外は `/`）、`?line_region=` / `?bot_prompt=` |
+| `GET /session` | クッキーから現在のユーザーのクレーム（`sub`, `name`, `line:*` など）を JSON で返す。有効なセッションが無ければ `401` |
+| `POST /logout` | セッションを破棄しクッキーを削除（`204`） |
+
+クッキーは `cookieKeys[0]` で署名され、`HttpOnly` / `SameSite=Lax`、issuer が HTTPS なら `Secure`。`return_to` はオープンリダイレクト防止のため検証されます。これは OIDC フローの代替であり置き換えではありません — 多くの統合は `/oidc/*` を使うべきです。
+
 ## その他
 
 | パス | 内容 |

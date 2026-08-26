@@ -25,6 +25,8 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 | `RENKEI_CORS_ORIGINS` | なし | `/liff/exchange` をブラウザから直接呼ぶ LIFF アプリのオリジン（カンマ区切り）。未設定なら CORS なし |
 | `RENKEI_ADMIN_TOKEN` | なし | 設定すると読み取り専用の `/inspect`（identity・LINE アカウント・直近 Webhook の参照）を有効化。このトークンで Bearer 認証。未設定なら未マウント。十分に長くランダムな値を使ってください |
 | `RENKEI_LOG_FORMAT` | pretty | `json` にするとログを 1 行 1 JSON（`{ level, msg, … }`）で出力（ログ集約向け）。形式に関わらず、ログのメタデータからシークレット（トークン・チャネルシークレット・Cookie など）は**常に**マスクされます |
+| `RENKEI_SESSION_COOKIE` | なし | `true` で第一者セッションクッキーモード（`/login`, `/session`, `/logout`）を有効化。自前の OIDC クライアントを持たず renkei を直接使うアプリ向け |
+| `RENKEI_SESSION_RETURN_URLS` | なし | `/login` 後の `return_to` として許可する絶対 URL のオリジン（カンマ区切り）。同一オリジンの相対パスは常に許可 |
 
 ## LINE チャネル
 

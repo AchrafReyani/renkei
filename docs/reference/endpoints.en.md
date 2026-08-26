@@ -85,6 +85,18 @@ Requires a `messagingChannels` entry with a `channelAccessToken` (`LINE_MESSAGIN
 
 **Forwarded (app-owned) mode.** If your app runs its own linking (it owns the nonce and the account it maps to — e.g. connecting LINE to a pre-existing password account), set `accountLinkForwardUrl` (+ `accountLinkForwardSecret`) on the messaging channel. renkei verifies LINE's signature and relays any `accountLink` event whose nonce it doesn't own to that URL as `{ type, userId, nonce, result, timestamp }`, signed with base64 HMAC-SHA256 in `x-renkei-signature`. Your app matches the nonce to its user and records the binding — no Messaging webhook of its own required. renkei-owned nonces (from `POST /link/start`) are handled internally and never forwarded.
 
+## Session cookie mode
+
+For an app that uses renkei **directly** (no OIDC client of its own). Enabled with `sessionCookie` (`RENKEI_SESSION_COOKIE=true`).
+
+| Path | What |
+|---|---|
+| `GET /login` | Runs LINE login and, on return, sets a signed HttpOnly session cookie, then redirects to `return_to`. Optional `?return_to=` (same-origin path, or an allowlisted absolute URL — otherwise `/`) and `?line_region=` / `?bot_prompt=` |
+| `GET /session` | Returns the current user's claims as JSON (`sub`, `name`, `line:*`, …) from the cookie; `401` if there is no valid session |
+| `POST /logout` | Destroys the session and clears the cookie (`204`) |
+
+The cookie is signed with `cookieKeys[0]`, `HttpOnly`, `SameSite=Lax`, and `Secure` when the issuer is HTTPS. `return_to` is validated to prevent open redirects. This is an alternative to the OIDC flow, not a replacement — most integrations should use `/oidc/*`.
+
 ## Other
 
 | Path | What |
