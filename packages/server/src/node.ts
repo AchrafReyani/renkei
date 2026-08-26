@@ -14,6 +14,7 @@
  *   RENKEI_JWKS                JSON array of private JWKs; generated for dev if absent
  *   RENKEI_CORS_ORIGINS        comma-separated browser origins allowed on /liff/exchange
  *   RENKEI_DEV                 true to mount the /dev relying party
+ *   RENKEI_ADMIN_TOKEN         bearer token; when set, mounts read-only /inspect
  *   DATABASE_URL               Postgres URL; in-memory storage if absent
  */
 import { serve } from '@hono/node-server';
@@ -71,6 +72,7 @@ const config: RenkeiConfigInput = {
     : {}),
   cookieKeys: env.RENKEI_COOKIE_KEYS ? env.RENKEI_COOKIE_KEYS.split(',') : [randomToken(32)],
   corsOrigins: env.RENKEI_CORS_ORIGINS ? env.RENKEI_CORS_ORIGINS.split(',') : [],
+  ...(env.RENKEI_ADMIN_TOKEN ? { adminToken: env.RENKEI_ADMIN_TOKEN } : {}),
   ...(env.RENKEI_JWKS ? { jwks: JSON.parse(env.RENKEI_JWKS) } : {}),
 };
 

@@ -16,5 +16,11 @@ export {
   type RenkeiOptions,
   renkeiConfigSchema,
 } from './config.js';
+export {
+  createWebhookLog,
+  inspectRoutes,
+  type WebhookLog,
+  type WebhookLogEntry,
+} from './inspect.js';
 export { generateDevJwks } from './keys.js';
 export { CLAIMS_BY_SCOPE, INTERACTION_PATH, OIDC_ROUTES } from './oidc/provider.js';

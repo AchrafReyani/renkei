@@ -88,3 +88,4 @@ LIFF SDK が持つ LINE のトークンを renkei の id_token に交換しま�
 |---|---|
 | `GET /healthz` | `{ ok: true }` |
 | `/dev/*` | `RENKEI_DEV=true` のときだけ。動作確認用の OIDC クライアント（`/dev`）、LIFF テスト（`/dev/liff`）、下流からの着地確認（`/dev/landing`） |
+| `/inspect` + `/inspect/api/*` | `RENKEI_ADMIN_TOKEN` を設定したときだけ。読み取り専用の参照ページとその JSON API（`GET /inspect/api/identity/:sub`, `/inspect/api/line/:channelId/:userId`, `/inspect/api/webhooks`）。API は admin トークンで Bearer 認証。ページ自体にデータは含まれず、トークンの入力を求めます。読み取り専用（状態を変更しません） |

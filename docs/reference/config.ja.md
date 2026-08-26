@@ -23,6 +23,7 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 | `RENKEI_JWKS` | 起動ごとに生成 | トークン署名用の秘密鍵（JWK の JSON 配列、`kid` と `alg` 付き）。未設定だと再起動で全トークンが無効になり、複数インスタンスで動きません。**本番では必ず設定**（[鍵の作り方](#署名鍵を作る)） |
 | `RENKEI_DEV` | `RENKEI_CLIENTS` と `DATABASE_URL` が両方未設定なら `true` | `/dev` の動作確認用リライングパーティを有効化。**本番では無効に** |
 | `RENKEI_CORS_ORIGINS` | なし | `/liff/exchange` をブラウザから直接呼ぶ LIFF アプリのオリジン（カンマ区切り）。未設定なら CORS なし |
+| `RENKEI_ADMIN_TOKEN` | なし | 設定すると読み取り専用の `/inspect`（identity・LINE アカウント・直近 Webhook の参照）を有効化。このトークンで Bearer 認証。未設定なら未マウント。十分に長くランダムな値を使ってください |
 
 ## LINE チャネル
 

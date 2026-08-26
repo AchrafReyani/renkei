@@ -58,6 +58,15 @@ export function firstRunChecks(config: RenkeiConfig, ctx: CheckContext): FirstRu
     });
   }
 
+  if (config.adminToken) {
+    checks.push({
+      level: 'info',
+      code: 'inspect-enabled',
+      message:
+        'adminToken が設定されているため、読み取り専用の /inspect が有効です（Bearer 認証）。トークンは十分に長くランダムなものを使ってください。 / adminToken is set: the read-only /inspect endpoints are mounted (Bearer-gated). Use a long random token.',
+    });
+  }
+
   const regions = new Set(config.channels.map((c) => c.region));
 
   for (const ch of config.channels) {

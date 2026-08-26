@@ -72,6 +72,13 @@ export const renkeiConfigSchema = z.object({
   lineCallbackPath: z.string().default('/line/callback'),
   /** Browser origins allowed to call `/liff/exchange` (your LIFF app URLs). Empty = no CORS. */
   corsOrigins: z.array(z.string().url()).default([]),
+  /**
+   * Admin bearer token. When set, mounts the read-only inspection endpoints
+   * under `/inspect` (identities, LINE accounts, recent webhooks), all gated
+   * on this token. Unset = the inspection routes are not mounted at all. Use a
+   * long random value; it grants read access to identity data.
+   */
+  adminToken: z.string().min(16).optional(),
   /** Token lifetimes in seconds. */
   ttl: z
     .object({

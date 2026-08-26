@@ -24,6 +24,7 @@ programmatic use, pass the same settings as an object to
 | `RENKEI_JWKS` | generated per boot | private signing keys (JSON array of JWKs with `kid` and `alg`). Unset means tokens die on restart and multi-instance deployments break. **Set in production** ([how to generate](#generating-signing-keys)) |
 | `RENKEI_DEV` | `true` only if both `RENKEI_CLIENTS` and `DATABASE_URL` are unset | mounts the `/dev` test relying party. **Off in production** |
 | `RENKEI_CORS_ORIGINS` | none | browser origins of LIFF apps that call `/liff/exchange` directly (comma-separated). Unset = no CORS |
+| `RENKEI_ADMIN_TOKEN` | none | when set, mounts the read-only `/inspect` endpoints (identity / LINE account / recent-webhook lookups), Bearer-gated on this token. Unset = not mounted. Use a long random value |
 
 ## LINE channel
 

@@ -88,3 +88,4 @@ Requires a `messagingChannels` entry with a `channelAccessToken` (`LINE_MESSAGIN
 |---|---|
 | `GET /healthz` | `{ ok: true }` |
 | `/dev/*` | only with `RENKEI_DEV=true`: a test OIDC client (`/dev`), LIFF test page (`/dev/liff`), landing page for downstream redirects (`/dev/landing`) |
+| `/inspect` + `/inspect/api/*` | only when `RENKEI_ADMIN_TOKEN` is set: a read-only lookup page and its JSON API (`GET /inspect/api/identity/:sub`, `/inspect/api/line/:channelId/:userId`, `/inspect/api/webhooks`). The API is Bearer-gated on the admin token; the page carries no data and prompts for it. Read-only — nothing here mutates state |

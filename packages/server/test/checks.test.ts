@@ -37,6 +37,15 @@ describe('firstRunChecks', () => {
     expect(codes(base, false)).toContain('memory-storage');
   });
 
+  it('notes when the /inspect endpoints are enabled via adminToken', () => {
+    const found = firstRunChecks(
+      parseConfig({ ...base, adminToken: 'a-long-enough-admin-token' }),
+      { hasPersistentStorage: true },
+    );
+    const c = found.find((x) => x.code === 'inspect-enabled');
+    expect(c?.level).toBe('info');
+  });
+
   it('warns when the /dev relying party is enabled', () => {
     const found = firstRunChecks(parseConfig({ ...base, dev: true }), {
       hasPersistentStorage: true,
