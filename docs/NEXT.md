@@ -1,107 +1,81 @@
 # NEXT — what to do at the start of the next session
 
-The v0.1 build is done (see PLAN.md §7 and ROADMAP.md). What remains before
-flipping the repo public is below, in order. Work through it **with Achraf,
-one item at a time**; several steps need his phone, passkey, or the GitHub
-UI. Tick items here as they complete and commit.
+**Type `/todo`** to have Claude read this file + ROADMAP.md and lay out the
+open items. Work through them **with Achraf, one at a time**; the remaining
+work is mostly release mechanics and steps that need his passkey, phone, the
+GitHub UI, or the LINE console.
 
-State to expect (after 2026-08-26): renkei may still be on :3000 with
-`ISSUER=https://sponsor-flight-wheels-gdp.trycloudflare.com` and that
-cloudflared tunnel running; the LIFF endpoint URL in the console points at
-it and is dead once the tunnel stops. Otherwise nothing is running. `.env` has the LINE secrets. The
-cloudflared tunnel URL from last time is dead — LIFF endpoint and Supabase
-`url` in `spikes/supabase-edge-runtime/supabase/config.toml` still point at
-it and will need a fresh one if you redo those checks.
+## Where things stand (2026-08-27)
 
-## 1. Human-only verifications
+**All buildable v0.1 and v0.2 code is done and merged to `main`** — 153 tests
+green; lint / typecheck / build / docs all pass. Shipped in v0.2: webhook
+parsing + `POST /line/webhook`, first-run config checks, account linking
+(Option A `/link/start` + `GET /link`, Option B forwarded `accountLinkForwardUrl`),
+`line:linked` claim, read-only `/inspect`, real-shaped webhook fixtures,
+Tutorial 3 (ja/en), structured logging + redaction, and session-cookie mode
+(`/login` `/session` `/logout`). Both the renkei and job-matching-platform
+remotes are pruned to just `main`.
 
-- [x] **Next.js example, final LINE leg.** Done 2026-08-26 — see DEV_SETUP.md.
-  ```sh
-  # terminal 1 — renkei with the example's client
-  cd packages/server
-  RENKEI_CLIENTS='[{"clientId":"my-next-app","clientSecret":"my-next-app-secret-0123456789abcdef","redirectUris":["http://localhost:3400/api/auth/callback/renkei"]}]' RENKEI_DEV=true pnpm dev
-  # terminal 2
-  cd examples/nextjs && cp .env.example .env.local && pnpm dev
-  ```
-  Achraf opens http://localhost:3400 → 「LINEでログイン」→ LINE → back with his
-  name and the `line` object. Claude can drive localhost:3400 in Chrome but
-  not `access.line.me`. Record the result in DEV_SETUP.md.
-  *2026-08-26: Claude drove it as far as the LINE login page — Auth.js →
-  renkei `/authorize` → `access.line.me` with PKCE, `scope=openid profile`,
-  `bot_prompt=aggressive`. LINE did not auto-SSO in that tab; the login
-  itself is still Achraf's.*
-- [x] **LIFF inside the LINE app** — done 2026-08-26 (`inClient: true`, Android). See DEV_SETUP.md.
-  Needs a fresh tunnel: `pnpm dlx cloudflared tunnel --url http://localhost:3000`,
-  restart renkei with `ISSUER=<tunnel>`, update the LIFF endpoint URL in the
-  console (LIFF tab → renkei-dev → Edit) to `<tunnel>/dev/liff`, then Achraf
-  opens `https://liff.line.me/2011257262-OKRFVulZ` on his phone. Expect
-  `inClient: true`.
+**A stack of ~9 unreleased changesets sits on `main`** (everything since 0.1.0).
+Nothing is published yet at these new versions.
 
-## 2. UI-only GitHub steps (Achraf, ~2 minutes)
+Cloud-session note: a fresh clone has **no `.env` and nothing running**. The
+LINE secrets, the demo's Render env, and the LINE console are all Achraf's side.
 
-- [ ] Upload `.github/social-preview.png`. *2026-08-26: the "Social preview"
-  block is gone from Settings → General and isn't in the About editor
-  either — GitHub appears to have removed/hidden it (repo is private).
-  Re-check after flipping public; if still absent, drop this item.*
-- [x] Pin Discussion #21 — done 2026-08-26 (green background).
+## 0. Cut the v0.2 release  (Achraf runs the publish — npm 2FA is a passkey)
 
-## 3. Launch mechanics
+- [ ] `pnpm changeset version` → review the bumped `renkei-core` /
+  `renkei-server` versions and the generated CHANGELOGs, commit.
+- [ ] `pnpm build && pnpm test` once more, then **Achraf** publishes:
+  `pnpm -r publish` (or the release flow) from an interactive terminal —
+  npm 2FA is a passkey, so Claude cannot do this.
+- [ ] Tag `vX.Y.Z` and push; confirm `release.yml` is green and the GHCR image
+  is pushed. (`gh` token needs `read:packages` to pull.)
 
-- [x] **Demo instance — Render free tier** — live 2026-08-26 at
-  `https://renkei-demo.onrender.com/dev`, LINE login verified by Achraf,
-  README demo link + disclaimer committed. Details and the Render routing
-  quirk in DEV_SETUP.md. Left over: rotate the Neon password (Neon →
-  Branches → Roles → reset, then update `DATABASE_URL` on Render);
-  optional `LIFF_ID` on Render + LIFF endpoint → demo.
-- [ ] **README GIF** of the `/dev` flow (optional, nice-to-have now that
-  there's a live demo): 「LINEでログイン」→ friend-add → claims JSON, plus the
-  in-app LIFF phone screenshot. LINE screens are blocked for Claude in Chrome,
-  so Achraf records those legs.
-- [x] **Version + tag** — done 2026-08-26. Packages are `renkei-core`,
-  `renkei-server`, `renkei-storage-postgres`, `renkei` at 0.1.0 (the
-  `@renkei` npm scope belongs to someone else — DECISIONS §10). Tag `v0.1.0`
-  pushed; `release.yml` green; image pushed as
-  `ghcr.io/achrafreyani/renkei:0.1.0` / `:0.1` / `:latest`
-  (digest `sha256:ae247c95…`). Local build of the same Dockerfile boots.
-  Pulling from GHCR needs a token with `read:packages`
-  (`gh auth refresh -s read:packages`) — not verified from this machine.
-- [x] **npm publish** — done 2026-08-26 by Achraf (`npm login` first: the
-  saved token was dead, npm shows that as E404 on publish). `renkei-core`,
-  `renkei-storage-postgres`, `renkei-server`, `renkei` all at 0.1.0 with
-  `latest`; `workspace:*` rewritten to `0.1.0`. Verified from a clean dir:
-  `npm install renkei` pulls the chain, `npx renkei --version` = 0.1.0,
-  `npx renkei` boots with `/healthz`, discovery and `/dev` answering.
-- [x] **Console screenshots** for docs/guides/line-console.{ja,en}.md — done
-  2026-08-26 in Japanese UI: `docs/images/console/*.png` (basic settings,
-  callback URL, linked OA + email permission, LIFF list, LIFF app detail).
-  Not captured: the Developing → Publish button (channel is already
-  Published) and the email-permission application form (already submitted).
-- [ ] **Flip public.** Only after everything above and item 4. Then run
-  LAUNCH.md §2 (Zenn article first).
+## 1. Live-verify the v0.2 features on the demo  (needs the LINE console + Render)
 
-## 4. Dogfooding (two weeks, calendar time)
+None of these have been exercised against real LINE yet — they need secrets a
+cloud session doesn't have, so they're Achraf's steps.
 
-- [ ] Wire renkei into one real thing and leave it running. Candidates:
-  `examples/nextjs` against a local renkei, or one of Achraf's own apps
-  (no hosted instance — see §3). Note bugs as issues.
-  Start date: ______  Earliest launch date: ______
+- [ ] On the **Messaging API channel**: set the webhook URL to
+  `https://renkei-demo.onrender.com/line/webhook`, enable "Use webhook",
+  disable auto-reply.
+- [ ] On the demo (Render): set `LINE_MESSAGING_CHANNEL_SECRET` and
+  `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`. Then follow/unfollow the OA and watch
+  `line:friend` flip (check via `/inspect` after setting `RENKEI_ADMIN_TOKEN`).
+- [ ] Exercise **account linking** end to end (a real consent round-trip →
+  `accountLink` webhook → `line:linked`), per `docs/tutorials/account-linking`.
+- [ ] (Optional) Try **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`),
+  **session mode** (`RENKEI_SESSION_COOKIE=true` → `/login`/`/session`), and
+  **JSON logs** (`RENKEI_LOG_FORMAT=json`).
 
-## 5. LINE email permission
+## 2. Launch / UI steps  (Achraf, GitHub UI)
 
-- [ ] Check the channel's status (Basic settings → Email address permission).
-  *Checked 2026-08-26: still 申請済み (Applied).*
-  When **Approved**: set `RENKEI_REQUEST_EMAIL=true`, log in once with the
-  email consent, confirm `email` appears in the id_token, and note in
-  DEV_SETUP.md. Until then Supabase-style downstreams rely on
-  `placeholderEmailDomain`.
+- [ ] Upload `.github/social-preview.png` (the setting was hidden while the repo
+  is private — re-check after flipping public; drop if still absent).
+- [ ] (Optional) README GIF of the `/dev` flow + the in-app LIFF phone shot —
+  LINE screens are blocked for Claude, so Achraf records them.
+- [ ] **Flip the repo public** — only after the release and the dogfood clock.
+  Then run LAUNCH.md §2 (publish the Zenn article — draft is
+  `drafts/zenn-account-linking.md`).
 
-## Still-running-process cleanup from 2026-08-26 (if the machine wasn't rebooted)
+## 3. Dogfooding (two weeks, calendar time)
 
-```sh
-# renkei dev server on :3000, next on :3400
-netstat -ano | grep -E ":3000|:3400"      # then taskkill //F //PID <pid>
-# local Supabase stack
-cd spikes/supabase-edge-runtime && pnpm exec supabase stop --no-backup
-# cloudflared
-tasklist | grep -i cloudflared            # then taskkill //F //IM cloudflared.exe
-```
+- [ ] renkei already brokers LINE login on the job-matching-platform in prod
+  (see the [[jobmatch-renkei-integration]] memory). Just let it run and log
+  bugs as issues. Start date: ______  Earliest launch date: ______
+
+## 4. LINE email permission
+
+- [ ] Check the channel (Basic settings → Email address permission).
+  *Last checked 2026-08-26: still 申請済み (Applied).* When **Approved**: set
+  `RENKEI_REQUEST_EMAIL=true`, log in once with email consent, confirm `email`
+  in the id_token, note in DEV_SETUP.md. Until then, Supabase-style downstreams
+  rely on `placeholderEmailDomain`.
+
+## After all of the above → v0.3
+
+Next real coding milestone (ROADMAP.md → v0.3): `renkei-client` /
+`renkei-next` SDKs, Cloudflare Workers + Supabase Edge deploy targets, LINE
+MINI App channel support, multi-region tutorial. Scope with Achraf before
+starting.
