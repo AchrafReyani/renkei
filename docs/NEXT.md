@@ -5,7 +5,10 @@ flipping the repo public is below, in order. Work through it **with Achraf,
 one item at a time**; several steps need his phone, passkey, or the GitHub
 UI. Tick items here as they complete and commit.
 
-State to expect: nothing is running. `.env` has the LINE secrets. The
+State to expect (after 2026-08-26): renkei may still be on :3000 with
+`ISSUER=https://sponsor-flight-wheels-gdp.trycloudflare.com` and that
+cloudflared tunnel running; the LIFF endpoint URL in the console points at
+it and is dead once the tunnel stops. Otherwise nothing is running. `.env` has the LINE secrets. The
 cloudflared tunnel URL from last time is dead — LIFF endpoint and Supabase
 `url` in `spikes/supabase-edge-runtime/supabase/config.toml` still point at
 it and will need a fresh one if you redo those checks.
@@ -27,7 +30,7 @@ it and will need a fresh one if you redo those checks.
   renkei `/authorize` → `access.line.me` with PKCE, `scope=openid profile`,
   `bot_prompt=aggressive`. LINE did not auto-SSO in that tab; the login
   itself is still Achraf's.*
-- [ ] **LIFF inside the LINE app** (external-browser path already verified).
+- [x] **LIFF inside the LINE app** — done 2026-08-26 (`inClient: true`, Android). See DEV_SETUP.md.
   Needs a fresh tunnel: `pnpm dlx cloudflared tunnel --url http://localhost:3000`,
   restart renkei with `ISSUER=<tunnel>`, update the LIFF endpoint URL in the
   console (LIFF tab → renkei-dev → Edit) to `<tunnel>/dev/liff`, then Achraf

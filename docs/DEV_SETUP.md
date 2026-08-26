@@ -73,7 +73,14 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
 - **LIFF exchange verified live (2026-08-26):** `/dev/liff` through a
   `cloudflared` quick tunnel; `liff.init` → `liff.login` → both tokens →
   `POST /liff/exchange` → renkei id_token with `line:*` claims. Works in an
-  external browser (`inClient: false`); in-app not yet tried.
+  external browser (`inClient: false`) **and inside the LINE app** (verified
+  2026-08-26 on Android: `inClient: true`, both LIFF tokens present,
+  `client: renkei-dev-liff`, payload has `name`, `picture`,
+  `line:user_id`, `line:channel_id`).
+- **`sub` is not stable across restarts on memory storage.** The same LINE
+  user got a different `sub` after renkei was restarted with a new
+  `ISSUER`, because the in-memory identity table starts empty. Expected;
+  use Postgres for anything where `sub` must persist.
 - **Claude in Chrome blocks `trycloudflare.com`** outright (not an approval
   prompt), so LIFF verification through the tunnel has to be done by Achraf.
 - **Supabase verified live (2026-08-26):** local `supabase start` with
