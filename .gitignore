@@ -24,3 +24,6 @@ spikes/supabase-edge-runtime/supabase/.branches/
 docs/.vitepress/dist/
 docs/.vitepress/cache/
 CLAUDE.local.md
+
+# TypeScript incremental build state
+*.tsbuildinfo
