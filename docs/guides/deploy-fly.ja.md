@@ -2,14 +2,14 @@
 
 > English: [deploy-fly.en.md](deploy-fly.en.md)
 
-Docker イメージをそのまま Fly.io（東京リージョン `nrt`）で動かす手順です。公開デモも同じ手順で立てています。所要時間 15 分。必要なもの: [flyctl](https://fly.io/docs/flyctl/install/)、Fly アカウント、Postgres（下記）。
+Docker イメージをそのまま Fly.io（東京リージョン `nrt`）で動かす手順です。所要時間 15 分。Fly は従量課金です（自動停止ありの最小構成で月数十円〜数百円程度）。必要なもの: [flyctl](https://fly.io/docs/flyctl/install/)、Fly アカウント、Postgres（下記）。
 
 ## 1. Postgres を用意する
 
 どちらでも構いません。`DATABASE_URL` が 1 本あればよいです。
 
 - **Neon**（無料枠、手軽）: プロジェクトを作り、接続文字列（`postgres://...?sslmode=require`）を控える
-- **Fly Managed Postgres**: `fly mpg create --region nrt` → `fly mpg attach <cluster> --app renkei-demo` で `DATABASE_URL` が自動設定されます
+- **Fly Managed Postgres**: `fly mpg create --region nrt` → `fly mpg attach <cluster> --app <app>` で `DATABASE_URL` が自動設定されます
 
 マイグレーションは renkei が起動時に自動で流します（`autoMigrate`）。
 
@@ -60,7 +60,7 @@ open https://<app>.fly.dev/dev                                 # RENKEI_DEV=true
 
 ## 本番で変えるところ
 
-| 項目 | デモ | 本番 |
+| 項目 | お試し | 本番 |
 |---|---|---|
 | `RENKEI_DEV` | `true`（`/dev` を公開） | 外す。`RENKEI_CLIENTS` に自分のアプリを登録 |
 | `min_machines_running` | `0`（コールドスタートあり） | `1` |

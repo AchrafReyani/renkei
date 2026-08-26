@@ -1,9 +1,9 @@
-# Fly.io app definition for the renkei demo instance.
+# Fly.io app definition for a self-hosted renkei (Tokyo region).
 #   fly launch --copy-config --no-deploy   (first time; pick the app name)
 #   fly secrets set ...                    (see docs/guides/deploy-fly)
 #   fly deploy
 # Guide: docs/guides/deploy-fly.ja.md / deploy-fly.en.md
-app = "renkei-demo"
+app = "my-renkei"            # change: must be globally unique on Fly
 primary_region = "nrt"
 
 [build]
@@ -11,8 +11,9 @@ primary_region = "nrt"
 
 [env]
   # Public URL — must match the app name above. Becomes the OIDC issuer.
-  ISSUER = "https://renkei-demo.fly.dev"
-  # The demo *is* the /dev relying party. Turn off for a real deployment.
+  ISSUER = "https://my-renkei.fly.dev"
+  # Mounts the /dev test relying party so you can try the login before
+  # wiring a real client. Remove for production and set RENKEI_CLIENTS.
   RENKEI_DEV = "true"
   LINE_LOGIN_REGION = "jp"
 

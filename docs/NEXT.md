@@ -47,15 +47,15 @@ it and will need a fresh one if you redo those checks.
 
 ## 3. Launch mechanics
 
-- [ ] **Demo instance — Fly.io, `nrt`** (decided 2026-08-26). `fly.toml` and
-  `docs/guides/deploy-fly.{ja,en}.md` are in the repo. Achraf runs it (no
-  flyctl on this machine): Neon or Fly Postgres → `fly launch --copy-config
-  --no-deploy` → `fly secrets set …` → register `https://renkei-demo.fly.dev/line/callback`
-  on the channel → `fly deploy` → LINE login through `/dev`. Original notes:
-  Postgres, `ISSUER=https://<demo host>`, stable `RENKEI_JWKS` + `RENKEI_COOKIE_KEYS`
-  (generate per docs/reference/config), the demo host's `/line/callback`
-  registered on the channel, `RENKEI_DEV=true` so `/dev` is the demo. The
-  Docker image is verified; `docker-compose.yml` is the template.
+- [x] ~~**Demo instance.**~~ **Scrapped 2026-08-26** — Fly has no free tier
+  and Achraf doesn't want a recurring bill; a hosted demo isn't worth it.
+  `fly.toml` + `docs/guides/deploy-fly` stay as the self-hosting reference.
+  Replacement, same job (let a reader see the flow without making a channel):
+- [ ] **README GIF** of the `/dev` flow: 「LINEでログイン」→ friend-add screen →
+  claims JSON (~15 s), plus the in-app LIFF phone screenshot. The LINE screens
+  are blocked for Claude in Chrome, so Achraf records it (or Claude records
+  the localhost legs with `gif_creator` and Achraf the LINE ones). Embed at
+  the top of README.md / README.en.md.
 - [ ] **Version + tag.** `pnpm changeset` → version `0.1.0` for `@renkei/core`,
   `@renkei/storage-postgres`, `@renkei/server`, `renkei`. Tag `v0.1.0` → the
   `release.yml` workflow builds and pushes `ghcr.io/achrafreyani/renkei`.
@@ -73,8 +73,9 @@ it and will need a fresh one if you redo those checks.
 
 ## 4. Dogfooding (two weeks, calendar time)
 
-- [ ] Wire renkei into one real thing and leave it running. Candidates: the
-  deployed `examples/nextjs`, or one of Achraf's own apps. Note bugs as issues.
+- [ ] Wire renkei into one real thing and leave it running. Candidates:
+  `examples/nextjs` against a local renkei, or one of Achraf's own apps
+  (no hosted instance — see §3). Note bugs as issues.
   Start date: ______  Earliest launch date: ______
 
 ## 5. LINE email permission

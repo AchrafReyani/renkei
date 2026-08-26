@@ -226,3 +226,11 @@ leave an identity row in the demo DB. Acceptable for a demo; the guide
 tells real deployments to drop `RENKEI_DEV` and register their own
 `RENKEI_CLIENTS`. Cold starts from `min_machines_running = 0` are a
 demo-only trade-off, also documented.
+
+**Superseded the same day.** Fly requires a payment method and bills
+pay-as-you-go (cents/month with auto-stop, but not zero), and Achraf
+doesn't want a recurring bill for a demo. No hosted instance for v0.1. The
+job the demo was for — letting a reader see the flow without creating a
+LINE channel — is done by a README GIF instead. `fly.toml` and the deploy
+guide stay as the self-hosting reference; if a free host is ever wanted,
+Render's free tier runs the image at $0 with a ~50 s cold start.

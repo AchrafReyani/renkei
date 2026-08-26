@@ -123,7 +123,7 @@ answer to "how much do we have to build before we can start sharing it."
 **Deployable**
 - [x] `docker run` works with a `.env` in < 5 minutes from a clean machine
 - [ ] Published Docker image (GHCR) and npm packages — at launch (workflows ready)
-- [ ] A live demo instance (can be behind a "demo" LINE channel)
+- [ ] ~~A live demo instance~~ → a README GIF of the flow (2026-08-26: no hosted demo — Fly has no free tier; DECISIONS §9)
 
 **Documented (Japanese, with English mirror)**
 - [x] README with the "why" in three sentences, a diagram, and a

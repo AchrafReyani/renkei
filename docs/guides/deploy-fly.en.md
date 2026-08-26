@@ -2,14 +2,14 @@
 
 > 日本語: [deploy-fly.ja.md](deploy-fly.ja.md)
 
-Run the Docker image as-is on Fly.io (Tokyo region `nrt`). The public demo is deployed exactly this way. Time: ~15 minutes. You need: [flyctl](https://fly.io/docs/flyctl/install/), a Fly account, and a Postgres (below).
+Run the Docker image as-is on Fly.io (Tokyo region `nrt`). Time: ~15 minutes. Fly is pay-as-you-go (a minimal auto-stopping setup is well under a dollar a month). You need: [flyctl](https://fly.io/docs/flyctl/install/), a Fly account, and a Postgres (below).
 
 ## 1. Get a Postgres
 
 Either works — all renkei needs is one `DATABASE_URL`.
 
 - **Neon** (free tier, easiest): create a project and note the connection string (`postgres://...?sslmode=require`)
-- **Fly Managed Postgres**: `fly mpg create --region nrt` → `fly mpg attach <cluster> --app renkei-demo` sets `DATABASE_URL` for you
+- **Fly Managed Postgres**: `fly mpg create --region nrt` → `fly mpg attach <cluster> --app <app>` sets `DATABASE_URL` for you
 
 renkei runs its migrations on boot (`autoMigrate`).
 
@@ -60,7 +60,7 @@ You are done when `/dev` completes a LINE login — friend-add screen, then an i
 
 ## What to change for production
 
-| | Demo | Production |
+| | Trying it out | Production |
 |---|---|---|
 | `RENKEI_DEV` | `true` (exposes `/dev`) | remove; register your apps in `RENKEI_CLIENTS` |
 | `min_machines_running` | `0` (cold starts) | `1` |
