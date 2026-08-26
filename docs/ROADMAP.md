@@ -44,8 +44,10 @@ Order matters: each item is what the next needs.
       Consumed by the `POST /line/webhook` server route (below).
 - [x] Identity mapping: upsert rules, multi-channel, `sub` stability (`upsertIdentityFromLine`, `buildClaims`)
 - [x] `Storage` interface + in-memory implementation for tests (+ shared behavioural contract test)
-- [ ] Unit tests against recorded LINE fixtures (HS256 and ES256 tokens,
-      real-shaped webhook bodies)
+- [x] Unit tests against real-shaped LINE fixtures: webhook bodies
+      (follow/unfollow/accountLink/message, group source, batched, verify ping)
+      in `test/fixtures/webhooks.ts` (2026-08-26). HS256/ES256 id_tokens are
+      exercised by `id-token.test.ts` (signed at test time with jose).
 
 **server**
 - [x] Config loader (env, zod-validated, JA/EN error messages) — YAML later
