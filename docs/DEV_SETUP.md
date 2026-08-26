@@ -63,6 +63,13 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
   matched LINE's `/verify`, `amr=["linesso"]`. No email claim (permission not
   applied yet). All four harness variants (`aggressive`, `normal`, no prompt,
   `email` scope) completed.
+- **Next.js example verified live (2026-08-26):** `examples/nextjs`
+  (Auth.js v5, plain OIDC provider) against renkei with `RENKEI_CLIENTS`
+  → 「LINEでログイン」 → LINE (PKCE, `scope=openid profile`,
+  `bot_prompt=aggressive`) → `/api/auth/callback/renkei` → signed in as
+  "Achraf" with `line: { userId, friend: true, channelId, region: "jp" }`.
+  renkei side: `created: true`, `amr: ["linesso"]`. Achraf completed the
+  LINE leg; Claude in Chrome cannot touch `access.line.me`.
 - **LIFF exchange verified live (2026-08-26):** `/dev/liff` through a
   `cloudflared` quick tunnel; `liff.init` → `liff.login` → both tokens →
   `POST /liff/exchange` → renkei id_token with `line:*` claims. Works in an

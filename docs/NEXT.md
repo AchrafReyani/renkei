@@ -12,7 +12,7 @@ it and will need a fresh one if you redo those checks.
 
 ## 1. Human-only verifications
 
-- [ ] **Next.js example, final LINE leg.**
+- [x] **Next.js example, final LINE leg.** Done 2026-08-26 — see DEV_SETUP.md.
   ```sh
   # terminal 1 — renkei with the example's client
   cd packages/server
