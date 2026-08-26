@@ -27,3 +27,6 @@ CLAUDE.local.md
 
 # TypeScript incremental build state
 *.tsbuildinfo
+
+# Claude Code personal settings
+.claude/settings.local.json
