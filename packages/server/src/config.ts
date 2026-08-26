@@ -16,6 +16,15 @@ export const lineChannelSchema = z.object({
   requestEmail: z.boolean().default(false),
 });
 
+export const messagingChannelSchema = z.object({
+  /** Messaging API channel secret — signs incoming webhooks (NOT the Login channel secret). */
+  channelSecret: z.string().min(1),
+  /** Which Login channel's users these events concern (a `channels[].region`). Defaults to the first channel. */
+  region: z.string().min(2).optional(),
+  /** Messaging API channel ID. Informational. */
+  channelId: z.string().optional(),
+});
+
 export const oidcClientSchema = z.object({
   clientId: z.string().min(1),
   clientSecret: z.string().min(1).optional(),
@@ -44,6 +53,8 @@ export const renkeiConfigSchema = z.object({
   /** Public base URL, e.g. https://auth.example.com — becomes the OIDC issuer. */
   issuer: z.string().url(),
   channels: z.array(lineChannelSchema).min(1),
+  /** LINE Messaging API channels whose webhooks renkei accepts at `POST /line/webhook`. */
+  messagingChannels: z.array(messagingChannelSchema).default([]),
   clients: z.array(oidcClientSchema).min(1),
   /** Keys for signing cookies. Rotate by prepending a new one. */
   cookieKeys: z.array(z.string().min(16)).min(1),
@@ -78,6 +89,7 @@ export const renkeiConfigSchema = z.object({
 export type RenkeiConfigInput = z.input<typeof renkeiConfigSchema>;
 export type RenkeiConfig = z.output<typeof renkeiConfigSchema>;
 export type LineChannelConfig = z.output<typeof lineChannelSchema>;
+export type MessagingChannelConfig = z.output<typeof messagingChannelSchema>;
 export type OidcClientConfig = z.output<typeof oidcClientSchema>;
 
 export interface RenkeiOptions {

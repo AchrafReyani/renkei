@@ -6,14 +6,19 @@ import {
   generatePkce,
   getFriendshipStatus,
   getProfile,
+  isAccountLinkEvent,
+  isFollowEvent,
+  isUnfollowEvent,
   LineApiError,
   LineAuthorizationError,
   LineIdTokenError,
   parseCallback,
+  parseWebhook,
   randomToken,
   type Storage,
   upsertIdentityFromLine,
   verifyIdToken,
+  verifyWebhookSignature,
 } from 'renkei-core';
 import { bridge, nodePair } from './adapters/fetch-to-node.js';
 import {
@@ -274,6 +279,65 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
         : { login: { accountId: String(result.sub) } };
     await provider.interactionFinished(req, res, outcome, { mergeWithLastSubmission: false });
     return done;
+  });
+
+  // ── Messaging API webhook: keep friendship state current ────────────────
+  // LINE POSTs follow/unfollow/accountLink events here, signed with a
+  // Messaging API channel secret. We verify the signature, then mirror
+  // follow/unfollow into the identity store so `line:friend` stays accurate
+  // between logins. Always answer 200 quickly on a valid request so LINE does
+  // not retry. Configure via `messagingChannels` (LINE_MESSAGING_CHANNEL_*).
+  app.post('/line/webhook', async (c) => {
+    if (config.messagingChannels.length === 0) {
+      return c.text('webhook not configured', 404);
+    }
+    const raw = await c.req.text();
+    const signature = c.req.header('x-line-signature');
+
+    // Find the messaging channel whose secret signed this request.
+    let matched: (typeof config.messagingChannels)[number] | undefined;
+    for (const mc of config.messagingChannels) {
+      if (await verifyWebhookSignature(mc.channelSecret, raw, signature)) {
+        matched = mc;
+        break;
+      }
+    }
+    if (!matched) {
+      logger.warn('[renkei] webhook signature verification failed');
+      return c.text('invalid signature', 401);
+    }
+
+    // Re-parse through the verified secret (throws only on malformed body now).
+    let payload: Awaited<ReturnType<typeof parseWebhook>>;
+    try {
+      payload = await parseWebhook({
+        body: raw,
+        signature,
+        channelSecret: matched.channelSecret,
+      });
+    } catch {
+      return c.text('bad request', 400);
+    }
+
+    // Friendship is tracked on the Login channel for this messaging channel's region.
+    const loginChannel = channelFor(matched.region);
+    for (const event of payload.events) {
+      const userId = event.source?.userId;
+      if (!userId) continue;
+      const at = new Date(event.timestamp);
+      if (isFollowEvent(event)) {
+        await storage.identities.setFriendship(loginChannel.channelId, userId, true, at);
+      } else if (isUnfollowEvent(event)) {
+        await storage.identities.setFriendship(loginChannel.channelId, userId, false, at);
+      } else if (isAccountLinkEvent(event)) {
+        // Account linking (nonce → downstream account) lands in a later slice;
+        // acknowledge so LINE does not retry.
+        logger.info(
+          `[renkei] accountLink ${event.link.result} for user ${userId} (nonce handling: TODO)`,
+        );
+      }
+    }
+    return c.json({ ok: true });
   });
 
   app.route('/liff', liffRoutes({ config, storage, jwks, fetch: lineFetch, logger }));

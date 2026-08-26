@@ -71,6 +71,7 @@ LIFF SDK が持つ LINE のトークンを renkei の id_token に交換しま�
 |---|---|
 | `GET /interaction/:uid` | OIDC プロバイダーがユーザー認証を必要とした時の入口。LINE に転送します（内部用） |
 | `GET /line/callback` | LINE からの戻り先。**Console の Callback URL に `${ISSUER}/line/callback` を登録**。パスは `lineCallbackPath` で変更可 |
+| `POST /line/webhook` | Messaging API の Webhook。`x-line-signature`（HMAC-SHA256、Messaging API チャネルシークレット）を検証し、`follow`/`unfollow` を `line:friend` に反映。`messagingChannels` で有効化。**OA の Webhook URL に `${ISSUER}/line/webhook` を設定** |
 | `GET /interaction/:uid/finish` | ログイン結果の受け渡し（内部用） |
 
 ## その他
