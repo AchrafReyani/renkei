@@ -65,9 +65,12 @@ it and will need a fresh one if you redo those checks.
   (digest `sha256:ae247c95…`). Local build of the same Dockerfile boots.
   Pulling from GHCR needs a token with `read:packages`
   (`gh auth refresh -s read:packages`) — not verified from this machine.
-- [ ] **npm publish** of the four packages — Achraf runs it (passkey 2FA):
-  `pnpm -r publish --access public` from the repo root after `pnpm build`.
-  Verify with `npm view renkei-server version`.
+- [x] **npm publish** — done 2026-08-26 by Achraf (`npm login` first: the
+  saved token was dead, npm shows that as E404 on publish). `renkei-core`,
+  `renkei-storage-postgres`, `renkei-server`, `renkei` all at 0.1.0 with
+  `latest`; `workspace:*` rewritten to `0.1.0`. Verified from a clean dir:
+  `npm install renkei` pulls the chain, `npx renkei --version` = 0.1.0,
+  `npx renkei` boots with `/healthz`, discovery and `/dev` answering.
 - [x] **Console screenshots** for docs/guides/line-console.{ja,en}.md — done
   2026-08-26 in Japanese UI: `docs/images/console/*.png` (basic settings,
   callback URL, linked OA + email permission, LIFF list, LIFF app detail).
