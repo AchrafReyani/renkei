@@ -41,7 +41,7 @@ Keycloak の「Realm URL」には renkei の `ISSUER` をそのまま入れま�
 | `openid` | `sub` — renkei が発行する不透明な ID。**LINE の userId から導出されません**（下流に LINE の ID を漏らさない） |
 | `profile` | `name`, `picture` |
 | `email` | `email`, `email_verified`, `email_placeholder`（プレースホルダー発行時のみ `true`） |
-| `line` | `line:user_id`（このチャネルでの LINE userId）, `line:friend`（リンク済み公式アカウントとの友だち状態。不明なら省略）, `line:channel_id`, `line:region` |
+| `line` | `line:user_id`（このチャネルでの LINE userId）, `line:friend`（リンク済み公式アカウントとの友だち状態。不明なら省略）, `line:channel_id`, `line:region`, `line:linked`（アカウント連携が完了すると `true`） |
 | `offline_access` | リフレッシュトークン |
 
 `sub` は初回ログイン時に一度だけ発行され、以後変わりません。名前と画像はログインのたびに更新、メールは**追加・更新はされても削除はされません**（メールスコープなしの再ログインで消えない）。
@@ -71,8 +71,16 @@ LIFF SDK が持つ LINE のトークンを renkei の id_token に交換しま�
 |---|---|
 | `GET /interaction/:uid` | OIDC プロバイダーがユーザー認証を必要とした時の入口。LINE に転送します（内部用） |
 | `GET /line/callback` | LINE からの戻り先。**Console の Callback URL に `${ISSUER}/line/callback` を登録**。パスは `lineCallbackPath` で変更可 |
-| `POST /line/webhook` | Messaging API の Webhook。`x-line-signature`（HMAC-SHA256、Messaging API チャネルシークレット）を検証し、`follow`/`unfollow` を `line:friend` に反映。`messagingChannels` で有効化。**OA の Webhook URL に `${ISSUER}/line/webhook` を設定** |
+| `POST /line/webhook` | Messaging API の Webhook。`x-line-signature`（HMAC-SHA256、Messaging API チャネルシークレット）を検証し、`follow`/`unfollow` を `line:friend` に反映し、`accountLink` イベントを確定（nonce → identity、`line:linked` を有効化）。`messagingChannels` で有効化。**OA の Webhook URL に `${ISSUER}/line/webhook` を設定** |
 | `GET /interaction/:uid/finish` | ログイン結果の受け渡し（内部用） |
+
+## アカウント連携
+
+| パス | 内容 |
+|---|---|
+| `POST /link/start` | 渡された renkei アクセストークン（`Authorization: Bearer <access_token>`）のユーザーについて LINE アカウント連携を開始。renkei が一度きりの LINE link token を発行し、`{ url }`（リダイレクト先の accountLink ダイアログ URL）を返す。連携は LINE が `accountLink` Webhook を送信した時点で非同期に確定し、`line:linked` が有効になる。 |
+
+`channelAccessToken`（`LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`）を持つ `messagingChannels` エントリが必要。未設定なら `404 account_linking_not_configured` を返す。その他のエラー: `401`（アクセストークンが無い／無効）, `409 no_line_account`（identity にまだ LINE ログインアカウントが無い）, `502 link_start_failed`（LINE が link token 発行を拒否）。
 
 ## その他
 

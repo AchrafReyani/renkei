@@ -27,5 +27,9 @@ export const LINE_ENDPOINTS = {
   certs: 'https://api.line.me/oauth2/v2.1/certs',
   profile: 'https://api.line.me/v2/profile',
   friendship: 'https://api.line.me/friendship/v1/status',
+  /** Messaging API per-user base; `${messagingUser}/{userId}/linkToken` mints a link token. */
+  messagingUser: 'https://api.line.me/v2/bot/user',
+  /** Account-linking consent dialog the user is redirected to with a linkToken + nonce. */
+  accountLinkDialog: 'https://access.line.me/dialog/bot/accountLink',
   issuer: 'https://access.line.me',
 } as const;

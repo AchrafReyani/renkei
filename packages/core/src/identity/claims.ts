@@ -9,6 +9,8 @@ export const LINE_CLAIMS = {
   friend: 'line:friend',
   channelId: 'line:channel_id',
   region: 'line:region',
+  /** Whether this identity has completed LINE account linking (a messaging-side account exists). */
+  linked: 'line:linked',
 } as const;
 
 /** The custom OIDC scope that releases the `line:*` claims. */
@@ -47,6 +49,9 @@ export function buildClaims(
     const region = options.regionOf?.(account.channelId);
     if (region !== undefined) claims[LINE_CLAIMS.region] = region;
   }
+  // Account linking adds a messaging-side account; surface it as a boolean so
+  // downstream apps can gate OA messaging without inspecting raw accounts.
+  claims[LINE_CLAIMS.linked] = accounts.some((a) => a.kind === 'messaging');
   return claims;
 }
 

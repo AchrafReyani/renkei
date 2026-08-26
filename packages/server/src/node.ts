@@ -6,6 +6,7 @@
  *   PORT                       listen port (default: from ISSUER, else 3000)
  *   LINE_LOGIN_CHANNEL_ID / LINE_LOGIN_CHANNEL_SECRET / LINE_LOGIN_REGION
  *   LINE_MESSAGING_CHANNEL_SECRET / LINE_MESSAGING_CHANNEL_ID  (enables POST /line/webhook)
+ *   LINE_MESSAGING_CHANNEL_ACCESS_TOKEN                        (enables POST /link/start)
  *   RENKEI_BOT_PROMPT          aggressive | normal | none   (default aggressive)
  *   RENKEI_REQUEST_EMAIL       true to request the email scope
  *   RENKEI_COOKIE_KEYS         comma-separated; generated for dev if absent
@@ -61,6 +62,9 @@ const config: RenkeiConfigInput = {
             channelSecret: env.LINE_MESSAGING_CHANNEL_SECRET,
             region: env.LINE_LOGIN_REGION ?? 'jp',
             ...(env.LINE_MESSAGING_CHANNEL_ID ? { channelId: env.LINE_MESSAGING_CHANNEL_ID } : {}),
+            ...(env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN
+              ? { channelAccessToken: env.LINE_MESSAGING_CHANNEL_ACCESS_TOKEN }
+              : {}),
           },
         ],
       }

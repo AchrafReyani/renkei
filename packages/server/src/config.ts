@@ -23,6 +23,12 @@ export const messagingChannelSchema = z.object({
   region: z.string().min(2).optional(),
   /** Messaging API channel ID. Informational. */
   channelId: z.string().optional(),
+  /**
+   * Messaging API channel access token. Required only for account linking
+   * (`POST /link/start` mints a one-time link token with it). Not needed for
+   * webhook signature verification. Prefer a long-lived channel access token.
+   */
+  channelAccessToken: z.string().optional(),
 });
 
 export const oidcClientSchema = z.object({

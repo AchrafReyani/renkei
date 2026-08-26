@@ -97,10 +97,13 @@ Order matters: each item is what the next needs.
 
 ## v0.2 — account linking
 
-- [ ] Link-token flow: `/link` entry, nonce store, redirect to
-      `dialog/bot/accountLink`
-- [ ] `accountLink` webhook handling (direct and forwarded modes)
-- [ ] Friendship sync from `follow`/`unfollow` with idempotency
+- [x] Link-token flow: `POST /link/start` (Bearer access token) mints the
+      LINE link token, stores nonce → sub, returns the `dialog/bot/accountLink`
+      URL; `startAccountLink()` / `issueLinkToken()` in renkei-core
+      (2026-08-26, DESIGN-account-linking.md — Option A, renkei-owned)
+- [~] `accountLink` webhook handling: direct mode done (nonce → identity,
+      `line:linked` claim). Forwarded mode (app-owned mapping, Option B) still open
+- [x] Friendship sync from `follow`/`unfollow` (idempotent `setFriendship`)
 - [ ] Minimal inspection UI (read-only): identities, linked accounts,
       friendship, recent webhooks. Not an admin console.
 - [ ] Tutorial 3: rich-menu account linking end to end

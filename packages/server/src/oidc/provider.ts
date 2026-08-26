@@ -27,7 +27,13 @@ export const CLAIMS_BY_SCOPE = {
   openid: ['sub'],
   profile: ['name', 'picture'],
   email: ['email', 'email_verified', EMAIL_PLACEHOLDER_CLAIM],
-  [LINE_SCOPE]: [LINE_CLAIMS.userId, LINE_CLAIMS.friend, LINE_CLAIMS.channelId, LINE_CLAIMS.region],
+  [LINE_SCOPE]: [
+    LINE_CLAIMS.userId,
+    LINE_CLAIMS.friend,
+    LINE_CLAIMS.channelId,
+    LINE_CLAIMS.region,
+    LINE_CLAIMS.linked,
+  ],
 } as const;
 
 export interface ProviderDeps {
