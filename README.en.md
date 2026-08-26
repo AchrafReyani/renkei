@@ -29,6 +29,12 @@ LINE Platform ──────▶  renkei (self-hosted)  ──────▶
 | Use from Supabase | ✅ via the built-in Keycloak provider | — | — | — | — | — |
 | Self-hosted / open source | ✅ Apache-2.0 | ✗ | ✗ | ✅ | ✗ | ✅ |
 
+## Live demo
+
+**<https://renkei-demo.onrender.com/dev>** — "LINEでログイン" → friend-add screen → an id_token with `line:*` claims, right there. You log in with your own LINE account (the only side effect is one row in the demo DB mapping to your LINE user ID).
+
+> **Free-hosting caveat (Render Free + Neon Free)**: the instance sleeps after 15 idle minutes, so **the first request can take up to a minute**. It can also **return 404 or not respond at all** for reasons on the hosting side. That is not a renkei bug — wait a bit and reload, or run it locally with "Try it in 5 minutes" below (which is the real experience).
+
 ## Try it in 5 minutes
 
 Prerequisite: in the LINE Developers Console, a **provider → LINE Login channel** (ideally with a linked Messaging API channel).

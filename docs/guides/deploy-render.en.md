@@ -4,7 +4,7 @@
 
 Run renkei as a free Render web service. The public demo (`https://renkei-demo.onrender.com/dev`) is deployed exactly this way. Time: ~15 minutes. You need: a Render account (GitHub-connected) and a Postgres (Neon free tier).
 
-> **Free-tier caveat**: the service sleeps after 15 minutes without traffic and takes **up to a minute** to wake on the next request. Fine for a demo or evaluation; use a paid plan or [Fly.io](deploy-fly.en.md) for anything real. Render's free Postgres is deleted after 30 days, which is why the database lives on Neon.
+> **Free-tier caveat**: the service sleeps after 15 minutes without traffic and takes **up to a minute** to wake on the next request. Render also **occasionally returns 404 or nothing at all** while the app logs stay clean. Fine for a demo or evaluation; use a paid plan or [Fly.io](deploy-fly.en.md) for anything real. Render's free Postgres is deleted after 30 days, which is why the database lives on Neon.
 
 ## 1. Postgres (Neon)
 

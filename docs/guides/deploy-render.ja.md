@@ -4,7 +4,7 @@
 
 Render の無料 Web サービスで renkei を動かす手順です。公開デモ（`https://renkei-demo.onrender.com/dev`）はこの手順そのままです。所要時間 15 分。必要なもの: Render アカウント（GitHub 連携）、Postgres（Neon 無料枠）。
 
-> **無料枠の注意**: 15 分アクセスが無いとスリープし、次のアクセスで起きるまで **最大 1 分** かかります。デモや検証には十分ですが、本番は有料プランか [Fly.io](deploy-fly.ja.md) を使ってください。Render の無料 Postgres は 30 日で消えるので DB は Neon にします。
+> **無料枠の注意**: 15 分アクセスが無いとスリープし、次のアクセスで起きるまで **最大 1 分** かかります。また、Render 側の都合で **404 や無応答になることが時々あります**（アプリのログは正常なまま）。デモや検証には十分ですが、本番は有料プランか [Fly.io](deploy-fly.ja.md) を使ってください。Render の無料 Postgres は 30 日で消えるので DB は Neon にします。
 
 ## 1. Postgres（Neon）
 
