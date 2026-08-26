@@ -206,3 +206,23 @@ as a CI job so upgrades can't silently break a target.
 `node:http` (inert there) but via a ~60-line fetch→(req,res) shim calling
 `provider.callback()`. That shim becomes the portable adapter for all
 non-Node runtimes. See SPIKE-oidc-provider-runtimes.md.
+
+## 9. Demo instance on Fly.io, Tokyo region (2026-08-26)
+
+**Decision.** The public demo runs the release Docker image on Fly.io in
+`nrt`, with `RENKEI_DEV=true` so `/dev` *is* the demo, pinned
+`RENKEI_JWKS` / `RENKEI_COOKIE_KEYS`, and an external Postgres (Neon free
+tier or Fly Managed Postgres). `fly.toml` and `docs/guides/deploy-fly` are
+the reference deployment for anyone self-hosting.
+
+**Why Fly over Railway / a VPS.** Fly has a Japan region — the demo logs
+users into a JP LINE channel, and the whole pitch is JP-first. It runs the
+verified Dockerfile unchanged, and `auto_stop_machines` keeps an idle demo
+near free. Railway would be simpler to wire but has no JP region; a VPS
+adds TLS and upkeep that are noise for a demo.
+
+**Cost.** Exposing `/dev` publicly means anyone can log in with LINE and
+leave an identity row in the demo DB. Acceptable for a demo; the guide
+tells real deployments to drop `RENKEI_DEV` and register their own
+`RENKEI_CLIENTS`. Cold starts from `min_machines_running = 0` are a
+demo-only trade-off, also documented.

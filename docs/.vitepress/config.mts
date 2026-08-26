@@ -46,7 +46,13 @@ export default defineConfig({
         ],
         sidebar: [
           { text: 'はじめに', items: [{ text: 'renkei とは', link: '/' }] },
-          { text: 'ガイド', items: [{ text: 'LINE Developers Console の準備', link: '/guides/line-console' }] },
+          {
+            text: 'ガイド',
+            items: [
+              { text: 'LINE Developers Console の準備', link: '/guides/line-console' },
+              { text: 'Fly.io にデプロイする', link: '/guides/deploy-fly' },
+            ],
+          },
           {
             text: 'チュートリアル',
             items: [
@@ -78,7 +84,13 @@ export default defineConfig({
         ],
         sidebar: [
           { text: 'Introduction', items: [{ text: 'What is renkei', link: '/en/' }] },
-          { text: 'Guides', items: [{ text: 'LINE Developers Console', link: '/en/guides/line-console' }] },
+          {
+            text: 'Guides',
+            items: [
+              { text: 'LINE Developers Console', link: '/en/guides/line-console' },
+              { text: 'Deploying to Fly.io', link: '/en/guides/deploy-fly' },
+            ],
+          },
           {
             text: 'Tutorials',
             items: [

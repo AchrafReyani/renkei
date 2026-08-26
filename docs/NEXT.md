@@ -39,12 +39,19 @@ it and will need a fresh one if you redo those checks.
 
 ## 2. UI-only GitHub steps (Achraf, ~2 minutes)
 
-- [ ] Upload `.github/social-preview.png`: repo → Settings → General → Social preview.
-- [ ] Pin Discussion #21 (はじめに / Welcome): open it → ⋯ → Pin discussion.
+- [ ] Upload `.github/social-preview.png`. *2026-08-26: the "Social preview"
+  block is gone from Settings → General and isn't in the About editor
+  either — GitHub appears to have removed/hidden it (repo is private).
+  Re-check after flipping public; if still absent, drop this item.*
+- [x] Pin Discussion #21 — done 2026-08-26 (green background).
 
 ## 3. Launch mechanics
 
-- [ ] **Demo instance.** Decide a host (Fly.io / Railway / a VPS). Needs:
+- [ ] **Demo instance — Fly.io, `nrt`** (decided 2026-08-26). `fly.toml` and
+  `docs/guides/deploy-fly.{ja,en}.md` are in the repo. Achraf runs it (no
+  flyctl on this machine): Neon or Fly Postgres → `fly launch --copy-config
+  --no-deploy` → `fly secrets set …` → register `https://renkei-demo.fly.dev/line/callback`
+  on the channel → `fly deploy` → LINE login through `/dev`. Original notes:
   Postgres, `ISSUER=https://<demo host>`, stable `RENKEI_JWKS` + `RENKEI_COOKIE_KEYS`
   (generate per docs/reference/config), the demo host's `/line/callback`
   registered on the channel, `RENKEI_DEV=true` so `/dev` is the demo. The

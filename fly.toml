@@ -1,0 +1,35 @@
+# Fly.io app definition for the renkei demo instance.
+#   fly launch --copy-config --no-deploy   (first time; pick the app name)
+#   fly secrets set ...                    (see docs/guides/deploy-fly)
+#   fly deploy
+# Guide: docs/guides/deploy-fly.ja.md / deploy-fly.en.md
+app = "renkei-demo"
+primary_region = "nrt"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # Public URL — must match the app name above. Becomes the OIDC issuer.
+  ISSUER = "https://renkei-demo.fly.dev"
+  # The demo *is* the /dev relying party. Turn off for a real deployment.
+  RENKEI_DEV = "true"
+  LINE_LOGIN_REGION = "jp"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
