@@ -67,7 +67,7 @@ Order matters: each item is what the next needs.
       GHCR publish workflow written (`release.yml`, runs on `v*` tags — not exercised yet)
 - [x] `docker-compose.yml` with Postgres — verified: migrations run at boot, healthz 200
 - [ ] npm publish via Changesets on tag (at launch; `renkei` CLI = `npx renkei` ready)
-- [ ] ~~Demo instance running~~ → README GIF of the flow (hosted demo scrapped 2026-08-26: cost)
+- [ ] Demo instance running (Render free tier, cold-start disclaimer in README)
 
 **docs (JA primary, EN mirror in the same PR)**
 - [x] README: why / diagram / 5-minute quickstart / comparison table (ja + en) — badges at launch

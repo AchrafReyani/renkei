@@ -47,15 +47,24 @@ it and will need a fresh one if you redo those checks.
 
 ## 3. Launch mechanics
 
-- [x] ~~**Demo instance.**~~ **Scrapped 2026-08-26** — Fly has no free tier
-  and Achraf doesn't want a recurring bill; a hosted demo isn't worth it.
-  `fly.toml` + `docs/guides/deploy-fly` stay as the self-hosting reference.
-  Replacement, same job (let a reader see the flow without making a channel):
-- [ ] **README GIF** of the `/dev` flow: 「LINEでログイン」→ friend-add screen →
-  claims JSON (~15 s), plus the in-app LIFF phone screenshot. The LINE screens
-  are blocked for Claude in Chrome, so Achraf records it (or Claude records
-  the localhost legs with `gif_creator` and Achraf the LINE ones). Embed at
-  the top of README.md / README.en.md.
+- [ ] **Demo instance — Render free tier** (decided 2026-08-26 after Fly was
+  ruled out: no free tier). `render.yaml` + `docs/guides/deploy-render.{ja,en}.md`
+  are in the repo. Achraf does the dashboard part (account, GitHub connect,
+  Blueprint, secrets — Claude can't create accounts or type secrets):
+  1. Neon: free project (Singapore) → connection string.
+  2. Render: sign up → **New → Blueprint** → this repo → paste
+     `LINE_LOGIN_CHANNEL_ID`, `LINE_LOGIN_CHANNEL_SECRET`, `DATABASE_URL`,
+     `RENKEI_JWKS` (Claude generates it into the scratchpad; kid `kmt9ncrjl`
+     was generated 2026-08-26 — regenerate if lost) → Apply.
+  3. If the URL isn't exactly `https://renkei-demo.onrender.com`, fix `ISSUER`.
+  4. LINE console → callback URL `https://renkei-demo.onrender.com/line/callback`.
+  5. Claude verifies discovery + `/healthz`; Achraf does the LINE login via `/dev`.
+  6. Then add the demo link **with the cold-start disclaimer** to README.md /
+     README.en.md (「無料ホスティングのため初回アクセスは 1 分ほど待ちます」).
+- [ ] **README GIF** of the `/dev` flow (optional, nice-to-have now that
+  there's a live demo): 「LINEでログイン」→ friend-add → claims JSON, plus the
+  in-app LIFF phone screenshot. LINE screens are blocked for Claude in Chrome,
+  so Achraf records those legs.
 - [ ] **Version + tag.** `pnpm changeset` → version `0.1.0` for `@renkei/core`,
   `@renkei/storage-postgres`, `@renkei/server`, `renkei`. Tag `v0.1.0` → the
   `release.yml` workflow builds and pushes `ghcr.io/achrafreyani/renkei`.

@@ -1,0 +1,40 @@
+# Render Blueprint — runs renkei on Render's free tier.
+# The public demo (https://renkei-demo.onrender.com/dev) is deployed from this file.
+#   Render dashboard → New → Blueprint → pick this repo → fill in the
+#   secrets it prompts for (sync: false below). Guide: docs/guides/deploy-render
+# Free-tier caveat: the service sleeps after ~15 min idle and takes up to a
+# minute to wake. Fine for a demo; use a paid plan (or Fly, see fly.toml)
+# for anything real.
+services:
+  - type: web
+    name: renkei-demo
+    runtime: docker
+    plan: free
+    region: singapore          # closest Render region to Japan
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /healthz
+    envVars:
+      # Public URL — must match what Render assigns to the service. If Render
+      # adds a suffix to the name, update this value in the dashboard.
+      - key: ISSUER
+        value: https://renkei-demo.onrender.com
+      - key: PORT
+        value: "3000"
+      # Mounts the /dev test relying party so the demo has something to show.
+      # Remove for a real deployment and set RENKEI_CLIENTS instead.
+      - key: RENKEI_DEV
+        value: "true"
+      - key: LINE_LOGIN_REGION
+        value: jp
+      # Cookie signing key: Render generates a random value once and keeps it.
+      - key: RENKEI_COOKIE_KEYS
+        generateValue: true
+      # Prompted for in the dashboard when the Blueprint is applied.
+      - key: RENKEI_JWKS               # JSON array of private JWKs (docs/reference/config)
+        sync: false
+      - key: DATABASE_URL              # e.g. Neon free tier, postgres://...?sslmode=require
+        sync: false
+      - key: LINE_LOGIN_CHANNEL_ID
+        sync: false
+      - key: LINE_LOGIN_CHANNEL_SECRET
+        sync: false

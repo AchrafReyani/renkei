@@ -227,10 +227,12 @@ tells real deployments to drop `RENKEI_DEV` and register their own
 `RENKEI_CLIENTS`. Cold starts from `min_machines_running = 0` are a
 demo-only trade-off, also documented.
 
-**Superseded the same day.** Fly requires a payment method and bills
-pay-as-you-go (cents/month with auto-stop, but not zero), and Achraf
-doesn't want a recurring bill for a demo. No hosted instance for v0.1. The
-job the demo was for — letting a reader see the flow without creating a
-LINE channel — is done by a README GIF instead. `fly.toml` and the deploy
-guide stay as the self-hosting reference; if a free host is ever wanted,
-Render's free tier runs the image at $0 with a ~50 s cold start.
+**Revised the same day: Render free tier instead.** Fly requires a payment
+method and bills pay-as-you-go (cents/month with auto-stop, but not zero),
+and Achraf doesn't want any recurring bill for a demo. The demo therefore
+runs on Render's free web service (`render.yaml`, Singapore — Render has no
+Japan region) with the database on Neon's free tier (Render's free Postgres
+is deleted after 30 days). Cost: $0. Trade-off: the service sleeps after
+15 min idle and takes up to a minute to wake — accepted, and stated next to
+the demo link in the README so nobody reads the cold start as renkei being
+slow. `fly.toml` and the Fly guide stay as the paid self-hosting reference.
