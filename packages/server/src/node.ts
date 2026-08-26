@@ -5,6 +5,7 @@
  *   ISSUER                     public base URL (default http://localhost:3000)
  *   PORT                       listen port (default: from ISSUER, else 3000)
  *   LINE_LOGIN_CHANNEL_ID / LINE_LOGIN_CHANNEL_SECRET / LINE_LOGIN_REGION
+ *   LINE_MESSAGING_CHANNEL_SECRET / LINE_MESSAGING_CHANNEL_ID  (enables POST /line/webhook)
  *   RENKEI_BOT_PROMPT          aggressive | normal | none   (default aggressive)
  *   RENKEI_REQUEST_EMAIL       true to request the email scope
  *   RENKEI_COOKIE_KEYS         comma-separated; generated for dev if absent
@@ -53,6 +54,17 @@ const config: RenkeiConfigInput = {
     },
   ],
   clients,
+  ...(env.LINE_MESSAGING_CHANNEL_SECRET
+    ? {
+        messagingChannels: [
+          {
+            channelSecret: env.LINE_MESSAGING_CHANNEL_SECRET,
+            region: env.LINE_LOGIN_REGION ?? 'jp',
+            ...(env.LINE_MESSAGING_CHANNEL_ID ? { channelId: env.LINE_MESSAGING_CHANNEL_ID } : {}),
+          },
+        ],
+      }
+    : {}),
   cookieKeys: env.RENKEI_COOKIE_KEYS ? env.RENKEI_COOKIE_KEYS.split(',') : [randomToken(32)],
   corsOrigins: env.RENKEI_CORS_ORIGINS ? env.RENKEI_CORS_ORIGINS.split(',') : [],
   ...(env.RENKEI_JWKS ? { jwks: JSON.parse(env.RENKEI_JWKS) } : {}),

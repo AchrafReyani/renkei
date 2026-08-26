@@ -72,6 +72,7 @@ For direct browser calls, list the LIFF app's origin in `RENKEI_CORS_ORIGINS`.
 | `GET /interaction/:uid` | entry point when the OIDC provider needs a user; forwards to LINE (internal) |
 | `GET /line/callback` | where LINE returns. **Register `${ISSUER}/line/callback` as a Callback URL in the console.** Path configurable via `lineCallbackPath` |
 | `GET /interaction/:uid/finish` | login-result hand-off (internal) |
+| `POST /line/webhook` | Messaging API webhook. Verifies `x-line-signature` (HMAC-SHA256, Messaging API channel secret) and mirrors `follow`/`unfollow` into `line:friend`. Enabled by `messagingChannels`; **set the OA webhook URL to `${ISSUER}/line/webhook`** |
 
 ## Other
 
