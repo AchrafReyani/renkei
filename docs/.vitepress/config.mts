@@ -12,6 +12,7 @@ export default defineConfig({
     'packages/**',
     'examples/**',
     'spikes/**',
+    'drafts/**',
     '.github/**',
     'CONTRIBUTING.md',
     'CODE_OF_CONDUCT.md',
