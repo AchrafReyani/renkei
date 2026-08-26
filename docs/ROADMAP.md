@@ -118,7 +118,8 @@ Order matters: each item is what the next needs.
 - [x] Tutorial 3: account linking end to end (ja/en) — the shipped `/link/start`
       → accountLink webhook → `line:linked` flow, with a rich-menu entry section
       and an /inspect verification walk-through (2026-08-27)
-- [ ] Zenn article #2
+- [~] Zenn article #2 — draft written (`drafts/zenn-account-linking.md`, ja);
+      publishing to Zenn is Achraf's step (2026-08-27)
 
 ## v0.3 — SDKs and edge targets
 
