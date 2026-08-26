@@ -41,7 +41,7 @@ Order matters: each item is what the next needs.
       (`verifyAccessToken` + profile); live-verified in a browser 2026-08-26
 - [x] `parseWebhook()` + signature check for `follow`, `unfollow`,
       `accountLink` (HMAC-SHA256 via Web Crypto; renkei-core, 2026-08-26).
-      Next: a server webhook route that updates friendship state.
+      Consumed by the `POST /line/webhook` server route (below).
 - [x] Identity mapping: upsert rules, multi-channel, `sub` stability (`upsertIdentityFromLine`, `buildClaims`)
 - [x] `Storage` interface + in-memory implementation for tests (+ shared behavioural contract test)
 - [ ] Unit tests against recorded LINE fixtures (HS256 and ES256 tokens,
@@ -49,9 +49,12 @@ Order matters: each item is what the next needs.
 
 **server**
 - [x] Config loader (env, zod-validated, JA/EN error messages) — YAML later
-- [ ] First-run checks: provider sharing warning, email-permission warning
-- [~] Routes: `/interaction/:uid` (→ LINE), `/line/callback`, `/interaction/:uid/finish`,
-      `/liff/exchange`, `/healthz` done; `/webhooks/line` pending
+- [x] First-run checks: provider-sharing + webhook-region + email-permission +
+      in-memory-storage + `/dev`-enabled warnings (`firstRunChecks()`,
+      renkei-server, 2026-08-26)
+- [x] Routes: `/interaction/:uid` (→ LINE), `/line/callback`, `/interaction/:uid/finish`,
+      `/liff/exchange`, `/healthz`, and `POST /line/webhook` (follow/unfollow →
+      friendship; accountLink acked) done
 - [x] `oidc-provider` mounted at `/oidc`: discovery, JWKS, authorize, token,
       userinfo; `findAccount` backed by identity store; `line:*` claims;
       first-party auto-grant (no second consent screen); PKCE required for
