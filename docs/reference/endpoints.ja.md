@@ -78,6 +78,7 @@ LIFF SDK が持つ LINE のトークンを renkei の id_token に交換しま�
 
 | パス | 内容 |
 |---|---|
+| `GET /link` | renkei アクセストークンをまだ持たないユーザー向けのブラウザ入口。renkei が LINE でログイン（共有コールバックでの通常のログイン往復）させた後、そのまま accountLink ダイアログへリダイレクトする。任意で `?line_region=`。 |
 | `POST /link/start` | 渡された renkei アクセストークン（`Authorization: Bearer <access_token>`）のユーザーについて LINE アカウント連携を開始。renkei が一度きりの LINE link token を発行し、`{ url }`（リダイレクト先の accountLink ダイアログ URL）を返す。連携は LINE が `accountLink` Webhook を送信した時点で非同期に確定し、`line:linked` が有効になる。 |
 
 `channelAccessToken`（`LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`）を持つ `messagingChannels` エントリが必要。未設定なら `404 account_linking_not_configured` を返す。その他のエラー: `401`（アクセストークンが無い／無効）, `409 no_line_account`（identity にまだ LINE ログインアカウントが無い）, `502 link_start_failed`（LINE が link token 発行を拒否）。

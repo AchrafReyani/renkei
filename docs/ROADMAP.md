@@ -102,7 +102,9 @@ Order matters: each item is what the next needs.
 - [x] Link-token flow: `POST /link/start` (Bearer access token) mints the
       LINE link token, stores nonce → sub, returns the `dialog/bot/accountLink`
       URL; `startAccountLink()` / `issueLinkToken()` in renkei-core
-      (2026-08-26, DESIGN-account-linking.md — Option A, renkei-owned)
+      (2026-08-26, DESIGN-account-linking.md — Option A, renkei-owned).
+      Plus `GET /link` — a browser entry that logs the user in then starts
+      linking, for users without an access token in hand (2026-08-27)
 - [~] `accountLink` webhook handling: direct mode done (nonce → identity,
       `line:linked` claim). Forwarded mode (app-owned mapping, Option B) still open
 - [x] Friendship sync from `follow`/`unfollow` (idempotent `setFriendship`)

@@ -78,6 +78,7 @@ For direct browser calls, list the LIFF app's origin in `RENKEI_CORS_ORIGINS`.
 
 | Path | What |
 |---|---|
+| `GET /link` | Browser entry for users who don't already hold a renkei access token. renkei logs them in at LINE (a normal login round-trip on the shared callback), then redirects straight to the accountLink dialog. Optional `?line_region=`. |
 | `POST /link/start` | Start LINE account linking for the user of the supplied renkei access token (`Authorization: Bearer <access_token>`). renkei mints a one-time LINE link token and returns `{ url }` — the accountLink dialog to redirect the browser to. The link is finalised asynchronously when LINE delivers the `accountLink` webhook, which sets `line:linked`. |
 
 Requires a `messagingChannels` entry with a `channelAccessToken` (`LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`); without one the route returns `404 account_linking_not_configured`. Other errors: `401` (missing/invalid access token), `409 no_line_account` (the identity has no LINE login account yet), `502 link_start_failed` (LINE rejected the link-token mint).
