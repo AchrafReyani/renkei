@@ -63,6 +63,18 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
   matched LINE's `/verify`, `amr=["linesso"]`. No email claim (permission not
   applied yet). All four harness variants (`aggressive`, `normal`, no prompt,
   `email` scope) completed.
+- **Public demo live on Render free tier (2026-08-26):**
+  `https://renkei-demo.onrender.com/dev` — Blueprint from `render.yaml`
+  (Docker, Singapore), DB on Neon free (Singapore), pinned `RENKEI_JWKS`
+  (kid `kmt9ncrjl`) and Render-generated `RENKEI_COOKIE_KEYS`. Achraf
+  completed a LINE login: RS256 id_token, `iss` = demo URL, `line:*` claims,
+  `line:friend: true`, userinfo matches. **Render quirk:** after each deploy
+  and after a restart, the router answered `404 x-render-routing: no-server`
+  for ~10 minutes (with 200/404 flapping near the end) while the app logs
+  were clean and Render showed "Deploy live"; it converged on its own both
+  times. Hence the README disclaimer. Follow-ups: rotate the Neon password
+  (it appeared in a chat screenshot); optionally set `LIFF_ID` on Render and
+  point the LIFF endpoint at the demo so `/dev/liff` is demo-able too.
 - **Next.js example verified live (2026-08-26):** `examples/nextjs`
   (Auth.js v5, plain OIDC provider) against renkei with `RENKEI_CLIENTS`
   → 「LINEでログイン」 → LINE (PKCE, `scope=openid profile`,

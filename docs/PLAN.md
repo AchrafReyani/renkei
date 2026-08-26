@@ -123,7 +123,7 @@ answer to "how much do we have to build before we can start sharing it."
 **Deployable**
 - [x] `docker run` works with a `.env` in < 5 minutes from a clean machine
 - [ ] Published Docker image (GHCR) and npm packages — at launch (workflows ready)
-- [ ] A live demo instance (Render free tier, sleeps when idle — DECISIONS §9)
+- [x] A live demo instance (Render free tier, sleeps when idle — DECISIONS §9) — 2026-08-26
 
 **Documented (Japanese, with English mirror)**
 - [x] README with the "why" in three sentences, a diagram, and a
