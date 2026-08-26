@@ -34,6 +34,16 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 
 複数地域（日本 + 台湾など）はプログラム設定の `channels` 配列で指定します（環境変数は 1 チャネル）。
 
+## Messaging API チャネル（Webhook・アカウント連携）
+
+| 変数 | 既定値 | 説明 |
+|---|---|---|
+| `LINE_MESSAGING_CHANNEL_SECRET` | なし | Messaging API チャネルシークレット。設定すると `POST /line/webhook` が有効化（`x-line-signature` を検証し `line:friend` を最新に保つ）。ログインチャネルのシークレットとは**別物** |
+| `LINE_MESSAGING_CHANNEL_ID` | なし | Messaging API チャネル ID。参考情報 |
+| `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` | なし | Messaging API チャネルアクセストークン。設定すると `POST /link/start`（アカウント連携。これを使って一度きりの link token を発行）が有効化 |
+
+Messaging API チャネルはログインチャネルと**同一の LINE プロバイダー**配下にある必要があります（でないと LINE userId が一致しません）。プログラム設定では `messagingChannels` 配列に対応します。
+
 ## 下流クライアント（`RENKEI_CLIENTS`）
 
 renkei に OIDC でログインしに来るアプリ／IdP の一覧。JSON 配列。

@@ -16,6 +16,7 @@ import {
   parseWebhook,
   randomToken,
   type Storage,
+  startAccountLink,
   upsertIdentityFromLine,
   verifyIdToken,
   verifyWebhookSignature,
@@ -37,8 +38,12 @@ import { createProvider, INTERACTION_PATH } from './oidc/provider.js';
 const LOGIN_MODEL = 'renkei:login';
 /** One-time handoff from /line/callback to /interaction/:uid/finish. */
 const RESULT_MODEL = 'renkei:login-result';
+/** Pending account link, keyed by the nonce echoed back on the accountLink webhook. */
+const LINK_MODEL = 'renkei:link';
 const LOGIN_TTL = 600;
 const RESULT_TTL = 60;
+/** LINE link tokens live ~10 min; match the nonce store to that. */
+const LINK_TTL = 600;
 
 interface LoginState {
   uid: string;
@@ -270,6 +275,59 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     return done;
   });
 
+  // ── Account linking: start the LINE accountLink flow ────────────────────
+  // A downstream app that already holds a renkei access token for the user
+  // POSTs here (Authorization: Bearer <access_token>). renkei resolves the
+  // token to a sub, mints a one-time LINE link token for that user's LINE
+  // account, stores nonce → sub, and returns the accountLink dialog URL for
+  // the app to redirect the browser to. The link is finalised asynchronously
+  // when LINE delivers the accountLink webhook (below). Requires a messaging
+  // channel with a channelAccessToken configured.
+  app.post('/link/start', async (c) => {
+    const messaging = config.messagingChannels.find((m) => m.channelAccessToken);
+    if (!messaging?.channelAccessToken) {
+      return c.json({ error: 'account_linking_not_configured' }, 404);
+    }
+
+    const authorization = c.req.header('authorization');
+    const bearer = authorization?.startsWith('Bearer ') ? authorization.slice(7) : undefined;
+    if (!bearer) return c.json({ error: 'unauthorized' }, 401);
+    const accessToken = await provider.AccessToken.find(bearer);
+    const sub = accessToken?.accountId;
+    if (!sub) return c.json({ error: 'invalid_token' }, 401);
+
+    // Find the LINE user ID for this identity (the login/liff account, not a
+    // messaging one), preferring the channel this messaging channel serves.
+    const loginChannel = channelFor(messaging.region);
+    const accounts = await storage.identities.listLineAccounts(sub);
+    const account =
+      accounts.find((a) => a.channelId === loginChannel.channelId && a.kind !== 'messaging') ??
+      accounts.find((a) => a.kind !== 'messaging');
+    if (!account) return c.json({ error: 'no_line_account' }, 409);
+
+    const nonce = randomToken();
+    try {
+      const { url } = await startAccountLink(
+        {
+          userId: account.lineUserId,
+          channelAccessToken: messaging.channelAccessToken,
+          nonce,
+        },
+        { fetch: lineFetch },
+      );
+      await storage.payloads.upsert(
+        LINK_MODEL,
+        nonce,
+        { sub, channelId: loginChannel.channelId },
+        LINK_TTL,
+      );
+      return c.json({ url });
+    } catch (e) {
+      logger.warn('[renkei] account link start failed', { message: (e as Error).message });
+      return c.json({ error: 'link_start_failed' }, 502);
+    }
+  });
+
   // ── Messaging API webhook: keep friendship state current ────────────────
   // LINE POSTs follow/unfollow/accountLink events here, signed with a
   // Messaging API channel secret. We verify the signature, then mirror
@@ -319,11 +377,26 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
       } else if (isUnfollowEvent(event)) {
         await storage.identities.setFriendship(loginChannel.channelId, userId, false, at);
       } else if (isAccountLinkEvent(event)) {
-        // Account linking (nonce → downstream account) lands in a later slice;
-        // acknowledge so LINE does not retry.
-        logger.info(
-          `[renkei] accountLink ${event.link.result} for user ${userId} (nonce handling: TODO)`,
-        );
+        // Finalise a link started at /link/start: resolve nonce → sub and
+        // record the messaging-side account, which flips the `line:linked`
+        // claim. The nonce is one-time — drop it whatever the result.
+        const pending = (await storage.payloads.find(LINK_MODEL, event.link.nonce)) as
+          | { sub?: string }
+          | undefined;
+        if (event.link.result === 'ok' && pending?.sub) {
+          await storage.identities.upsertLineAccount({
+            identitySub: pending.sub,
+            channelId: matched.channelId ?? loginChannel.channelId,
+            lineUserId: userId,
+            kind: 'messaging',
+          });
+          logger.info(`[renkei] accountLink ok: linked ${userId} to ${pending.sub}`);
+        } else {
+          logger.info(
+            `[renkei] accountLink ${event.link.result} for ${userId}${pending ? '' : ' (no pending nonce)'}`,
+          );
+        }
+        if (pending) await storage.payloads.destroy(LINK_MODEL, event.link.nonce);
       }
     }
     return c.json({ ok: true });

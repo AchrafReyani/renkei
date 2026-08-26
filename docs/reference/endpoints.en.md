@@ -41,7 +41,7 @@ Use renkei's `ISSUER` as the Keycloak "Realm URL".
 | `openid` | `sub` — an opaque ID minted by renkei. **Never derived from the LINE userId** (LINE IDs don't leak downstream) |
 | `profile` | `name`, `picture` |
 | `email` | `email`, `email_verified`, `email_placeholder` (`true` only when a placeholder was issued) |
-| `line` | `line:user_id` (LINE userId within this channel), `line:friend` (friendship with the linked Official Account; omitted if unknown), `line:channel_id`, `line:region` |
+| `line` | `line:user_id` (LINE userId within this channel), `line:friend` (friendship with the linked Official Account; omitted if unknown), `line:channel_id`, `line:region`, `line:linked` (`true` once the user has completed account linking) |
 | `offline_access` | refresh tokens |
 
 `sub` is minted once at first login and never changes. Name and picture refresh on every login; email is **only ever added or updated, never removed** (a later login without the email scope keeps it).
@@ -72,7 +72,15 @@ For direct browser calls, list the LIFF app's origin in `RENKEI_CORS_ORIGINS`.
 | `GET /interaction/:uid` | entry point when the OIDC provider needs a user; forwards to LINE (internal) |
 | `GET /line/callback` | where LINE returns. **Register `${ISSUER}/line/callback` as a Callback URL in the console.** Path configurable via `lineCallbackPath` |
 | `GET /interaction/:uid/finish` | login-result hand-off (internal) |
-| `POST /line/webhook` | Messaging API webhook. Verifies `x-line-signature` (HMAC-SHA256, Messaging API channel secret) and mirrors `follow`/`unfollow` into `line:friend`. Enabled by `messagingChannels`; **set the OA webhook URL to `${ISSUER}/line/webhook`** |
+| `POST /line/webhook` | Messaging API webhook. Verifies `x-line-signature` (HMAC-SHA256, Messaging API channel secret), mirrors `follow`/`unfollow` into `line:friend`, and finalises `accountLink` events (nonce → identity, flipping `line:linked`). Enabled by `messagingChannels`; **set the OA webhook URL to `${ISSUER}/line/webhook`** |
+
+## Account linking
+
+| Path | What |
+|---|---|
+| `POST /link/start` | Start LINE account linking for the user of the supplied renkei access token (`Authorization: Bearer <access_token>`). renkei mints a one-time LINE link token and returns `{ url }` — the accountLink dialog to redirect the browser to. The link is finalised asynchronously when LINE delivers the `accountLink` webhook, which sets `line:linked`. |
+
+Requires a `messagingChannels` entry with a `channelAccessToken` (`LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`); without one the route returns `404 account_linking_not_configured`. Other errors: `401` (missing/invalid access token), `409 no_line_account` (the identity has no LINE login account yet), `502 link_start_failed` (LINE rejected the link-token mint).
 
 ## Other
 

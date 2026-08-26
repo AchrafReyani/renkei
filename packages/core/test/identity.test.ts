@@ -121,6 +121,7 @@ describe('buildClaims', () => {
       [LINE_CLAIMS.channelId]: channelId,
       [LINE_CLAIMS.friend]: true,
       [LINE_CLAIMS.region]: 'jp',
+      [LINE_CLAIMS.linked]: false,
     });
   });
 
@@ -149,5 +150,17 @@ describe('buildClaims', () => {
     expect(
       buildClaims(identity, accounts, { preferChannelId: 'msg' })[LINE_CLAIMS.userId],
     ).not.toBe('Umsg');
+    // ...but their presence flips line:linked to true
+    expect(buildClaims(identity, accounts)[LINE_CLAIMS.linked]).toBe(true);
+  });
+
+  it('reports line:linked false until a messaging account is linked', async () => {
+    const s = createMemoryStorage();
+    await upsertIdentityFromLine(s, { channelId, claims, generateSub: () => 'sub-A' });
+    const identity = await s.identities.findIdentity('sub-A');
+    if (!identity) throw new Error('identity missing');
+    expect(
+      buildClaims(identity, await s.identities.listLineAccounts('sub-A'))[LINE_CLAIMS.linked],
+    ).toBe(false);
   });
 });
