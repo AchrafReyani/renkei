@@ -21,6 +21,7 @@ import {
   verifyWebhookSignature,
 } from 'renkei-core';
 import { bridge, nodePair } from './adapters/fetch-to-node.js';
+import { reportFirstRunChecks } from './checks.js';
 import {
   type LineChannelConfig,
   parseConfig,
@@ -69,22 +70,10 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
   let jwks = config.jwks;
   if (!jwks) {
     jwks = await generateDevJwks();
-    logger.warn(
-      '[renkei] 署名鍵が設定されていないため一時的な鍵を生成しました。再起動でトークンが無効になります。本番では jwks を設定してください。 / No signing keys configured; generated a temporary key. Tokens die on restart. Configure jwks in production.',
-    );
   }
-  if (!storage.init) {
-    logger.warn(
-      '[renkei] インメモリストレージを使用しています。本番では使用しないでください。 / Using in-memory storage. Do not use in production.',
-    );
-  }
-  for (const ch of config.channels) {
-    if (ch.requestEmail) {
-      logger.info(
-        `[renkei] channel ${ch.channelId}: email scope is requested. LINE silently drops it unless the channel has email permission — verify in LINE Developers Console.`,
-      );
-    }
-  }
+
+  // Surface the config mistakes that otherwise fail silently at runtime.
+  reportFirstRunChecks(config, { hasPersistentStorage: Boolean(storage.init) }, logger);
 
   await storage.init?.();
   const provider = createProvider({ config, storage, jwks, logger });
