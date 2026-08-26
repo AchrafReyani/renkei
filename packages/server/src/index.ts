@@ -23,4 +23,5 @@ export {
   type WebhookLogEntry,
 } from './inspect.js';
 export { generateDevJwks } from './keys.js';
+export { createLogger, DEFAULT_REDACT_KEYS, type Logger, redact } from './logging.js';
 export { CLAIMS_BY_SCOPE, INTERACTION_PATH, OIDC_ROUTES } from './oidc/provider.js';

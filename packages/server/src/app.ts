@@ -34,6 +34,7 @@ import { devRoutes } from './dev-rp.js';
 import { createWebhookLog, inspectRoutes } from './inspect.js';
 import { generateDevJwks } from './keys.js';
 import { liffRoutes } from './liff.js';
+import { createLogger } from './logging.js';
 import { createProvider, INTERACTION_PATH } from './oidc/provider.js';
 
 /** Short-lived login state, keyed by the OAuth `state` sent to LINE. */
@@ -78,7 +79,11 @@ export interface Renkei {
 export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
   const config = parseConfig(options.config);
   const { storage } = options;
-  const logger = options.logger ?? console;
+  // Wrap the sink so every log call redacts secrets first; JSON is opt-in.
+  const logger = createLogger({
+    base: options.logger ?? console,
+    json: options.logStructured ?? false,
+  });
   const lineFetch = options.fetch ?? fetch;
   const issuer = new URL(config.issuer);
   const bridgeOpts = { host: issuer.host, protocol: issuer.protocol.replace(':', '') };

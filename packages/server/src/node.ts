@@ -16,6 +16,7 @@
  *   RENKEI_CORS_ORIGINS        comma-separated browser origins allowed on /liff/exchange
  *   RENKEI_DEV                 true to mount the /dev relying party
  *   RENKEI_ADMIN_TOKEN         bearer token; when set, mounts read-only /inspect
+ *   RENKEI_LOG_FORMAT          "json" for one JSON object per log line (secrets always redacted)
  *   DATABASE_URL               Postgres URL; in-memory storage if absent
  */
 import { serve } from '@hono/node-server';
@@ -87,7 +88,12 @@ const storage: Storage = env.DATABASE_URL
   ? createPostgresStorage({ connectionString: env.DATABASE_URL })
   : createMemoryStorage();
 
-const renkei = await createRenkei({ config, storage, liffId: env.LIFF_ID });
+const renkei = await createRenkei({
+  config,
+  storage,
+  liffId: env.LIFF_ID,
+  logStructured: env.RENKEI_LOG_FORMAT === 'json',
+});
 const port = Number(env.PORT ?? new URL(issuer).port ?? 3000) || 3000;
 
 serve({ fetch: renkei.app.fetch, port }, () => {

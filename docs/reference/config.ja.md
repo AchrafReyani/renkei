@@ -24,6 +24,7 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 | `RENKEI_DEV` | `RENKEI_CLIENTS` と `DATABASE_URL` が両方未設定なら `true` | `/dev` の動作確認用リライングパーティを有効化。**本番では無効に** |
 | `RENKEI_CORS_ORIGINS` | なし | `/liff/exchange` をブラウザから直接呼ぶ LIFF アプリのオリジン（カンマ区切り）。未設定なら CORS なし |
 | `RENKEI_ADMIN_TOKEN` | なし | 設定すると読み取り専用の `/inspect`（identity・LINE アカウント・直近 Webhook の参照）を有効化。このトークンで Bearer 認証。未設定なら未マウント。十分に長くランダムな値を使ってください |
+| `RENKEI_LOG_FORMAT` | pretty | `json` にするとログを 1 行 1 JSON（`{ level, msg, … }`）で出力（ログ集約向け）。形式に関わらず、ログのメタデータからシークレット（トークン・チャネルシークレット・Cookie など）は**常に**マスクされます |
 
 ## LINE チャネル
 
