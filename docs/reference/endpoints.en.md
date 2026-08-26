@@ -83,6 +83,8 @@ For direct browser calls, list the LIFF app's origin in `RENKEI_CORS_ORIGINS`.
 
 Requires a `messagingChannels` entry with a `channelAccessToken` (`LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`); without one the route returns `404 account_linking_not_configured`. Other errors: `401` (missing/invalid access token), `409 no_line_account` (the identity has no LINE login account yet), `502 link_start_failed` (LINE rejected the link-token mint).
 
+**Forwarded (app-owned) mode.** If your app runs its own linking (it owns the nonce and the account it maps to — e.g. connecting LINE to a pre-existing password account), set `accountLinkForwardUrl` (+ `accountLinkForwardSecret`) on the messaging channel. renkei verifies LINE's signature and relays any `accountLink` event whose nonce it doesn't own to that URL as `{ type, userId, nonce, result, timestamp }`, signed with base64 HMAC-SHA256 in `x-renkei-signature`. Your app matches the nonce to its user and records the binding — no Messaging webhook of its own required. renkei-owned nonces (from `POST /link/start`) are handled internally and never forwarded.
+
 ## Other
 
 | Path | What |

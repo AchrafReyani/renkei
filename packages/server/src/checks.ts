@@ -89,6 +89,16 @@ export function firstRunChecks(config: RenkeiConfig, ctx: CheckContext): FirstRu
     }
   }
 
+  for (const mc of config.messagingChannels) {
+    if (mc.accountLinkForwardUrl && !mc.accountLinkForwardSecret) {
+      checks.push({
+        level: 'warn',
+        code: 'accountlink-forward-unsigned',
+        message: `messaging channel${mc.channelId ? ` ${mc.channelId}` : ''}: accountLinkForwardUrl is set without accountLinkForwardSecret — forwarded events are unsigned, so the receiving app cannot verify they came from renkei. Set a shared secret.`,
+      });
+    }
+  }
+
   if (config.messagingChannels.length > 0) {
     checks.push({
       level: 'info',

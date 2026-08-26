@@ -1,7 +1,10 @@
 # Design: account linking (v0.2)
 
-Status: **draft / awaiting decision.** This proposes how renkei should
-implement LINE account linking. It does not change code yet.
+Status: **implemented (v0.2).** Both options shipped: Option A (renkei-owned,
+`POST /link/start` + `GET /link` → `line:linked`) and Option B (forwarded /
+app-owned, `accountLinkForwardUrl`). This doc is kept as the rationale; see the
+[endpoints](reference/endpoints.en.md#account-linking) and
+[config](reference/config.en.md) reference for the shipped surface.
 
 renkei-core already parses and verifies the `accountLink` webhook
 (`LineAccountLinkEvent { link: { result, nonce } }`, `isAccountLinkEvent`),

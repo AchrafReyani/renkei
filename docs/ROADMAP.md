@@ -105,8 +105,10 @@ Order matters: each item is what the next needs.
       (2026-08-26, DESIGN-account-linking.md — Option A, renkei-owned).
       Plus `GET /link` — a browser entry that logs the user in then starts
       linking, for users without an access token in hand (2026-08-27)
-- [~] `accountLink` webhook handling: direct mode done (nonce → identity,
-      `line:linked` claim). Forwarded mode (app-owned mapping, Option B) still open
+- [x] `accountLink` webhook handling: direct mode (Option A — nonce → identity,
+      `line:linked`) and forwarded mode (Option B — verify + relay to an
+      app-owned `accountLinkForwardUrl`, signed with `x-renkei-signature`)
+      (2026-08-27)
 - [x] Friendship sync from `follow`/`unfollow` (idempotent `setFriendship`)
 - [x] Minimal inspection UI (read-only): identity / LINE account lookup
       (by sub or channel+userId), friendship + `line:linked`, recent webhooks.

@@ -29,6 +29,20 @@ export const messagingChannelSchema = z.object({
    * webhook signature verification. Prefer a long-lived channel access token.
    */
   channelAccessToken: z.string().optional(),
+  /**
+   * Forwarded (app-owned) account linking. When set, `accountLink` webhook
+   * events whose nonce renkei does NOT own are POSTed to this URL as
+   * `{ type, userId, nonce, result, timestamp }`. Your app owns the nonce→account
+   * mapping; renkei just verifies LINE's signature and relays the trusted event,
+   * so your app needs no Messaging webhook of its own.
+   */
+  accountLinkForwardUrl: z.string().url().optional(),
+  /**
+   * Shared secret for the forward above. When set, renkei signs the forwarded
+   * body with base64 HMAC-SHA256 in the `x-renkei-signature` header (the same
+   * scheme as LINE's `x-line-signature`), so your app can verify it.
+   */
+  accountLinkForwardSecret: z.string().optional(),
 });
 
 export const oidcClientSchema = z.object({

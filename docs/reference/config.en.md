@@ -43,6 +43,8 @@ Multiple regions (Japan + Taiwan, …) are configured programmatically via the `
 | `LINE_MESSAGING_CHANNEL_SECRET` | none | Messaging API channel secret. Set it to enable `POST /line/webhook` (verifies `x-line-signature`, keeps `line:friend` current). **Not** the Login channel secret |
 | `LINE_MESSAGING_CHANNEL_ID` | none | Messaging API channel ID. Informational |
 | `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` | none | Messaging API channel access token. Set it to enable `POST /link/start` (account linking mints a one-time link token with it) |
+| `LINE_ACCOUNTLINK_FORWARD_URL` | none | Forwarded (app-owned) linking: `accountLink` events whose nonce renkei doesn't own are POSTed here as `{ type, userId, nonce, result, timestamp }`. Your app owns the nonce → account mapping |
+| `LINE_ACCOUNTLINK_FORWARD_SECRET` | none | Shared secret for the forward. renkei signs the body (base64 HMAC-SHA256) in `x-renkei-signature`, so your app can verify it the same way it would a LINE webhook |
 
 The Messaging API channel must live under the **same LINE provider** as the Login channel, or the LINE user IDs won't line up. Programmatically these map to the `messagingChannels` array.
 
