@@ -25,6 +25,7 @@ programmatic use, pass the same settings as an object to
 | `RENKEI_DEV` | `true` only if both `RENKEI_CLIENTS` and `DATABASE_URL` are unset | mounts the `/dev` test relying party. **Off in production** |
 | `RENKEI_CORS_ORIGINS` | none | browser origins of LIFF apps that call `/liff/exchange` directly (comma-separated). Unset = no CORS |
 | `RENKEI_ADMIN_TOKEN` | none | when set, mounts the read-only `/inspect` endpoints (identity / LINE account / recent-webhook lookups), Bearer-gated on this token. Unset = not mounted. Use a long random value |
+| `RENKEI_LOG_FORMAT` | pretty | `json` emits one JSON object per log line (`{ level, msg, … }`) for log aggregators. Secrets (tokens, channel secrets, cookies, …) are **always** redacted from log metadata regardless of format |
 
 ## LINE channel
 

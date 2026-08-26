@@ -124,8 +124,10 @@ export interface RenkeiOptions {
   storage: Storage;
   /** Injectable fetch for LINE API calls (tests, custom agents). */
   fetch?: typeof fetch;
-  /** Logger. Defaults to console. */
+  /** Base logger sink. Defaults to console. renkei wraps it to redact secrets. */
   logger?: Pick<Console, 'info' | 'warn' | 'error'>;
+  /** Emit logs as one JSON object per line (for log aggregators). Default: false. */
+  logStructured?: boolean;
   /** LIFF app ID used only by the /dev/liff page. */
   liffId?: string | undefined;
 }

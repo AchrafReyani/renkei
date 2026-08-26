@@ -62,7 +62,9 @@ Order matters: each item is what the next needs.
       first-party auto-grant (no second consent screen); PKCE required for
       public clients only; RS256 dev keys; e2e test with a fake LINE
 - [ ] Session cookie mode for direct-app usage
-- [ ] Structured logs with redaction
+- [x] Structured logs with redaction: `createLogger()` wraps the sink,
+      deep-redacts secrets by key (always on), `RENKEI_LOG_FORMAT=json` for
+      one-JSON-line output (2026-08-27)
 
 **storage**
 - [x] `storage-postgres` (Drizzle, migrations) incl. the `oidc-provider` adapter — tested on PGlite
