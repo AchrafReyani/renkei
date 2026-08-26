@@ -1,5 +1,5 @@
-import { createMemoryStorage } from '@renkei/core';
 import { createLocalJWKSet, jwtVerify, SignJWT } from 'jose';
+import { createMemoryStorage } from 'renkei-core';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createRenkei, type Renkei } from '../src/index.js';
 

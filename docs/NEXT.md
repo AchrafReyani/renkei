@@ -57,13 +57,13 @@ it and will need a fresh one if you redo those checks.
   there's a live demo): 「LINEでログイン」→ friend-add → claims JSON, plus the
   in-app LIFF phone screenshot. LINE screens are blocked for Claude in Chrome,
   so Achraf records those legs.
-- [ ] **Version + tag.** `pnpm changeset` → version `0.1.0` for `@renkei/core`,
-  `@renkei/storage-postgres`, `@renkei/server`, `renkei`. Tag `v0.1.0` → the
+- [ ] **Version + tag.** `pnpm changeset` → version `0.1.0` for `renkei-core`,
+  `renkei-storage-postgres`, `renkei-server`, `renkei`. Tag `v0.1.0` → the
   `release.yml` workflow builds and pushes `ghcr.io/achrafreyani/renkei`.
   Verify the image lands and `docker run ghcr.io/achrafreyani/renkei:0.1.0` boots.
 - [ ] **npm publish** of the four packages — Achraf runs it (passkey 2FA):
   `pnpm -r publish --access public` from the repo root after `pnpm build`.
-  Verify with `npm view @renkei/server version`.
+  Verify with `npm view renkei-server version`.
 - [x] **Console screenshots** for docs/guides/line-console.{ja,en}.md — done
   2026-08-26 in Japanese UI: `docs/images/console/*.png` (basic settings,
   callback URL, linked OA + email permission, LIFF list, LIFF app detail).

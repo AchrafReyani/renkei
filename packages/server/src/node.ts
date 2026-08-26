@@ -15,8 +15,8 @@
  *   DATABASE_URL               Postgres URL; in-memory storage if absent
  */
 import { serve } from '@hono/node-server';
-import { createMemoryStorage, randomToken, type Storage } from '@renkei/core';
-import { createPostgresStorage } from '@renkei/storage-postgres';
+import { createMemoryStorage, randomToken, type Storage } from 'renkei-core';
+import { createPostgresStorage } from 'renkei-storage-postgres';
 import { createRenkei } from './app.js';
 import type { RenkeiConfigInput } from './config.js';
 

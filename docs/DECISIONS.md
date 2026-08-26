@@ -236,3 +236,26 @@ is deleted after 30 days). Cost: $0. Trade-off: the service sleeps after
 15 min idle and takes up to a minute to wake — accepted, and stated next to
 the demo link in the README so nobody reads the cold start as renkei being
 slow. `fly.toml` and the Fly guide stay as the paid self-hosting reference.
+
+## 10. npm package names: unscoped `renkei-*` (2026-08-26)
+
+**Decision.** The packages publish as `renkei-core`, `renkei-server`,
+`renkei-storage-postgres` and the CLI `renkei`. Not `@renkei/*`.
+
+**Why.** The `@renkei` npm scope belongs to another user (`aminnairi`,
+who published `@renkei/core`, `@renkei/node`, `@renkei/fetch` in December
+2024). Scopes are tied to an npm user or org name, so `@renkei/*` can never
+be ours. Discovered on the day of the first publish, via a dry run that
+silently skipped `@renkei/core` because "0.1.0 already exists".
+
+**Alternatives.** A new org scope (`@renkeijs`, `@renkei-id` — both free)
+would be tidier but needs an org created and the name explained forever;
+`@achrafreyani/*` ties the project to a personal handle. Unscoped names
+are publishable from the existing account today, and `renkei` (the CLI)
+was already ours. Future packages follow the same pattern: `renkei-client`,
+`renkei-next`.
+
+**Cost.** Unscoped names can be squatted by anyone and read as less
+"official"; the repo and docs are the source of truth for which packages
+are real. `pnpm changeset`'s `linked` group is now `renkei-*`, which
+excludes the `renkei` CLI (same as before).

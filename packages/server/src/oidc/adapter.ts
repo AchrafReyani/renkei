@@ -1,5 +1,5 @@
-import type { PayloadRecord, PayloadStore } from '@renkei/core';
 import type { Adapter, AdapterPayload } from 'oidc-provider';
+import type { PayloadRecord, PayloadStore } from 'renkei-core';
 
 /**
  * `oidc-provider` adapter backed by renkei's PayloadStore. One instance per

@@ -1,5 +1,5 @@
-import type { Storage } from '@renkei/core';
 import type { JWK } from 'jose';
+import type { Storage } from 'renkei-core';
 import { z } from 'zod';
 
 const botPromptSchema = z.enum(['normal', 'aggressive', 'none']);

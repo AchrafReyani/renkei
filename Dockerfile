@@ -7,9 +7,9 @@ WORKDIR /repo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json turbo.json ./
 COPY packages ./packages
 RUN pnpm install --frozen-lockfile
-RUN pnpm turbo run build --filter=@renkei/server...
+RUN pnpm turbo run build --filter=renkei-server...
 # Prune to the server's production dependencies only
-RUN pnpm --filter @renkei/server deploy --prod --legacy /app
+RUN pnpm --filter renkei-server deploy --prod --legacy /app
 
 FROM node:22-alpine
 WORKDIR /app

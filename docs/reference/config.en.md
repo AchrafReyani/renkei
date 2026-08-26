@@ -89,8 +89,8 @@ Put the output in `RENKEI_JWKS`. To rotate, prepend a new key and keep the old o
 ## Programmatic configuration
 
 ```ts
-import { createRenkei } from '@renkei/server';
-import { createPostgresStorage } from '@renkei/storage-postgres';
+import { createRenkei } from 'renkei-server';
+import { createPostgresStorage } from 'renkei-storage-postgres';
 
 const renkei = await createRenkei({
   storage: createPostgresStorage({ connectionString: process.env.DATABASE_URL! }),

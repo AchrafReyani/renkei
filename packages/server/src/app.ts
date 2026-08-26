@@ -1,3 +1,5 @@
+import { Hono } from 'hono';
+import type Provider from 'oidc-provider';
 import {
   buildAuthorizeUrl,
   exchangeCode,
@@ -12,9 +14,7 @@ import {
   type Storage,
   upsertIdentityFromLine,
   verifyIdToken,
-} from '@renkei/core';
-import { Hono } from 'hono';
-import type Provider from 'oidc-provider';
+} from 'renkei-core';
 import { bridge, nodePair } from './adapters/fetch-to-node.js';
 import {
   type LineChannelConfig,

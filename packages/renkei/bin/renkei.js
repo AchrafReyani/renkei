@@ -17,4 +17,4 @@ if (process.argv.includes('--version') || process.argv.includes('-v')) {
   console.log(createRequire(import.meta.url)('../package.json').version);
   process.exit(0);
 }
-await import('@renkei/server/node');
+await import('renkei-server/node');

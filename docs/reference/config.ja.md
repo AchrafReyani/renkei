@@ -88,8 +88,8 @@ console.log(JSON.stringify([{ ...jwk, kid: 'k' + Date.now().toString(36), alg: '
 ## プログラムからの設定
 
 ```ts
-import { createRenkei } from '@renkei/server';
-import { createPostgresStorage } from '@renkei/storage-postgres';
+import { createRenkei } from 'renkei-server';
+import { createPostgresStorage } from 'renkei-storage-postgres';
 
 const renkei = await createRenkei({
   storage: createPostgresStorage({ connectionString: process.env.DATABASE_URL! }),

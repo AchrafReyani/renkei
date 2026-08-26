@@ -1,5 +1,5 @@
 /**
- * Storage contract for renkei. Implemented by `@renkei/storage-postgres`
+ * Storage contract for renkei. Implemented by `renkei-storage-postgres`
  * and by the in-memory store in this package (tests, local dev).
  *
  * Two halves:

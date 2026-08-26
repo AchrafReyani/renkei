@@ -1,3 +1,6 @@
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { importJWK, type JWK, SignJWT } from 'jose';
 import {
   buildClaims,
   decodeIdTokenAudience,
@@ -9,10 +12,7 @@ import {
   upsertIdentityFromLine,
   verifyAccessToken,
   verifyIdToken,
-} from '@renkei/core';
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { importJWK, type JWK, SignJWT } from 'jose';
+} from 'renkei-core';
 import type { LineChannelConfig, OidcClientConfig, RenkeiConfig } from './config.js';
 import { applyEmailPlaceholder } from './oidc/claims.js';
 import { CLAIMS_BY_SCOPE } from './oidc/provider.js';

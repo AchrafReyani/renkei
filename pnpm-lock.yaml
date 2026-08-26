@@ -66,7 +66,7 @@ importers:
 
   packages/renkei:
     dependencies:
-      '@renkei/server':
+      renkei-server:
         specifier: workspace:*
         version: link:../server
 
@@ -75,12 +75,6 @@ importers:
       '@hono/node-server':
         specifier: ^2.1.1
         version: 2.1.1(hono@4.13.4)
-      '@renkei/core':
-        specifier: workspace:*
-        version: link:../core
-      '@renkei/storage-postgres':
-        specifier: workspace:*
-        version: link:../storage-postgres
       hono:
         specifier: ^4.13.4
         version: 4.13.4
@@ -90,6 +84,12 @@ importers:
       oidc-provider:
         specifier: ^9.11.5
         version: 9.11.5
+      renkei-core:
+        specifier: workspace:*
+        version: link:../core
+      renkei-storage-postgres:
+        specifier: workspace:*
+        version: link:../storage-postgres
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -103,15 +103,15 @@ importers:
 
   packages/storage-postgres:
     dependencies:
-      '@renkei/core':
-        specifier: workspace:*
-        version: link:../core
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(@electric-sql/pglite@0.5.7)(postgres@3.4.9)
       postgres:
         specifier: ^3.4.9
         version: 3.4.9
+      renkei-core:
+        specifier: workspace:*
+        version: link:../core
     devDependencies:
       '@electric-sql/pglite':
         specifier: ^0.5.7

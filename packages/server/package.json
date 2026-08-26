@@ -1,6 +1,6 @@
 {
-  "name": "@renkei/server",
-  "version": "0.0.0",
+  "name": "renkei-server",
+  "version": "0.1.0",
   "description": "renkei server: LINE-facing login flow on one side, a standard OpenID Connect provider on the other. Hono + oidc-provider.",
   "license": "Apache-2.0",
   "repository": {
@@ -36,8 +36,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
-    "@renkei/core": "workspace:*",
-    "@renkei/storage-postgres": "workspace:*",
+    "renkei-core": "workspace:*",
+    "renkei-storage-postgres": "workspace:*",
     "hono": "^4.13.4",
     "jose": "^6.2.10",
     "oidc-provider": "^9.11.5",

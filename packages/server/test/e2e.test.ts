@@ -4,8 +4,9 @@
  * carrying `line:*` claims. Exercises oidc-provider, the fetch→node bridge,
  * the interaction hand-off, identity upsert and claims — with no network.
  */
-import { createMemoryStorage } from '@renkei/core';
+
 import { createLocalJWKSet, jwtVerify, SignJWT } from 'jose';
+import { createMemoryStorage } from 'renkei-core';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createRenkei, type Renkei } from '../src/index.js';
 

@@ -3,7 +3,7 @@ import type { Storage } from '../src/index.js';
 
 /**
  * Behavioural contract every Storage implementation must satisfy. Imported by
- * the memory tests here and by @renkei/storage-postgres, so both stay in sync.
+ * the memory tests here and by renkei-storage-postgres, so both stay in sync.
  */
 export function storageContract(name: string, factory: () => Promise<Storage> | Storage) {
   describe(`Storage contract: ${name}`, () => {

@@ -1,7 +1,7 @@
 import { PGlite } from '@electric-sql/pglite';
-import type { Storage } from '@renkei/core';
 import { drizzle } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
+import type { Storage } from 'renkei-core';
 import { migrationsFolder } from '../src/migrations-path.js';
 import { createDrizzleStorage } from '../src/storage.js';
 

@@ -1,13 +1,15 @@
 /**
  * Development harness for the LINE Login flow against a real channel.
  *
- * Not the renkei server — a minimal Hono app that exercises @renkei/core end
+ * Not the renkei server — a minimal Hono app that exercises renkei-core end
  * to end so the flow can be verified on a phone before the OIDC provider,
  * storage and config layers exist. Reads LINE_LOGIN_* from the repo .env.
  *
  *   pnpm dev:server   →   http://localhost:3000
  */
 import { serve } from '@hono/node-server';
+import { Hono } from 'hono';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import {
   buildAuthorizeUrl,
   exchangeCode,
@@ -21,9 +23,7 @@ import {
   randomToken,
   verifyIdToken,
   verifyIdTokenViaLine,
-} from '@renkei/core';
-import { Hono } from 'hono';
-import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
+} from 'renkei-core';
 
 const channel = {
   channelId: required('LINE_LOGIN_CHANNEL_ID'),

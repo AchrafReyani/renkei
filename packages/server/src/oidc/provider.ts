@@ -1,5 +1,5 @@
-import { buildClaims, LINE_CLAIMS, LINE_SCOPE, type Storage } from '@renkei/core';
 import Provider, { type Configuration, type KoaContextWithOIDC } from 'oidc-provider';
+import { buildClaims, LINE_CLAIMS, LINE_SCOPE, type Storage } from 'renkei-core';
 import type { RenkeiConfig } from '../config.js';
 import { adapterFactory } from './adapter.js';
 import { applyEmailPlaceholder, EMAIL_PLACEHOLDER_CLAIM } from './claims.js';

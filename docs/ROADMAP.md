@@ -104,8 +104,8 @@ Order matters: each item is what the next needs.
 
 ## v0.3 — SDKs and edge targets
 
-- [ ] `@renkei/client`: `loginUrl()`, `exchangeLiffToken()`, session helpers
-- [ ] `@renkei/next`: App Router helpers, middleware, `<LineLoginButton />`
+- [ ] `renkei-client`: `loginUrl()`, `exchangeLiffToken()`, session helpers
+- [ ] `renkei-next`: App Router helpers, middleware, `<LineLoginButton />`
 - [ ] Cloudflare Workers deploy target via `httpServerHandler` + KV/D1 or Hyperdrive adapter
 - [ ] Supabase Edge Function deploy target — `adapters/fetch-to-node.ts` from the spike shim (+ host-header fix, Postgres adapter)
 - [ ] LINE MINI App channel support (LINE is folding LIFF into MINI App; new apps should be MINI App channels under the same provider) — service messages prerequisites, `liff.permanentLink`

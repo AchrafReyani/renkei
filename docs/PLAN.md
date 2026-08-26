@@ -97,7 +97,7 @@ Full source list is in the research notes at the bottom of this file.
 ## 7. Scope before sharing — the v0.1 bar
 
 > **Status 2026-08-26:** everything below is done except the items marked
-> *open* in ROADMAP.md: demo instance, npm publish of `@renkei/*`, two weeks
+> *open* in ROADMAP.md: demo instance, npm publish of `renkei-*`, two weeks
 > of dogfooding, console screenshots in the guide, social-preview upload
 > (UI-only). Human-only verifications outstanding: Next.js example final
 > LINE leg; LIFF in the LINE app (in-client) — external browser verified.
@@ -153,7 +153,7 @@ trending past 10, cut Tutorial 2 and SQLite, not the OIDC-provider side.
 |---|---|---|
 | v0.1 | The bar above. LINE Login + LIFF + OIDC provider + Supabase tutorial | **Launch** |
 | v0.2 | Messaging API account linking (link token, nonce, `accountLink` webhook), minimal admin/inspection UI | Yes |
-| v0.3 | Client SDKs (`@renkei/client`, `@renkei/next`), Cloudflare Workers + Supabase Edge deploy targets, LINE Mini App specifics | Yes |
+| v0.3 | Client SDKs (`renkei-client`, `renkei-next`), Cloudflare Workers + Supabase Edge deploy targets, LINE Mini App specifics | Yes |
 | v0.4 | Firebase / Cognito / Keycloak federation guides, `examples/` for Rails, Laravel, Spring, Go | Yes |
 | v1.0 | Stability promise. Config schema frozen. Security review done. | Yes |
 | later | Provider plugins for other Asian IdPs — only if users ask | — |

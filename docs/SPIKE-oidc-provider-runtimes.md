@@ -73,7 +73,7 @@ Gotchas found:
 
 **Implication:** the shim is the portable deploy path for *every* non-Node
 runtime (edge-runtime, Deno Deploy, Workers without `httpServerHandler`).
-It belongs in `@renkei/server` as `adapters/fetch-to-node.ts` with its own
+It belongs in `renkei-server` as `adapters/fetch-to-node.ts` with its own
 tests, and the Workers target can choose between it and `httpServerHandler`.
 "Deploy renkei as a Supabase Edge Function" is therefore real — v0.3 as
 planned; the v0.1 Supabase tutorial can still use Docker next to Supabase.
