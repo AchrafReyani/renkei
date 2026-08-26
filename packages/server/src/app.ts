@@ -16,6 +16,7 @@ import {
   parseWebhook,
   randomToken,
   type Storage,
+  signWebhookBody,
   startAccountLink,
   upsertIdentityFromLine,
   verifyIdToken,
@@ -386,6 +387,27 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     return c.redirect(url);
   }
 
+  // Forward a verified accountLink event to an app-owned endpoint (Option B).
+  // Fire-and-log: a failed forward must not turn the 200 to LINE into a retry
+  // storm, and LINE re-sends unacked events on its own schedule anyway.
+  async function forwardAccountLink(
+    url: string,
+    secret: string | undefined,
+    event: { userId: string; nonce: string; result: string; timestamp: number },
+  ): Promise<void> {
+    const payload = JSON.stringify({ type: 'accountLink', ...event });
+    const headers: Record<string, string> = { 'content-type': 'application/json' };
+    if (secret) headers['x-renkei-signature'] = await signWebhookBody(secret, payload);
+    try {
+      const res = await lineFetch(url, { method: 'POST', headers, body: payload });
+      if (!res.ok) {
+        logger.warn('[renkei] accountLink forward returned non-2xx', { status: res.status });
+      }
+    } catch (e) {
+      logger.warn('[renkei] accountLink forward failed', { message: (e as Error).message });
+    }
+  }
+
   // ── Account linking: start the LINE accountLink flow ────────────────────
   // A downstream app that already holds a renkei access token for the user
   // POSTs here (Authorization: Bearer <access_token>). renkei resolves the
@@ -496,26 +518,42 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
       } else if (isUnfollowEvent(event)) {
         await storage.identities.setFriendship(loginChannel.channelId, userId, false, at);
       } else if (isAccountLinkEvent(event)) {
-        // Finalise a link started at /link/start: resolve nonce → sub and
-        // record the messaging-side account, which flips the `line:linked`
-        // claim. The nonce is one-time — drop it whatever the result.
         const pending = (await storage.payloads.find(LINK_MODEL, event.link.nonce)) as
           | { sub?: string }
           | undefined;
-        if (event.link.result === 'ok' && pending?.sub) {
-          await storage.identities.upsertLineAccount({
-            identitySub: pending.sub,
-            channelId: matched.channelId ?? loginChannel.channelId,
-            lineUserId: userId,
-            kind: 'messaging',
-          });
-          logger.info(`[renkei] accountLink ok: linked ${userId} to ${pending.sub}`);
+        if (pending) {
+          // renkei-owned link (Option A): resolve nonce → sub and record the
+          // messaging-side account, which flips `line:linked`. Nonce is one-time.
+          if (event.link.result === 'ok' && pending.sub) {
+            await storage.identities.upsertLineAccount({
+              identitySub: pending.sub,
+              channelId: matched.channelId ?? loginChannel.channelId,
+              lineUserId: userId,
+              kind: 'messaging',
+            });
+            logger.info(`[renkei] accountLink ok: linked ${userId} to ${pending.sub}`);
+          } else {
+            logger.info(`[renkei] accountLink ${event.link.result} for ${userId}`);
+          }
+          await storage.payloads.destroy(LINK_MODEL, event.link.nonce);
+        } else if (matched.accountLinkForwardUrl) {
+          // App-owned link (Option B): relay the verified event to the app,
+          // which owns the nonce → account mapping.
+          await forwardAccountLink(
+            matched.accountLinkForwardUrl,
+            matched.accountLinkForwardSecret,
+            {
+              userId,
+              nonce: event.link.nonce,
+              result: event.link.result,
+              timestamp: event.timestamp,
+            },
+          );
         } else {
           logger.info(
-            `[renkei] accountLink ${event.link.result} for ${userId}${pending ? '' : ' (no pending nonce)'}`,
+            `[renkei] accountLink ${event.link.result} for ${userId} (no pending nonce, no forward configured)`,
           );
         }
-        if (pending) await storage.payloads.destroy(LINK_MODEL, event.link.nonce);
       }
     }
     return c.json({ ok: true });

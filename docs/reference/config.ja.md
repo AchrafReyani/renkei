@@ -42,6 +42,8 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 | `LINE_MESSAGING_CHANNEL_SECRET` | なし | Messaging API チャネルシークレット。設定すると `POST /line/webhook` が有効化（`x-line-signature` を検証し `line:friend` を最新に保つ）。ログインチャネルのシークレットとは**別物** |
 | `LINE_MESSAGING_CHANNEL_ID` | なし | Messaging API チャネル ID。参考情報 |
 | `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` | なし | Messaging API チャネルアクセストークン。設定すると `POST /link/start`（アカウント連携。これを使って一度きりの link token を発行）が有効化 |
+| `LINE_ACCOUNTLINK_FORWARD_URL` | なし | フォワード方式（アプリ主導）の連携: renkei が所有しない nonce の `accountLink` イベントを `{ type, userId, nonce, result, timestamp }` としてここへ POST。nonce → アカウントの対応はアプリ側が管理 |
+| `LINE_ACCOUNTLINK_FORWARD_SECRET` | なし | 上記フォワードの共有シークレット。renkei が本文を署名（base64 HMAC-SHA256）して `x-renkei-signature` ヘッダーに付与するので、アプリは LINE の Webhook と同じ方法で検証できます |
 
 Messaging API チャネルはログインチャネルと**同一の LINE プロバイダー**配下にある必要があります（でないと LINE userId が一致しません）。プログラム設定では `messagingChannels` 配列に対応します。
 

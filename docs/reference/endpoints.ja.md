@@ -83,6 +83,8 @@ LIFF SDK が持つ LINE のトークンを renkei の id_token に交換しま�
 
 `channelAccessToken`（`LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`）を持つ `messagingChannels` エントリが必要。未設定なら `404 account_linking_not_configured` を返す。その他のエラー: `401`（アクセストークンが無い／無効）, `409 no_line_account`（identity にまだ LINE ログインアカウントが無い）, `502 link_start_failed`（LINE が link token 発行を拒否）。
 
+**フォワード方式（アプリ主導）。** アプリが独自に連携を回す場合（nonce と紐づけ先アカウントをアプリが所有 — 例: 既存のパスワードアカウントに LINE を連携）、messaging チャネルに `accountLinkForwardUrl`（+ `accountLinkForwardSecret`）を設定します。renkei は LINE の署名を検証し、自分が所有しない nonce の `accountLink` イベントを `{ type, userId, nonce, result, timestamp }` としてその URL へ中継します。本文は base64 HMAC-SHA256 で署名され `x-renkei-signature` に付きます。アプリは nonce を自分のユーザーに突き合わせて紐づけを記録します — アプリ側に Messaging Webhook は不要です。renkei が所有する nonce（`POST /link/start` 由来）は内部で処理され、転送されません。
+
 ## その他
 
 | パス | 内容 |

@@ -130,8 +130,9 @@ app.
 - **Same person, their own app account.** This flow binds a LINE identity to
   the account behind the renkei access token — i.e. the account they logged
   into with LINE. Linking LINE to a *pre-existing password account* (a merge
-  only your app can authorise) is a separate, forwarded-mode flow on renkei's
-  roadmap; it is not covered here.
+  only your app can authorise) uses renkei's **forwarded mode**
+  (`accountLinkForwardUrl`) instead — see the
+  [endpoints reference](../reference/endpoints.md#account-linking).
 - **`line:linked` is renkei-owned.** renkei stores the link and exposes it as a
   claim, so your app needs no webhook code of its own — the same pattern as
   `line:friend`.

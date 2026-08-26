@@ -136,6 +136,25 @@ export async function verifyWebhookSignature(
   return timingSafeEqual(mac, expected);
 }
 
+/**
+ * Base64 HMAC-SHA256 of a body under a secret — the same scheme LINE uses for
+ * `x-line-signature`. renkei uses it to sign events it forwards to a downstream
+ * app (so the app can verify the forward the same way it would a LINE webhook).
+ */
+export async function signWebhookBody(secret: string, body: RawBody): Promise<string> {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const mac = new Uint8Array(await crypto.subtle.sign('HMAC', key, toBytes(body) as BufferSource));
+  let bin = '';
+  for (const b of mac) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+
 export interface ParseWebhookParams {
   /** Raw request body bytes/string — must be the exact bytes LINE sent. */
   body: RawBody;

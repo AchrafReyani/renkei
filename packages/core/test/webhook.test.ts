@@ -6,6 +6,7 @@ import {
   LineWebhookError,
   type LineWebhookPayload,
   parseWebhook,
+  signWebhookBody,
   verifyWebhookSignature,
 } from '../src/index.js';
 
@@ -137,5 +138,19 @@ describe('parseWebhook', () => {
       channelSecret: CHANNEL_SECRET,
     }).catch((e) => e);
     expect(err).toBeInstanceOf(LineWebhookError);
+  });
+});
+
+describe('signWebhookBody', () => {
+  it('produces a signature verifyWebhookSignature accepts', async () => {
+    const body = '{"hello":"world"}';
+    const sig = await signWebhookBody(CHANNEL_SECRET, body);
+    expect(await verifyWebhookSignature(CHANNEL_SECRET, body, sig)).toBe(true);
+  });
+
+  it('is rejected under a different secret', async () => {
+    const body = '{"hello":"world"}';
+    const sig = await signWebhookBody(CHANNEL_SECRET, body);
+    expect(await verifyWebhookSignature('other-secret', body, sig)).toBe(false);
   });
 });
