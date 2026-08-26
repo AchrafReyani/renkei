@@ -106,8 +106,11 @@ Order matters: each item is what the next needs.
 - [~] `accountLink` webhook handling: direct mode done (nonce → identity,
       `line:linked` claim). Forwarded mode (app-owned mapping, Option B) still open
 - [x] Friendship sync from `follow`/`unfollow` (idempotent `setFriendship`)
-- [ ] Minimal inspection UI (read-only): identities, linked accounts,
-      friendship, recent webhooks. Not an admin console.
+- [x] Minimal inspection UI (read-only): identity / LINE account lookup
+      (by sub or channel+userId), friendship + `line:linked`, recent webhooks.
+      Mounted only when `RENKEI_ADMIN_TOKEN` is set; Bearer-gated JSON API +
+      a self-contained HTML shell (`/inspect`). Not an admin console — no
+      list-all, nothing mutates (2026-08-26)
 - [ ] Tutorial 3: rich-menu account linking end to end
 - [ ] Zenn article #2
 

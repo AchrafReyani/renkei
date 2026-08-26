@@ -30,6 +30,7 @@ import {
   type RenkeiOptions,
 } from './config.js';
 import { devRoutes } from './dev-rp.js';
+import { createWebhookLog, inspectRoutes } from './inspect.js';
 import { generateDevJwks } from './keys.js';
 import { liffRoutes } from './liff.js';
 import { createProvider, INTERACTION_PATH } from './oidc/provider.js';
@@ -83,6 +84,8 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
   await storage.init?.();
   const provider = createProvider({ config, storage, jwks, logger });
   const app = new Hono();
+  // Recent-webhook ring for the /inspect view (in-memory, per-process).
+  const webhookLog = createWebhookLog();
 
   const channelFor = (region?: string): LineChannelConfig => {
     const first = config.channels[0] as LineChannelConfig;
@@ -351,6 +354,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     }
     if (!matched) {
       logger.warn('[renkei] webhook signature verification failed');
+      webhookLog.record({ at: Date.now(), type: '(unverified)', verified: false });
       return c.text('invalid signature', 401);
     }
 
@@ -370,6 +374,13 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     const loginChannel = channelFor(matched.region);
     for (const event of payload.events) {
       const userId = event.source?.userId;
+      webhookLog.record({
+        at: Date.now(),
+        type: event.type,
+        userId,
+        result: isAccountLinkEvent(event) ? event.link.result : undefined,
+        verified: true,
+      });
       if (!userId) continue;
       const at = new Date(event.timestamp);
       if (isFollowEvent(event)) {
@@ -403,6 +414,9 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
   });
 
   app.route('/liff', liffRoutes({ config, storage, jwks, fetch: lineFetch, logger }));
+
+  // Read-only inspection, only when an admin token is configured.
+  if (config.adminToken) app.route('/inspect', inspectRoutes({ config, storage, webhookLog }));
 
   if (config.dev) app.route('/dev', devRoutes({ config, provider, liffId: options.liffId }));
 
