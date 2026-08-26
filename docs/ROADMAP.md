@@ -111,7 +111,9 @@ Order matters: each item is what the next needs.
       Mounted only when `RENKEI_ADMIN_TOKEN` is set; Bearer-gated JSON API +
       a self-contained HTML shell (`/inspect`). Not an admin console — no
       list-all, nothing mutates (2026-08-26)
-- [ ] Tutorial 3: rich-menu account linking end to end
+- [x] Tutorial 3: account linking end to end (ja/en) — the shipped `/link/start`
+      → accountLink webhook → `line:linked` flow, with a rich-menu entry section
+      and an /inspect verification walk-through (2026-08-27)
 - [ ] Zenn article #2
 
 ## v0.3 — SDKs and edge targets

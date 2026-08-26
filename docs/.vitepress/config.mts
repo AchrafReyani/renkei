@@ -23,6 +23,7 @@ export default defineConfig({
     'docs/LAUNCH.md',
     'docs/DEV_SETUP.md',
     'docs/SPIKE-*.md',
+    'docs/DESIGN-*.md',
   ],
   rewrites: {
     'README.md': 'index.md',
@@ -59,6 +60,7 @@ export default defineConfig({
             items: [
               { text: 'Supabase', link: '/tutorials/supabase' },
               { text: 'Next.js（Auth.js）', link: '/tutorials/nextjs' },
+              { text: 'アカウント連携', link: '/tutorials/account-linking' },
             ],
           },
           {
@@ -98,6 +100,7 @@ export default defineConfig({
             items: [
               { text: 'Supabase', link: '/en/tutorials/supabase' },
               { text: 'Next.js (Auth.js)', link: '/en/tutorials/nextjs' },
+              { text: 'Account linking', link: '/en/tutorials/account-linking' },
             ],
           },
           {
