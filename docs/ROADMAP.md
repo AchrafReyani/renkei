@@ -61,7 +61,9 @@ Order matters: each item is what the next needs.
       userinfo; `findAccount` backed by identity store; `line:*` claims;
       first-party auto-grant (no second consent screen); PKCE required for
       public clients only; RS256 dev keys; e2e test with a fake LINE
-- [ ] Session cookie mode for direct-app usage
+- [x] Session cookie mode for direct-app usage: `/login` + signed session
+      cookie, `/session` (claims), `/logout`; `return_to` open-redirect guard;
+      enable via `sessionCookie` / `RENKEI_SESSION_COOKIE` (2026-08-27)
 - [x] Structured logs with redaction: `createLogger()` wraps the sink,
       deep-redacts secrets by key (always on), `RENKEI_LOG_FORMAT=json` for
       one-JSON-line output (2026-08-27)

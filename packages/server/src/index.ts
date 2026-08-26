@@ -15,6 +15,7 @@ export {
   type RenkeiConfigInput,
   type RenkeiOptions,
   renkeiConfigSchema,
+  type SessionCookieConfig,
 } from './config.js';
 export {
   createWebhookLog,

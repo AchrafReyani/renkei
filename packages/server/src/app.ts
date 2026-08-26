@@ -1,7 +1,9 @@
 import { type Context, Hono } from 'hono';
+import { deleteCookie, getSignedCookie, setSignedCookie } from 'hono/cookie';
 import type Provider from 'oidc-provider';
 import {
   buildAuthorizeUrl,
+  buildClaims,
   exchangeCode,
   generatePkce,
   getFriendshipStatus,
@@ -45,6 +47,10 @@ const RESULT_MODEL = 'renkei:login-result';
 const LINK_MODEL = 'renkei:link';
 /** Standalone `/link` login state, keyed by the OAuth `state` sent to LINE. */
 const LINK_FLOW_MODEL = 'renkei:link-flow';
+/** Session-cookie `/login` state, keyed by the OAuth `state` sent to LINE. */
+const SESSION_FLOW_MODEL = 'renkei:session-flow';
+/** Established first-party session, keyed by an opaque session id (the cookie value). */
+const SESSION_MODEL = 'renkei:session';
 const LOGIN_TTL = 600;
 const RESULT_TTL = 60;
 /** LINE link tokens live ~10 min; match the nonce store to that. */
@@ -62,6 +68,14 @@ interface LinkFlowState {
   nonce: string;
   verifier: string;
   channelId: string;
+}
+
+/** State for the session-cookie `/login` flow. */
+interface SessionFlowState {
+  nonce: string;
+  verifier: string;
+  channelId: string;
+  returnTo: string;
 }
 
 export interface Renkei {
@@ -107,6 +121,8 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     if (!region) return first;
     return config.channels.find((c) => c.region === region) ?? first;
   };
+  const regionOf = (channelId: string) =>
+    config.channels.find((c) => c.channelId === channelId)?.region;
 
   app.get('/healthz', (c) => c.json({ ok: true }));
 
@@ -202,6 +218,10 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
           | LinkFlowState
           | undefined;
         if (linkFlow) return await finishLinkFlow(c, cb, linkFlow);
+        const sessionFlow = (await storage.payloads.find(SESSION_FLOW_MODEL, cb.state)) as
+          | SessionFlowState
+          | undefined;
+        if (sessionFlow) return await finishSessionLogin(c, cb, sessionFlow);
         return c.text('ログイン状態が無効です / invalid or expired login state', 400);
       }
       await storage.payloads.destroy(LOGIN_MODEL, cb.state);
@@ -288,6 +308,13 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
             400,
           );
         }
+        const pendingSession = (await storage.payloads.find(SESSION_FLOW_MODEL, e.state)) as
+          | SessionFlowState
+          | undefined;
+        if (pendingSession) {
+          await storage.payloads.destroy(SESSION_FLOW_MODEL, e.state);
+          return c.text('ログインがキャンセルされました / login was cancelled', 400);
+        }
       }
       return c.text(`LINE ログインに失敗しました / LINE login failed: ${info.type}`, 400);
     }
@@ -310,6 +337,117 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     await provider.interactionFinished(req, res, outcome, { mergeWithLastSubmission: false });
     return done;
   });
+
+  // ── First-party session-cookie mode (direct-app usage) ──────────────────
+  // For an app that uses renkei directly (no OIDC client of its own): /login
+  // runs LINE login and sets a signed session cookie, /session returns the
+  // user's claims, /logout clears it. Mounted only when configured.
+  const sc = config.sessionCookie;
+  if (sc?.enabled) {
+    const cookieSecret = config.cookieKeys[0] as string;
+
+    // Prevent open redirects: allow same-origin relative paths, or absolute
+    // URLs whose origin is explicitly allowlisted; otherwise fall back to "/".
+    const safeReturnTo = (raw: string | undefined): string => {
+      if (!raw) return '/';
+      if (raw.startsWith('/') && !raw.startsWith('//')) return raw;
+      try {
+        const origin = new URL(raw).origin;
+        if (sc.returnUrls.some((allowed) => new URL(allowed).origin === origin)) return raw;
+      } catch {
+        // not a URL
+      }
+      return '/';
+    };
+
+    app.get('/login', async (c) => {
+      const channel = channelFor(c.req.query('line_region'));
+      const state = randomToken();
+      const nonce = randomToken();
+      const pkce = await generatePkce();
+      const returnTo = safeReturnTo(c.req.query('return_to'));
+      await storage.payloads.upsert(
+        SESSION_FLOW_MODEL,
+        state,
+        { nonce, verifier: pkce.verifier, channelId: channel.channelId, returnTo },
+        LOGIN_TTL,
+      );
+      const scope = ['openid', 'profile', ...(channel.requestEmail ? ['email'] : [])];
+      const botPrompt = pickBotPrompt(c.req.query('bot_prompt'), channel.botPrompt);
+      const url = buildAuthorizeUrl({
+        channelId: channel.channelId,
+        redirectUri: new URL(config.lineCallbackPath, config.issuer).toString(),
+        state,
+        nonce,
+        scope,
+        codeChallenge: pkce.challenge,
+        ...(botPrompt ? { botPrompt } : {}),
+      });
+      return c.redirect(url);
+    });
+
+    app.get('/session', async (c) => {
+      const sid = await getSignedCookie(c, cookieSecret, sc.cookieName);
+      if (!sid) return c.json({ error: 'no_session' }, 401);
+      const rec = (await storage.payloads.find(SESSION_MODEL, sid)) as { sub?: string } | undefined;
+      if (!rec?.sub) return c.json({ error: 'no_session' }, 401);
+      const identity = await storage.identities.findIdentity(rec.sub);
+      if (!identity) return c.json({ error: 'no_session' }, 401);
+      const accounts = await storage.identities.listLineAccounts(rec.sub);
+      return c.json(buildClaims(identity, accounts, { regionOf }));
+    });
+
+    app.post('/logout', async (c) => {
+      const sid = await getSignedCookie(c, cookieSecret, sc.cookieName);
+      if (sid) await storage.payloads.destroy(SESSION_MODEL, sid);
+      deleteCookie(c, sc.cookieName, { path: '/' });
+      return c.body(null, 204);
+    });
+  }
+
+  // Complete a session-cookie /login from the shared LINE callback: log the
+  // user in, create a session, set the signed cookie, redirect to return_to.
+  async function finishSessionLogin(
+    c: Context,
+    cb: ReturnType<typeof parseCallback>,
+    flow: SessionFlowState,
+  ): Promise<Response> {
+    await storage.payloads.destroy(SESSION_FLOW_MODEL, cb.state);
+    const conf = config.sessionCookie;
+    if (!conf?.enabled) return c.text('session mode not enabled', 404);
+    const channel = config.channels.find((ch) => ch.channelId === flow.channelId);
+    if (!channel) return c.text('unknown channel', 500);
+
+    const redirectUri = new URL(config.lineCallbackPath, config.issuer).toString();
+    const tokens = await exchangeCode(
+      { channel, code: cb.code, redirectUri, codeVerifier: flow.verifier },
+      { fetch: lineFetch },
+    );
+    if (!tokens.id_token) return c.text('LINE returned no id_token', 502);
+    const claims = await verifyIdToken(tokens.id_token, { channel, nonce: flow.nonce });
+    const [profile, friend] = await Promise.all([
+      getProfile(tokens.access_token, { fetch: lineFetch }).catch(() => undefined),
+      getFriendshipStatus(tokens.access_token, { fetch: lineFetch }).catch(() => undefined),
+    ]);
+    const { identity } = await upsertIdentityFromLine(storage, {
+      channelId: channel.channelId,
+      claims,
+      ...(profile ? { profile } : {}),
+      ...(friend !== undefined ? { friend } : {}),
+    });
+
+    const sid = randomToken();
+    await storage.payloads.upsert(SESSION_MODEL, sid, { sub: identity.sub }, conf.ttl);
+    await setSignedCookie(c, conf.cookieName, sid, config.cookieKeys[0] as string, {
+      httpOnly: true,
+      secure: issuer.protocol === 'https:',
+      sameSite: 'Lax',
+      path: '/',
+      maxAge: conf.ttl,
+    });
+    logger.info('[renkei] session login', { sub: identity.sub });
+    return c.redirect(flow.returnTo);
+  }
 
   // ── Account linking: browser-initiated entry ────────────────────────────
   // A user with no renkei access token in hand can open /link directly. renkei

@@ -17,6 +17,8 @@
  *   RENKEI_DEV                 true to mount the /dev relying party
  *   RENKEI_ADMIN_TOKEN         bearer token; when set, mounts read-only /inspect
  *   RENKEI_LOG_FORMAT          "json" for one JSON object per log line (secrets always redacted)
+ *   RENKEI_SESSION_COOKIE      "true" to mount /login, /session, /logout (first-party session cookie)
+ *   RENKEI_SESSION_RETURN_URLS comma-separated absolute return_to URLs allowed after /login
  *   DATABASE_URL               Postgres URL; in-memory storage if absent
  */
 import { serve } from '@hono/node-server';
@@ -81,6 +83,16 @@ const config: RenkeiConfigInput = {
   cookieKeys: env.RENKEI_COOKIE_KEYS ? env.RENKEI_COOKIE_KEYS.split(',') : [randomToken(32)],
   corsOrigins: env.RENKEI_CORS_ORIGINS ? env.RENKEI_CORS_ORIGINS.split(',') : [],
   ...(env.RENKEI_ADMIN_TOKEN ? { adminToken: env.RENKEI_ADMIN_TOKEN } : {}),
+  ...(env.RENKEI_SESSION_COOKIE === 'true'
+    ? {
+        sessionCookie: {
+          enabled: true,
+          ...(env.RENKEI_SESSION_RETURN_URLS
+            ? { returnUrls: env.RENKEI_SESSION_RETURN_URLS.split(',') }
+            : {}),
+        },
+      }
+    : {}),
   ...(env.RENKEI_JWKS ? { jwks: JSON.parse(env.RENKEI_JWKS) } : {}),
 };
 
