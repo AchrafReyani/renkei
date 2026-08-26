@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
 import type Provider from 'oidc-provider';
 import {
   buildAuthorizeUrl,
@@ -41,6 +41,8 @@ const LOGIN_MODEL = 'renkei:login';
 const RESULT_MODEL = 'renkei:login-result';
 /** Pending account link, keyed by the nonce echoed back on the accountLink webhook. */
 const LINK_MODEL = 'renkei:link';
+/** Standalone `/link` login state, keyed by the OAuth `state` sent to LINE. */
+const LINK_FLOW_MODEL = 'renkei:link-flow';
 const LOGIN_TTL = 600;
 const RESULT_TTL = 60;
 /** LINE link tokens live ~10 min; match the nonce store to that. */
@@ -48,6 +50,13 @@ const LINK_TTL = 600;
 
 interface LoginState {
   uid: string;
+  nonce: string;
+  verifier: string;
+  channelId: string;
+}
+
+/** State for the browser-initiated `/link` flow (no OIDC interaction behind it). */
+interface LinkFlowState {
   nonce: string;
   verifier: string;
   channelId: string;
@@ -181,7 +190,14 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     try {
       const cb = parseCallback(c.req.url);
       const login = (await storage.payloads.find(LOGIN_MODEL, cb.state)) as LoginState | undefined;
-      if (!login) return c.text('ログイン状態が無効です / invalid or expired login state', 400);
+      if (!login) {
+        // Not an OIDC login — maybe a browser-initiated /link flow.
+        const linkFlow = (await storage.payloads.find(LINK_FLOW_MODEL, cb.state)) as
+          | LinkFlowState
+          | undefined;
+        if (linkFlow) return await finishLinkFlow(c, cb, linkFlow);
+        return c.text('ログイン状態が無効です / invalid or expired login state', 400);
+      }
       await storage.payloads.destroy(LOGIN_MODEL, cb.state);
       const channel = config.channels.find((ch) => ch.channelId === login?.channelId);
       if (!channel) return c.text('unknown channel', 500);
@@ -255,6 +271,17 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
           );
           return c.redirect(`${INTERACTION_PATH}/${pending.uid}/finish?t=${token}`);
         }
+        // Or a browser-initiated /link flow that the user cancelled.
+        const pendingLink = (await storage.payloads.find(LINK_FLOW_MODEL, e.state)) as
+          | LinkFlowState
+          | undefined;
+        if (pendingLink) {
+          await storage.payloads.destroy(LINK_FLOW_MODEL, e.state);
+          return c.text(
+            'アカウント連携がキャンセルされました / account linking was cancelled',
+            400,
+          );
+        }
       }
       return c.text(`LINE ログインに失敗しました / LINE login failed: ${info.type}`, 400);
     }
@@ -277,6 +304,87 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     await provider.interactionFinished(req, res, outcome, { mergeWithLastSubmission: false });
     return done;
   });
+
+  // ── Account linking: browser-initiated entry ────────────────────────────
+  // A user with no renkei access token in hand can open /link directly. renkei
+  // logs them in at LINE (a normal login round-trip on the same callback), then
+  // — instead of finishing an OIDC interaction — starts account linking and
+  // sends them to the accountLink dialog. Requires a messaging channel with a
+  // channelAccessToken; region via `?line_region=`.
+  app.get('/link', async (c) => {
+    const messaging = config.messagingChannels.find((m) => m.channelAccessToken);
+    if (!messaging?.channelAccessToken) {
+      return c.text('アカウント連携は設定されていません / account linking is not configured', 404);
+    }
+    const channel = channelFor(c.req.query('line_region'));
+    const state = randomToken();
+    const nonce = randomToken();
+    const pkce = await generatePkce();
+    await storage.payloads.upsert(
+      LINK_FLOW_MODEL,
+      state,
+      { nonce, verifier: pkce.verifier, channelId: channel.channelId },
+      LOGIN_TTL,
+    );
+    const url = buildAuthorizeUrl({
+      channelId: channel.channelId,
+      redirectUri: new URL(config.lineCallbackPath, config.issuer).toString(),
+      state,
+      nonce,
+      scope: ['openid', 'profile'],
+      codeChallenge: pkce.challenge,
+    });
+    return c.redirect(url);
+  });
+
+  // Complete a browser-initiated /link flow from the shared LINE callback:
+  // log the user in, then mint a link token and redirect to the accountLink
+  // dialog (the same nonce store the webhook consumes).
+  async function finishLinkFlow(
+    c: Context,
+    cb: ReturnType<typeof parseCallback>,
+    linkFlow: LinkFlowState,
+  ): Promise<Response> {
+    await storage.payloads.destroy(LINK_FLOW_MODEL, cb.state);
+    const messaging = config.messagingChannels.find((m) => m.channelAccessToken);
+    if (!messaging?.channelAccessToken) {
+      return c.text('アカウント連携は設定されていません / account linking is not configured', 404);
+    }
+    const channel = config.channels.find((ch) => ch.channelId === linkFlow.channelId);
+    if (!channel) return c.text('unknown channel', 500);
+
+    const redirectUri = new URL(config.lineCallbackPath, config.issuer).toString();
+    const tokens = await exchangeCode(
+      { channel, code: cb.code, redirectUri, codeVerifier: linkFlow.verifier },
+      { fetch: lineFetch },
+    );
+    if (!tokens.id_token) return c.text('LINE returned no id_token', 502);
+    const claims = await verifyIdToken(tokens.id_token, { channel, nonce: linkFlow.nonce });
+
+    const profile = await getProfile(tokens.access_token, { fetch: lineFetch }).catch(
+      () => undefined,
+    );
+    const { identity } = await upsertIdentityFromLine(storage, {
+      channelId: channel.channelId,
+      claims,
+      ...(profile ? { profile } : {}),
+    });
+
+    // The LINE userId is the id_token subject.
+    const nonce = randomToken();
+    const { url } = await startAccountLink(
+      { userId: claims.sub, channelAccessToken: messaging.channelAccessToken, nonce },
+      { fetch: lineFetch },
+    );
+    await storage.payloads.upsert(
+      LINK_MODEL,
+      nonce,
+      { sub: identity.sub, channelId: channel.channelId },
+      LINK_TTL,
+    );
+    logger.info('[renkei] link flow: redirecting to accountLink', { sub: identity.sub });
+    return c.redirect(url);
+  }
 
   // ── Account linking: start the LINE accountLink flow ────────────────────
   // A downstream app that already holds a renkei access token for the user
