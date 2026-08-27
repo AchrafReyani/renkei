@@ -1,6 +1,6 @@
 {
   "name": "renkei-storage-postgres",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Postgres storage for renkei (Drizzle). Works with any Postgres including Supabase; tests run on PGlite.",
   "license": "Apache-2.0",
   "repository": {
