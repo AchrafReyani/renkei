@@ -16,8 +16,9 @@ Tutorial 3 (ja/en), structured logging + redaction, and session-cookie mode
 (`/login` `/session` `/logout`). Both the renkei and job-matching-platform
 remotes are pruned to just `main`.
 
-**A stack of ~9 unreleased changesets sits on `main`** (everything since 0.1.0).
-Nothing is published yet at these new versions.
+**v0.2.0 is released** (npm + GHCR, 2026-08-27). Patch changesets found during
+live verification (#38 `/inspect` API path, claims after a collapsed link row)
+sit on `main` for a 0.2.1.
 
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. The
 LINE secrets, the demo's Render env, and the LINE console are all Achraf's side.
@@ -39,8 +40,7 @@ LINE secrets, the demo's Render env, and the LINE console are all Achraf's side.
 
 ## 1. Live-verify the v0.2 features on the demo  (needs the LINE console + Render)
 
-None of these have been exercised against real LINE yet — they need secrets a
-cloud session doesn't have, so they're Achraf's steps.
+Being exercised against real LINE with Achraf's phone + the Render secrets.
 
 - [x] On the **Messaging API channel**: set the webhook URL to
   `https://renkei-demo.onrender.com/line/webhook`, enable "Use webhook",
@@ -56,8 +56,13 @@ cloud session doesn't have, so they're Achraf's steps.
   identity's `friend` flipped to true at the `follow` timestamp. Found and fixed
   #38 on the way: the `/inspect` shell fetched `/api/...` instead of
   `/inspect/api/...`. Note the webhook log is per-process — a redeploy empties it.)
-- [ ] Exercise **account linking** end to end (a real consent round-trip →
+- [x] Exercise **account linking** end to end (a real consent round-trip →
   `accountLink` webhook → `line:linked`), per `docs/tutorials/account-linking`.
+  (Verified 2026-08-27 via `GET /link` on the phone: `accountLink` `result: ok`
+  in `/inspect`, identity `linked: true`. Found a real bug: with no
+  `LINE_MESSAGING_CHANNEL_ID` the link lands on the login row and flipped its
+  `kind`, so `buildClaims()` lost `line:user_id` & co — fixed in core with a
+  fallback + tests. Unreleased until 0.2.1.)
 - [ ] (Optional) Try **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`),
   **session mode** (`RENKEI_SESSION_COOKIE=true` → `/login`/`/session`), and
   **JSON logs** (`RENKEI_LOG_FORMAT=json`).

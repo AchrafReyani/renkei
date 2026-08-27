@@ -163,4 +163,37 @@ describe('buildClaims', () => {
       buildClaims(identity, await s.identities.listLineAccounts('sub-A'))[LINE_CLAIMS.linked],
     ).toBe(false);
   });
+
+  it('keeps line:user_id/friend when the link collapses onto the login row', async () => {
+    // Login and Messaging channels under one provider share the userId. When the
+    // messaging channelId is not configured, the accountLink handler records the
+    // messaging account under the login channelId — the same row — and its kind
+    // becomes 'messaging'. That must not make the identity look account-less
+    // (seen live on renkei-demo 2026-08-27: line:linked true, line:user_id gone).
+    const s = createMemoryStorage();
+    await upsertIdentityFromLine(s, {
+      channelId,
+      claims,
+      friend: true,
+      generateSub: () => 'sub-A',
+    });
+    await s.identities.upsertLineAccount({
+      identitySub: 'sub-A',
+      channelId,
+      lineUserId: 'Uaaa',
+      kind: 'messaging',
+    });
+    const identity = await s.identities.findIdentity('sub-A');
+    if (!identity) throw new Error('identity missing');
+    const c = buildClaims(identity, await s.identities.listLineAccounts('sub-A'), {
+      regionOf: () => 'jp',
+    });
+    expect(c).toMatchObject({
+      [LINE_CLAIMS.userId]: 'Uaaa',
+      [LINE_CLAIMS.channelId]: channelId,
+      [LINE_CLAIMS.friend]: true,
+      [LINE_CLAIMS.region]: 'jp',
+      [LINE_CLAIMS.linked]: true,
+    });
+  });
 });

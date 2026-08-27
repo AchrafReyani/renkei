@@ -16,7 +16,7 @@ const USER = 'U54de992ad068a07f1d4ef661a0a946bd';
 const SUB = 'sub-linktest';
 const LINK_TOKEN = 'LT-generated-by-line';
 
-function baseConfig(withAccessToken = true): RenkeiConfigInput {
+function baseConfig(withAccessToken = true, withMessagingChannelId = true): RenkeiConfigInput {
   return {
     issuer: ISSUER,
     channels: [
@@ -26,7 +26,7 @@ function baseConfig(withAccessToken = true): RenkeiConfigInput {
       {
         channelSecret: MSG_SECRET,
         region: 'jp',
-        channelId: '2011257490',
+        ...(withMessagingChannelId ? { channelId: '2011257490' } : {}),
         ...(withAccessToken ? { channelAccessToken: MSG_TOKEN } : {}),
       },
     ],
@@ -103,11 +103,11 @@ let renkei: Renkei;
 let storage: Storage;
 let lineFetch: ReturnType<typeof fakeLineFetch>;
 
-async function boot(withAccessToken = true) {
+async function boot(withAccessToken = true, withMessagingChannelId = true) {
   storage = createMemoryStorage();
   lineFetch = fakeLineFetch();
   renkei = await createRenkei({
-    config: baseConfig(withAccessToken),
+    config: baseConfig(withAccessToken, withMessagingChannelId),
     storage,
     fetch: lineFetch as unknown as typeof fetch,
     logger: { info() {}, warn() {}, error() {} },
@@ -218,6 +218,37 @@ describe('accountLink webhook completion', () => {
 
     // The nonce is one-time: a replay does not error and does not re-link.
     expect((await postWebhook(body)).status).toBe(200);
+  });
+
+  it('keeps line:user_id after linking when the messaging channelId is not configured', async () => {
+    // Without messagingChannels[].channelId the link is recorded on the login
+    // row itself (same provider ⇒ same userId). The identity must not lose its
+    // login-side claims as a result — found live on renkei-demo 2026-08-27.
+    await boot(true, false);
+    const { token, nonce } = await startAndGetNonce();
+    const body = webhookBody([
+      {
+        type: 'accountLink',
+        timestamp: 1_700_000_000_000,
+        source: { type: 'user', userId: USER },
+        link: { result: 'ok', nonce },
+      },
+    ]);
+    expect((await postWebhook(body)).status).toBe(200);
+
+    const accounts = await storage.identities.listLineAccounts(SUB);
+    expect(accounts).toHaveLength(1);
+    expect(accounts[0]).toMatchObject({ channelId: LOGIN_CHANNEL_ID, kind: 'messaging' });
+
+    const me = await renkei.app.fetch(
+      new Request(`${ISSUER}/oidc/me`, { headers: { authorization: `Bearer ${token}` } }),
+    );
+    expect(me.status).toBe(200);
+    expect((await me.json()) as Record<string, unknown>).toMatchObject({
+      'line:linked': true,
+      'line:user_id': USER,
+      'line:channel_id': LOGIN_CHANNEL_ID,
+    });
   });
 
   it('does not link on result failed, and drops the nonce', async () => {
