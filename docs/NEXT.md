@@ -48,9 +48,14 @@ cloud session doesn't have, so they're Achraf's steps.
   Response settings. The console's "Verify" button returns 404 until the demo
   has `LINE_MESSAGING_CHANNEL_SECRET` — `/line/webhook` is only mounted when a
   messaging channel is configured — so re-run Verify after the next step.)
-- [ ] On the demo (Render): set `LINE_MESSAGING_CHANNEL_SECRET` and
+- [x] On the demo (Render): set `LINE_MESSAGING_CHANNEL_SECRET` and
   `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`. Then follow/unfollow the OA and watch
   `line:friend` flip (check via `/inspect` after setting `RENKEI_ADMIN_TOKEN`).
+  (Verified 2026-08-27: console Verify → Success; block/unblock produced
+  signature-verified `unfollow` + `follow` events in `/inspect`, and the
+  identity's `friend` flipped to true at the `follow` timestamp. Found and fixed
+  #38 on the way: the `/inspect` shell fetched `/api/...` instead of
+  `/inspect/api/...`. Note the webhook log is per-process — a redeploy empties it.)
 - [ ] Exercise **account linking** end to end (a real consent round-trip →
   `accountLink` webhook → `line:linked`), per `docs/tutorials/account-linking`.
 - [ ] (Optional) Try **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`),
