@@ -22,17 +22,20 @@ Nothing is published yet at these new versions.
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. The
 LINE secrets, the demo's Render env, and the LINE console are all Achraf's side.
 
-## 0. Cut the v0.2 release  (Achraf runs the publish — npm 2FA is a passkey)
+## 0. Cut the v0.2 release  — DONE 2026-08-27
 
 - [x] `pnpm changeset version` → review the bumped `renkei-core` /
   `renkei-server` versions and the generated CHANGELOGs, commit. (Done
   2026-08-27: all four packages → 0.2.0; `renkei` added to the Changesets
   `linked` group so the CLI tracks the server version.)
-- [ ] `pnpm build && pnpm test` once more, then **Achraf** publishes:
+- [x] `pnpm build && pnpm test` once more, then **Achraf** publishes:
   `pnpm -r publish` (or the release flow) from an interactive terminal —
-  npm 2FA is a passkey, so Claude cannot do this.
-- [ ] Tag `vX.Y.Z` and push; confirm `release.yml` is green and the GHCR image
-  is pushed. (`gh` token needs `read:packages` to pull.)
+  npm 2FA is a passkey, so Claude cannot do this. (Published 2026-08-27: all
+  four packages at 0.2.0 / `latest`. Gotcha: an expired npm session shows up as
+  `E404 PUT` on publish — run `npm login` first.)
+- [x] Tag `vX.Y.Z` and push; confirm `release.yml` is green and the GHCR image
+  is pushed. (`gh` token needs `read:packages` to pull.) (`v0.2.0` tagged
+  2026-08-27; `ghcr.io/achrafreyani/renkei:0.2.0` / `:0.2` / `:latest` pushed.)
 
 ## 1. Live-verify the v0.2 features on the demo  (needs the LINE console + Render)
 
