@@ -43,8 +43,16 @@ a done item.
 
 ## Known environment quirks
 
-- Claude in Chrome: `localhost:3000` is approved; `access.line.me` and
-  `*.trycloudflare.com` are blocked; `developers.line.biz` works but its
-  attestation checkboxes must be set with `form_input`, not clicked.
+- Claude in Chrome: `localhost:3000`, `renkei-demo.onrender.com`,
+  `developers.line.biz` and `manager.line.biz` work; `access.line.me`,
+  `account.line.biz` (the console's login page) and `*.trycloudflare.com` are
+  blocked — when the console session has expired, Achraf logs in on the tab
+  Claude opened. Console attestation checkboxes must be set with `form_input`,
+  not clicked.
+- Achraf's own terminal is `cmd.exe`: give him commands joined with `&&`,
+  never `;`. The auto-mode classifier sometimes blocks `gh pr merge` and
+  `git push` of tags — hand him the exact command instead of retrying.
+- Every merge to `main` redeploys renkei-demo on Render (empties the
+  per-process `/inspect` webhook ring).
 - Bash tool: avoid single quotes inside heredocs; put scripts in a file.
 - Windows: kill servers by PID from `netstat -ano`, never `taskkill //IM node.exe`.
