@@ -1,5 +1,19 @@
 # renkei
 
+## 0.2.0
+
+### Patch Changes
+
+- Updated dependencies [d78649e]
+- Updated dependencies [e47e577]
+- Updated dependencies [dba8faf]
+- Updated dependencies [eac1fb3]
+- Updated dependencies [b735c20]
+- Updated dependencies [d1c6505]
+- Updated dependencies [65eb7c9]
+- Updated dependencies [e77484b]
+  - renkei-server@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes

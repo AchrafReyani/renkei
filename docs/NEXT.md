@@ -24,8 +24,10 @@ LINE secrets, the demo's Render env, and the LINE console are all Achraf's side.
 
 ## 0. Cut the v0.2 release  (Achraf runs the publish — npm 2FA is a passkey)
 
-- [ ] `pnpm changeset version` → review the bumped `renkei-core` /
-  `renkei-server` versions and the generated CHANGELOGs, commit.
+- [x] `pnpm changeset version` → review the bumped `renkei-core` /
+  `renkei-server` versions and the generated CHANGELOGs, commit. (Done
+  2026-08-27: all four packages → 0.2.0; `renkei` added to the Changesets
+  `linked` group so the CLI tracks the server version.)
 - [ ] `pnpm build && pnpm test` once more, then **Achraf** publishes:
   `pnpm -r publish` (or the release flow) from an interactive terminal —
   npm 2FA is a passkey, so Claude cannot do this.
