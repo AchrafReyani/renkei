@@ -56,7 +56,12 @@ export function buildClaims(
 }
 
 function pickAccount(accounts: readonly LineAccount[], preferChannelId?: string) {
-  const candidates = accounts.filter((a) => a.kind !== 'messaging');
+  // Prefer login-side rows for line:user_id & co. A messaging-side row is only
+  // acceptable when it is all there is — which happens when the messaging
+  // channelId is not configured and the accountLink handler records the link on
+  // the login row itself (same provider ⇒ same userId), flipping its kind.
+  const loginSide = accounts.filter((a) => a.kind !== 'messaging');
+  const candidates = loginSide.length > 0 ? loginSide : accounts;
   if (preferChannelId) {
     const hit = candidates.find((a) => a.channelId === preferChannelId);
     if (hit) return hit;
