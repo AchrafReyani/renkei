@@ -161,15 +161,19 @@ const INSPECT_HTML = `<!doctype html>
 <pre id="out">—</pre>
 <script>
   const $ = (id) => document.getElementById(id);
+  // API base derived from wherever this page is mounted (/inspect, /inspect/, or an
+  // embedder's own prefix). A bare relative 'api/...' resolves to /api/... from
+  // /inspect (no trailing slash) and 404s.
+  const apiBase = location.pathname.replace(/\\/+$/, '') + '/api/';
   try { $('token').value = localStorage.getItem('renkei-inspect-token') || ''; } catch {}
   function saveToken() {
     try { localStorage.setItem('renkei-inspect-token', $('token').value); } catch {}
-    $('out').textContent = 'token saved';
+    $('out').textContent = 'token saved (' + $('token').value.length + ' chars)';
   }
   async function call(path) {
     $('out').textContent = 'loading…';
     try {
-      const res = await fetch('api/' + path, { headers: { authorization: 'Bearer ' + $('token').value } });
+      const res = await fetch(apiBase + path, { headers: { authorization: 'Bearer ' + $('token').value } });
       const text = await res.text();
       let body; try { body = JSON.stringify(JSON.parse(text), null, 2); } catch { body = text; }
       $('out').textContent = res.status + ' ' + res.statusText + '\\n' + body;

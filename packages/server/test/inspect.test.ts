@@ -94,7 +94,12 @@ describe('/inspect gating', () => {
     const page = await get('/inspect');
     expect(page.status).toBe(200);
     expect(page.headers.get('content-type')).toContain('text/html');
-    expect(await page.text()).toContain('renkei inspect');
+    const html = await page.text();
+    expect(html).toContain('renkei inspect');
+    // The shell must call the API under its own mount path. A bare relative
+    // fetch('api/...') resolves to /api/... from /inspect and 404s (found live).
+    expect(html).not.toMatch(/fetch\('api\//);
+    expect(html).toContain("location.pathname.replace(/\\/+$/, '') + '/api/'");
 
     expect((await get('/inspect/api/webhooks')).status).toBe(401); // no token
     expect((await get('/inspect/api/webhooks', 'wrong')).status).toBe(401);
