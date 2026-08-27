@@ -42,9 +42,12 @@ LINE secrets, the demo's Render env, and the LINE console are all Achraf's side.
 None of these have been exercised against real LINE yet — they need secrets a
 cloud session doesn't have, so they're Achraf's steps.
 
-- [ ] On the **Messaging API channel**: set the webhook URL to
+- [x] On the **Messaging API channel**: set the webhook URL to
   `https://renkei-demo.onrender.com/line/webhook`, enable "Use webhook",
-  disable auto-reply.
+  disable auto-reply. (Done 2026-08-27 via the console + OA Manager →
+  Response settings. The console's "Verify" button returns 404 until the demo
+  has `LINE_MESSAGING_CHANNEL_SECRET` — `/line/webhook` is only mounted when a
+  messaging channel is configured — so re-run Verify after the next step.)
 - [ ] On the demo (Render): set `LINE_MESSAGING_CHANNEL_SECRET` and
   `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`. Then follow/unfollow the OA and watch
   `line:friend` flip (check via `/inspect` after setting `RENKEI_ADMIN_TOKEN`).
