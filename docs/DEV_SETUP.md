@@ -126,7 +126,9 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
 
 - Rename OA display name → "renkei dev"
 - Issue long-lived channel access token (v0.2)
-- Set OA webhook URL / disable auto-reply (v0.2, when renkei receives webhooks)
+- ~~Set OA webhook URL / disable auto-reply~~ — done 2026-08-27: webhook URL
+  `https://renkei-demo.onrender.com/line/webhook`, "Use webhook" on, auto-reply
+  off (OA Manager → Settings → Response settings)
 - Email permission application (after spike)
 - TW / TH Login channels (v0.3)
 - LINE MINI App channel (v0.3)
