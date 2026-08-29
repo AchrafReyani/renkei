@@ -32,7 +32,7 @@ import {
   type RenkeiConfig,
   type RenkeiOptions,
 } from './config.js';
-import { devRoutes } from './dev-rp.js';
+import { devRoutes, findDevClient } from './dev-rp.js';
 import { createWebhookLog, inspectRoutes } from './inspect.js';
 import { generateDevJwks } from './keys.js';
 import { liffRoutes } from './liff.js';
@@ -707,7 +707,14 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
   // Read-only inspection, only when an admin token is configured.
   if (config.adminToken) app.route('/inspect', inspectRoutes({ config, storage, webhookLog }));
 
-  if (config.dev) app.route('/dev', devRoutes({ config, provider, liffId: options.liffId }));
+  if (config.dev) {
+    if (!findDevClient(config)) {
+      logger.warn(
+        `[renkei] /dev is enabled but no client is registered for ${config.issuer}/dev/callback; the page will explain instead of logging in. Add the renkei-dev client to RENKEI_CLIENTS or unset RENKEI_DEV.`,
+      );
+    }
+    app.route('/dev', devRoutes({ config, provider, liffId: options.liffId }));
+  }
 
   return {
     app,

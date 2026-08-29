@@ -21,7 +21,7 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 | `DATABASE_URL` | なし | Postgres の接続文字列。未設定なら**インメモリ**（再起動で全消去、複数プロセス不可。開発専用） |
 | `RENKEI_COOKIE_KEYS` | 起動ごとに生成 | Cookie 署名鍵。カンマ区切りで複数。ローテーションは先頭に新しい鍵を追加。**本番では必ず設定** |
 | `RENKEI_JWKS` | 起動ごとに生成 | トークン署名用の秘密鍵（JWK の JSON 配列、`kid` と `alg` 付き）。未設定だと再起動で全トークンが無効になり、複数インスタンスで動きません。**本番では必ず設定**（[鍵の作り方](#署名鍵を作る)） |
-| `RENKEI_DEV` | `RENKEI_CLIENTS` と `DATABASE_URL` が両方未設定なら `true` | `/dev` の動作確認用リライングパーティを有効化。**本番では無効に** |
+| `RENKEI_DEV` | `RENKEI_CLIENTS` と `DATABASE_URL` が両方未設定なら `true` | `/dev` の動作確認用リライングパーティを有効化。`RENKEI_CLIENTS` と併用時は `renkei-dev` / `renkei-dev-liff` クライアントが自動で追加される。**本番では無効に** |
 | `RENKEI_CORS_ORIGINS` | なし | `/liff/exchange` をブラウザから直接呼ぶ LIFF アプリのオリジン（カンマ区切り）。未設定なら CORS なし |
 | `RENKEI_ADMIN_TOKEN` | なし | 設定すると読み取り専用の `/inspect`（identity・LINE アカウント・直近 Webhook の参照）を有効化。このトークンで Bearer 認証。未設定なら未マウント。十分に長くランダムな値を使ってください |
 | `RENKEI_LOG_FORMAT` | pretty | `json` にするとログを 1 行 1 JSON（`{ level, msg, … }`）で出力（ログ集約向け）。形式に関わらず、ログのメタデータからシークレット（トークン・チャネルシークレット・Cookie など）は**常に**マスクされます |

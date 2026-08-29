@@ -21,6 +21,7 @@ services:
       - key: PORT
         value: "3000"
       # Mounts the /dev test relying party so the demo has something to show.
+      # Its renkei-dev clients are added even when RENKEI_CLIENTS is set.
       # Remove for a real deployment and set RENKEI_CLIENTS instead.
       - key: RENKEI_DEV
         value: "true"
