@@ -1,5 +1,12 @@
 # renkei
 
+## 0.2.1
+
+### Patch Changes
+
+- Updated dependencies [388d4b2]
+  - renkei-server@0.2.1
+
 ## 0.2.0
 
 ### Patch Changes
