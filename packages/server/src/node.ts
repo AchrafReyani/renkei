@@ -14,7 +14,7 @@
  *   RENKEI_CLIENTS             JSON array of { clientId, clientSecret, redirectUris, tokenEndpointAuthMethod?, lineRegion? }
  *   RENKEI_JWKS                JSON array of private JWKs; generated for dev if absent
  *   RENKEI_CORS_ORIGINS        comma-separated browser origins allowed on /liff/exchange
- *   RENKEI_DEV                 true to mount the /dev relying party
+ *   RENKEI_DEV                 true to mount the /dev relying party (adds the renkei-dev clients even when RENKEI_CLIENTS is set)
  *   RENKEI_ADMIN_TOKEN         bearer token; when set, mounts read-only /inspect
  *   RENKEI_LOG_FORMAT          "json" for one JSON object per log line (secrets always redacted)
  *   RENKEI_SESSION_COOKIE      "true" to mount /login, /session, /logout (first-party session cookie)
@@ -26,25 +26,19 @@ import { createMemoryStorage, randomToken, type Storage } from 'renkei-core';
 import { createPostgresStorage } from 'renkei-storage-postgres';
 import { createRenkei } from './app.js';
 import type { RenkeiConfigInput } from './config.js';
+import { devClientsFor, withDevClients } from './dev-rp.js';
 
 const env = process.env;
 const issuer = env.ISSUER ?? 'http://localhost:3000';
 const dev = env.RENKEI_DEV === 'true' || (!env.RENKEI_CLIENTS && !env.DATABASE_URL);
 
+// RENKEI_CLIENTS replaces the client list; with RENKEI_DEV=true the /dev
+// clients are appended so the test page keeps working next to real clients.
 const clients: RenkeiConfigInput['clients'] = env.RENKEI_CLIENTS
-  ? JSON.parse(env.RENKEI_CLIENTS)
-  : [
-      {
-        clientId: 'renkei-dev',
-        clientSecret: 'renkei-dev-secret',
-        redirectUris: [`${issuer}/dev/callback`],
-      },
-      {
-        clientId: 'renkei-dev-liff',
-        redirectUris: [`${issuer}/dev/liff`],
-        tokenEndpointAuthMethod: 'none' as const,
-      },
-    ];
+  ? dev
+    ? withDevClients(JSON.parse(env.RENKEI_CLIENTS), issuer)
+    : JSON.parse(env.RENKEI_CLIENTS)
+  : devClientsFor(issuer);
 
 const config: RenkeiConfigInput = {
   issuer,

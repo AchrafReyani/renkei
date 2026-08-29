@@ -2,8 +2,62 @@ import { Hono } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { createRemoteJWKSet, decodeJwt, jwtVerify } from 'jose';
 import type Provider from 'oidc-provider';
-import type { RenkeiConfig } from './config.js';
+import type { RenkeiConfig, RenkeiConfigInput } from './config.js';
 import { OIDC_ROUTES } from './oidc/provider.js';
+
+type ClientInput = RenkeiConfigInput['clients'][number];
+
+/**
+ * The two clients the /dev relying party needs: a confidential one for
+ * /dev/callback and a public (PKCE) one for /dev/liff. The secret is a fixed,
+ * public dev value — these clients can only redirect back to renkei itself.
+ */
+export function devClientsFor(issuer: string): ClientInput[] {
+  return [
+    {
+      clientId: 'renkei-dev',
+      clientSecret: 'renkei-dev-secret',
+      redirectUris: [`${issuer}/dev/callback`],
+    },
+    {
+      clientId: 'renkei-dev-liff',
+      redirectUris: [`${issuer}/dev/liff`],
+      tokenEndpointAuthMethod: 'none',
+    },
+  ];
+}
+
+/**
+ * Append the /dev clients to an operator-supplied client list, skipping any
+ * clientId the operator already defined. Used when RENKEI_DEV=true is
+ * combined with RENKEI_CLIENTS so the demo page keeps working next to real
+ * clients instead of silently disappearing (or, worse, borrowing one).
+ */
+export function withDevClients(clients: ClientInput[], issuer: string): ClientInput[] {
+  const taken = new Set(clients.map((c) => c.clientId));
+  return [...clients, ...devClientsFor(issuer).filter((c) => !taken.has(c.clientId))];
+}
+
+/**
+ * The client /dev logs in with: it must be registered for renkei's own
+ * `/dev/callback`. Never falls back to an arbitrary client — a test page
+ * must not impersonate a real downstream app.
+ */
+export function findDevClient(config: RenkeiConfig): RenkeiConfig['clients'][number] | undefined {
+  const cb = `${config.issuer}/dev/callback`;
+  const candidates = config.clients.filter((c) => c.redirectUris.includes(cb));
+  return candidates.find((c) => c.clientId === 'renkei-dev') ?? candidates[0];
+}
+
+/** The public client /dev/liff exchanges tokens with; same rule as above. */
+export function findDevLiffClient(
+  config: RenkeiConfig,
+): RenkeiConfig['clients'][number] | undefined {
+  const cb = `${config.issuer}/dev/liff`;
+  return config.clients.find(
+    (c) => c.tokenEndpointAuthMethod === 'none' && c.redirectUris.includes(cb),
+  );
+}
 
 /**
  * A tiny relying party mounted at /dev when `config.dev` is on. It logs in
@@ -21,10 +75,28 @@ export function devRoutes({
   liffId?: string | undefined;
 }) {
   const dev = new Hono();
-  const liffClient = config.clients.find((c) => c.tokenEndpointAuthMethod === 'none');
-  const client = config.clients.find((c) => c.clientId === 'renkei-dev') ?? config.clients[0];
-  if (!client) return dev;
+  const liffClient = findDevLiffClient(config);
+  const client = findDevClient(config);
   const redirectUri = `${config.issuer}/dev/callback`;
+  if (!client) {
+    // RENKEI_DEV is on but no client can redirect to /dev/callback (typically
+    // RENKEI_CLIENTS was set without the dev clients). Explain instead of
+    // borrowing whatever client happens to be first in the list.
+    dev.get('/', (c) =>
+      c.html(
+        `<!doctype html><meta charset="utf-8"><title>renkei dev RP</title>
+<body style="font-family:system-ui;max-width:40rem;margin:3rem auto;line-height:1.7">
+<h1>renkei — dev relying party (not configured)</h1>
+<p>/dev は有効ですが、<code>${redirectUri}</code> にリダイレクトできるクライアントが登録されていません。
+<code>RENKEI_CLIENTS</code> に <code>renkei-dev</code> クライアントを追加するか、<code>RENKEI_DEV</code> を外してください。</p>
+<p>/dev is enabled but no client is registered for <code>${redirectUri}</code>.
+Add the <code>renkei-dev</code> client to <code>RENKEI_CLIENTS</code>, or unset <code>RENKEI_DEV</code>.</p>
+<pre style="white-space:pre-wrap;background:#f6f6f6;padding:1rem;border-radius:8px">${JSON.stringify(devClientsFor(config.issuer), null, 2)}</pre>`,
+        503,
+      ),
+    );
+    return dev;
+  }
   const COOKIE = 'renkei_dev_rp';
 
   dev.get('/', (c) =>

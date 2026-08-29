@@ -22,7 +22,7 @@ programmatic use, pass the same settings as an object to
 | `DATABASE_URL` | none | Postgres connection string. Unset = **in-memory** (wiped on restart, single process; development only) |
 | `RENKEI_COOKIE_KEYS` | generated per boot | cookie signing keys, comma-separated. Rotate by prepending. **Set in production** |
 | `RENKEI_JWKS` | generated per boot | private signing keys (JSON array of JWKs with `kid` and `alg`). Unset means tokens die on restart and multi-instance deployments break. **Set in production** ([how to generate](#generating-signing-keys)) |
-| `RENKEI_DEV` | `true` only if both `RENKEI_CLIENTS` and `DATABASE_URL` are unset | mounts the `/dev` test relying party. **Off in production** |
+| `RENKEI_DEV` | `true` only if both `RENKEI_CLIENTS` and `DATABASE_URL` are unset | mounts the `/dev` test relying party; its `renkei-dev` / `renkei-dev-liff` clients are appended to `RENKEI_CLIENTS` when both are set. **Off in production** |
 | `RENKEI_CORS_ORIGINS` | none | browser origins of LIFF apps that call `/liff/exchange` directly (comma-separated). Unset = no CORS |
 | `RENKEI_ADMIN_TOKEN` | none | when set, mounts the read-only `/inspect` endpoints (identity / LINE account / recent-webhook lookups), Bearer-gated on this token. Unset = not mounted. Use a long random value |
 | `RENKEI_LOG_FORMAT` | pretty | `json` emits one JSON object per log line (`{ level, msg, … }`) for log aggregators. Secrets (tokens, channel secrets, cookies, …) are **always** redacted from log metadata regardless of format |
