@@ -4,6 +4,13 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
+**Pick up here (session ended 2026-08-30 ~04:30 JST):** everything urgent is
+done — 0.2.1 shipped, the demo login works, #40 is confirmed live. The
+remaining list is optional/launch/time-gated. First ask: the **§3 dogfood
+dates** (one line from Achraf), then the **§4 email-permission check** (needs
+the LINE console logged in), then §2 launch steps. 0.2.2 can wait until
+another patch lands or the launch is near.
+
 ## Where things stand (end of 2026-08-30)
 
 - **v0.2.1 is released (2026-08-30)**: `renkei`, `renkei-core`, `renkei-server`,
@@ -20,7 +27,9 @@ steps need his passkey, phone, the GitHub UI, the LINE console or Render.
     `line:user_id` / `line:channel_id` / `line:friend` / `line:region` while
     reporting `line:linked: true`. Anyone on 0.2.0 without that env var hits
     this — 0.2.1 fixes it; the live confirmation on the demo is still open (§1).
-- 159 tests green; lint / typecheck / build / docs pass. `main` = `fd34b95`.
+- 159 tests green; lint / typecheck / build / docs pass. `main` = `4ccd8b5`.
+- **Live #40 confirmation done** (§1): Achraf's `/dev` login on the demo shows
+  `line:linked: true` with all `line:*` claims.
 - **One patch changeset pending → 0.2.2** (#44, 2026-08-30): `/dev` borrowed
   `clients[0]` when `RENKEI_CLIENTS` had no `renkei-dev` client, so the demo's
   login button died with `invalid_redirect_uri` / `client_id=jobmatch`. Now the
@@ -39,8 +48,10 @@ secrets, the demo's Render env and the LINE console are all Achraf's side.
 
 ## 0. Cut 0.2.1  — DONE 2026-08-30
 
-Same flow as 0.2.0. Split so Claude does the git side and Achraf the passkey
-side. Achraf's terminal is **`cmd.exe`** — join commands with `&&`, never `;`.
+Same flow as 0.2.0; reuse it verbatim for **0.2.2** when the time comes
+(one changeset already pending, #44). Split so Claude does the git side and
+Achraf the passkey side. Achraf's terminal is **`cmd.exe`** — join commands
+with `&&`, never `;`.
 
 - [x] Claude: branch → `pnpm changeset version` → check all four packages land
       on **0.2.1** (the `linked` group keeps them in step) → `pnpm lint &&
