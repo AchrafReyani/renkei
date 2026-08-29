@@ -20,7 +20,14 @@ steps need his passkey, phone, the GitHub UI, the LINE console or Render.
     `line:user_id` / `line:channel_id` / `line:friend` / `line:region` while
     reporting `line:linked: true`. Anyone on 0.2.0 without that env var hits
     this — 0.2.1 fixes it; the live confirmation on the demo is still open (§1).
-- 155 tests green; lint / typecheck / build / docs pass. `main` = `d3057ab`.
+- 159 tests green; lint / typecheck / build / docs pass. `main` = `fd34b95`.
+- **One patch changeset pending → 0.2.2** (#44, 2026-08-30): `/dev` borrowed
+  `clients[0]` when `RENKEI_CLIENTS` had no `renkei-dev` client, so the demo's
+  login button died with `invalid_redirect_uri` / `client_id=jobmatch`. Now the
+  dev clients are appended when `RENKEI_DEV=true`, and `/dev` 503s with an
+  explanation rather than impersonating a real client. Live on the demo
+  (`/dev` → `client_id=renkei-dev` → `/interaction/…`). Not urgent to release:
+  only affects `RENKEI_DEV=true` + `RENKEI_CLIENTS` deployments.
 - Demo config on Render now has `LINE_MESSAGING_CHANNEL_SECRET`,
   `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`, `RENKEI_ADMIN_TOKEN`. Achraf's
   identity on the demo: sub `j_QoAMmfl7tyAG-SFrz1XfE3YY04RdU0`, LINE userId
@@ -92,7 +99,11 @@ side. Achraf's terminal is **`cmd.exe`** — join commands with `&&`, never `;`.
       consent, confirm `email` in the id_token, note in DEV_SETUP.md. Until
       then, Supabase-style downstreams rely on `placeholderEmailDomain`.
 
-## Things learned on 2026-08-27 (don't relearn)
+## Things learned on 2026-08-27/30 (don't relearn)
+
+- `RENKEI_CLIENTS` on the demo holds the jobmatch client **secret**; the
+  Claude-in-Chrome classifier blocks every scripted or typed edit of that Render
+  field. Change code, not that env var — the demo redeploys on merge anyway.
 
 - The LINE console session expires; the login page is `account.line.biz`,
   which Claude-in-Chrome cannot touch. Achraf logs in on the tab Claude opened,
