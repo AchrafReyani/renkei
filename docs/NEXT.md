@@ -4,24 +4,23 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
-## Where things stand (end of 2026-08-27)
+## Where things stand (end of 2026-08-30)
 
-- **v0.2.0 is released**: `renkei`, `renkei-core`, `renkei-server`,
-  `renkei-storage-postgres` all `0.2.0` / `latest` on npm; tag `v0.2.0`;
-  `ghcr.io/achrafreyani/renkei:0.2.0` / `:0.2` / `:latest` built by
-  `release.yml`.
+- **v0.2.1 is released (2026-08-30)**: `renkei`, `renkei-core`, `renkei-server`,
+  `renkei-storage-postgres` all `0.2.1` / `latest` on npm; tag `v0.2.1`;
+  `ghcr.io/achrafreyani/renkei:0.2.1` / `:0.2` / `:latest` built by
+  `release.yml` (run 33269515485). It carries the two fixes below.
 - **Live-verified on renkei-demo** (real LINE, Achraf's phone): Messaging API
   webhook (console Verify → Success), follow/unfollow flips `friend`, and
   account linking via `GET /link` → `accountLink` `ok` → `linked: true`.
-- **Two real bugs found by that live pass are fixed on `main` but NOT released**
-  (two patch changesets pending → **0.2.1**):
+- Two real bugs found by that live pass, fixed in 0.2.1:
   - #38 `/inspect` page fetched `/api/...` instead of `/inspect/api/...` (every
     lookup 404'd on the live demo).
   - #40 after linking with no `LINE_MESSAGING_CHANNEL_ID`, tokens lost
     `line:user_id` / `line:channel_id` / `line:friend` / `line:region` while
-    reporting `line:linked: true`. **Anyone on 0.2.0 without that env var hits
-    this — release 0.2.1 first thing.**
-- 155 tests green; lint / typecheck / build / docs pass. `main` = `4cc0151`.
+    reporting `line:linked: true`. Anyone on 0.2.0 without that env var hits
+    this — 0.2.1 fixes it; the live confirmation on the demo is still open (§1).
+- 155 tests green; lint / typecheck / build / docs pass. `main` = `d3057ab`.
 - Demo config on Render now has `LINE_MESSAGING_CHANNEL_SECRET`,
   `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`, `RENKEI_ADMIN_TOKEN`. Achraf's
   identity on the demo: sub `j_QoAMmfl7tyAG-SFrz1XfE3YY04RdU0`, LINE userId
@@ -31,24 +30,25 @@ steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.2.1  (first thing next session)
+## 0. Cut 0.2.1  — DONE 2026-08-30
 
 Same flow as 0.2.0. Split so Claude does the git side and Achraf the passkey
 side. Achraf's terminal is **`cmd.exe`** — join commands with `&&`, never `;`.
 
-- [ ] Claude: branch → `pnpm changeset version` → check all four packages land
+- [x] Claude: branch → `pnpm changeset version` → check all four packages land
       on **0.2.1** (the `linked` group keeps them in step) → `pnpm lint &&
       pnpm typecheck && pnpm test && pnpm build` → single-paragraph DCO commit →
       PR → CI green → squash-merge. (The auto-mode classifier sometimes blocks
       `gh pr merge` / `git push` of tags; if so, hand Achraf the exact command.)
-- [ ] Achraf, in cmd on `main`: `git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
+- [x] Achraf, in cmd on `main`: `git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
       (an expired npm session shows up as `E404 PUT` on publish — that is what
       `npm login` fixes; passkey prompt once per package).
-- [ ] Achraf: `git tag -a v0.2.1 -m "v0.2.1" && git push origin v0.2.1`, then
+- [x] Achraf: `git tag -a v0.2.1 -m "v0.2.1" && git push origin v0.2.1`, then
       Claude watches `release.yml` (`gh run watch`) and reads the run log for
       the pushed GHCR tags (`gh api` needs `read:packages`, which the token
       lacks — read the log instead).
-- [ ] Claude: tick here + ROADMAP.md, confirm `npm view renkei version` = 0.2.1.
+- [x] Claude: tick here + ROADMAP.md, confirm `npm view renkei version` = 0.2.1.
+      (PR #42; all four packages `0.2.1` on npm; GHCR tags read from the run log.)
 
 ## 1. Live verification — what is left
 
@@ -67,13 +67,13 @@ side. Achraf's terminal is **`cmd.exe`** — join commands with `&&`, never `;`.
 
 ## 2. Launch / UI steps  (Achraf, GitHub UI)
 
-- [ ] Upload `.github/social-preview.png` (the setting was hidden while the repo
-      is private — re-check after flipping public; drop if still absent).
+- [ ] Upload `.github/social-preview.png` (repo is public now, so the setting
+      should be visible under Settings → General → Social preview).
 - [ ] (Optional) README GIF of the `/dev` flow + the in-app LIFF phone shot —
       LINE screens are blocked for Claude, so Achraf records them.
-- [ ] **Flip the repo public** — only after 0.2.1 and the dogfood clock.
-      Then run LAUNCH.md §2 (publish the Zenn article — draft is
-      `drafts/zenn-account-linking.md`).
+- [x] **Flip the repo public** — already PUBLIC as of 2026-08-30 (`gh repo view`).
+- [ ] Run LAUNCH.md §2 (publish the Zenn article — draft is
+      `drafts/zenn-account-linking.md`) — after the dogfood clock.
 
 ## 3. Dogfooding (two weeks, calendar time)
 
