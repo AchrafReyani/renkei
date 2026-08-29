@@ -59,11 +59,10 @@ side. Achraf's terminal is **`cmd.exe`** — join commands with `&&`, never `;`.
 
 ## 1. Live verification — what is left
 
-- [ ] **Confirm the #40 fix live**: Achraf logs in once at
-      https://renkei-demo.onrender.com/dev (Claude can't — `access.line.me` is
-      blocked in Claude-in-Chrome) and reads the claims panel: it must show
-      **both** `line:linked: true` and `line:user_id` (+ `line:friend: true`).
-      Before #40 the demo would have shown `line:linked` only.
+- [x] **Confirm the #40 fix live** — done 2026-08-30 on renkei-demo (0.2.1 +
+      #44): Achraf's `/dev` login showed `line:linked: true` **and**
+      `line:user_id`, `line:friend: true`, `line:channel_id`, `line:region` in
+      both the id_token and userinfo, `aud: renkei-dev`.
 - [ ] (Optional, cleaner data model) set `LINE_MESSAGING_CHANNEL_ID=2011257490`
       on Render so the link is stored as its own `messaging` row instead of
       flipping the login row's `kind`. Not required after #40.
