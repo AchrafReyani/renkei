@@ -14,8 +14,8 @@ context. Then:
    another — then work it one at a time, ticking `docs/NEXT.md` and committing
    as each completes.
 
-Context: v0.2.0 is published (npm + GHCR) and live-verified; two patch fixes
-(#38, #40) are merged but unreleased — **0.2.1 is the first item**. `docs/NEXT.md`
+Context: v0.2.1 is published (npm + GHCR, 2026-08-30) with the two patch fixes
+(#38, #40); the repo is already public. `docs/NEXT.md`
 has the exact split of who runs what (Achraf's terminal is `cmd.exe`: `&&`, not
 `;`). Then optional live checks, launch/UI/time-gated steps. Don't re-implement
 finished features; confirm against `main` before suggesting work.
