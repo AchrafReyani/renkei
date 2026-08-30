@@ -5,5 +5,6 @@ Tutorial: [docs/tutorials/nextjs.ja.md](../../docs/tutorials/nextjs.ja.md) / [en
 
 ```sh
 cp .env.example .env.local     # set RENKEI_* to match a client in renkei's RENKEI_CLIENTS
+#   (in the renkei directory: npx renkei add-client my-next-app --redirect http://localhost:3400/api/auth/callback/renkei --preset authjs)
 pnpm install && pnpm dev       # http://localhost:3400
 ```

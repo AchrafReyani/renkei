@@ -16,6 +16,13 @@ Next.js（Auth.js） ──OIDC──▶ renkei ──▶ LINE Login（友だち
 renkei の `RENKEI_CLIENTS` に Next.js アプリを追加します。Auth.js のコールバックは
 `/api/auth/callback/<provider id>` です（以下 provider id は `renkei`）。
 
+```sh
+npx renkei add-client my-next-app --redirect http://localhost:3400/api/auth/callback/renkei --preset authjs
+```
+
+シークレットを生成して下記のエントリを `.env` に書き込み、手順 2 で使う `.env.local` の行と provider
+ブロックを表示します。手で書くなら:
+
 ```json
 [{
   "clientId": "my-next-app",

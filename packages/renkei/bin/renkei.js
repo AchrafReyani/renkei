@@ -1,20 +1,23 @@
 #!/usr/bin/env node
 // `npx renkei` — start the renkei server from environment variables.
-// See README / docs/reference/config for the variables.
-if (process.argv.includes('--help') || process.argv.includes('-h')) {
-  console.log(`renkei — self-hosted identity broker for LINE
-
-usage: renkei            start the server (reads .env / environment)
-       renkei --version
-
-Required env: LINE_LOGIN_CHANNEL_ID, LINE_LOGIN_CHANNEL_SECRET
-Recommended:  ISSUER, DATABASE_URL, RENKEI_COOKIE_KEYS, RENKEI_JWKS, RENKEI_CLIENTS
-Docs:         https://github.com/AchrafReyani/renkei`);
-  process.exit(0);
-}
-if (process.argv.includes('--version') || process.argv.includes('-v')) {
+// `renkei init` / `renkei add-client` — set up .env; see lib/cli.js.
+const args = process.argv.slice(2);
+if (args.includes('--version') || args.includes('-v')) {
   const { createRequire } = await import('node:module');
   console.log(createRequire(import.meta.url)('../package.json').version);
   process.exit(0);
+}
+if (
+  args.includes('--help') ||
+  args.includes('-h') ||
+  args[0] === 'init' ||
+  args[0] === 'add-client'
+) {
+  const { run, HELP } = await import('../lib/cli.js');
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(HELP);
+    process.exit(0);
+  }
+  process.exit(await run(args));
 }
 await import('renkei-server/node');

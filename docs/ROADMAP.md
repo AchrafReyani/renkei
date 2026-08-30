@@ -141,6 +141,12 @@ Order matters: each item is what the next needs.
       Motivation: renkei's setup cost (Postgres + env vars) is the main objection
       versus raw LINE Login; this removes the database from a single-box deploy
       (2026-08-30, DECISIONS.md §11)
+- [x] `renkei init` / `renkei add-client` — the CLI writes a ready-to-run `.env`
+      (signing + cookie keys generated, SQLite storage, `/dev` on; only the two LINE
+      channel values are pasted) and registers OIDC clients with presets for Auth.js,
+      Supabase (Keycloak fields, placeholder email domain) and public/PKCE clients,
+      printing the app-side config. First run is `npx renkei init && npx renkei`
+      (2026-08-30)
 - [ ] `renkei-client`: `loginUrl()`, `exchangeLiffToken()`, session helpers
 - [ ] `renkei-next`: App Router helpers, middleware, `<LineLoginButton />`
 - [ ] Cloudflare Workers deploy target via `httpServerHandler` + KV/D1 or Hyperdrive adapter

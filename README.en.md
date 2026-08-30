@@ -43,6 +43,14 @@ Prerequisite: in the LINE Developers Console, a **provider → LINE Login channe
 First time? Read the [LINE Developers Console guide](docs/guides/line-console.en.md).
 
 ```sh
+mkdir renkei && cd renkei
+npx renkei init             # writes .env (signing keys, cookie keys, SQLite); paste the channel ID and secret
+npx renkei                  # Node 22.13+, no database server
+```
+
+Or with Docker:
+
+```sh
 git clone https://github.com/AchrafReyani/renkei && cd renkei
 cp .env.example .env        # set LINE_LOGIN_CHANNEL_ID / LINE_LOGIN_CHANNEL_SECRET
 docker compose up           # renkei + Postgres
@@ -58,6 +66,7 @@ Register `http://localhost:3000/line/callback` as a Callback URL on the channel 
 ### 1. From your app (as a standard OIDC client)
 
 renkei is an OpenID Connect provider. Discovery: `http(s)://<renkei>/.well-known/openid-configuration`.
+Register a client with `npx renkei add-client my-app --redirect <callback URL> --preset authjs` (adds it to `RENKEI_CLIENTS` and prints the app-side config).
 
 ```ts
 // e.g. Auth.js (next-auth) generic OIDC provider

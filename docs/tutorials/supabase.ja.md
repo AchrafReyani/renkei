@@ -45,6 +45,8 @@ services:
   `https://<project-ref>.supabase.co/auth/v1/callback`、ローカル CLI は
   `http://127.0.0.1:54321/auth/v1/callback`。
 - `placeholderEmailDomain` については [§4](#4-メールアドレスについて必読) を必ず読んでください。
+- compose ではなく `.env` で動かすなら `npx renkei add-client supabase --redirect <Callback URL> --preset supabase`
+  がこのクライアントを書き込み、手順 2 で使うダッシュボード / `config.toml` の値を表示します。
 - LINE Developers Console の **Callback URL** に `${ISSUER}/line/callback` を登録します。
 
 起動確認:

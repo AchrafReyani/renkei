@@ -43,6 +43,14 @@ LINE Platform ──────▶  renkei（自分でホスト）  ───�
 初めてなら [LINE Developers Console の準備ガイド](docs/guides/line-console.ja.md) を先に。
 
 ```sh
+mkdir renkei && cd renkei
+npx renkei init             # .env を生成（署名鍵・Cookie 鍵・SQLite）。チャネル ID とシークレットだけ貼る
+npx renkei                  # Node 22.13+。DB サーバー不要
+```
+
+Docker 派なら / or with Docker:
+
+```sh
 git clone https://github.com/AchrafReyani/renkei && cd renkei
 cp .env.example .env        # LINE_LOGIN_CHANNEL_ID / LINE_LOGIN_CHANNEL_SECRET を入れる
 docker compose up           # renkei + Postgres
@@ -58,6 +66,7 @@ LINE Developers Console の Callback URL に `http://localhost:3000/line/callbac
 ### 1. 自分のアプリから（標準 OIDC クライアントとして）
 
 renkei は OpenID Connect プロバイダーです。ディスカバリは `http(s)://<renkei>/.well-known/openid-configuration`。
+クライアントの登録は `npx renkei add-client my-app --redirect <callback URL> --preset authjs`（`RENKEI_CLIENTS` に追記し、アプリ側に貼る設定を表示）。
 
 ```ts
 // 例: Auth.js (next-auth) の汎用 OIDC プロバイダー

@@ -53,7 +53,10 @@ The Messaging API channel must live under the **same LINE provider** as the Logi
 
 ## Downstream clients (`RENKEI_CLIENTS`)
 
-The apps / IdPs that log in through renkei over OIDC. JSON array.
+The apps / IdPs that log in through renkei over OIDC. JSON array. Rather than writing it by hand,
+`npx renkei add-client <id> --redirect <url> [--preset authjs|supabase|public]` generates the secret,
+appends the client to `RENKEI_CLIENTS` in `.env`, and prints what to paste on the app side (the Auth.js
+provider block / Supabase's Keycloak fields). `--replace` overwrites, `--print` shows without writing.
 
 ```json
 [
@@ -90,6 +93,8 @@ When unset, development clients `renkei-dev` (secret `renkei-dev-secret`, redire
 `ttl.accessToken` 3600 s, `ttl.idToken` 3600, `ttl.refreshToken` 14 days, `ttl.session` 14 days, `ttl.interaction` 600.
 
 ## Generating signing keys
+
+`npx renkei init` writes a `.env` with `RENKEI_JWKS` and `RENKEI_COOKIE_KEYS` already generated. By hand:
 
 ```sh
 node -e "
