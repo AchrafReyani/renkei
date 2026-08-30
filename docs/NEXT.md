@@ -9,8 +9,8 @@ done — 0.2.1 shipped, the demo login works, #40 is confirmed live. The
 remaining list is optional/launch/time-gated. Dogfood dates are set (§3: 2026-08-27 → earliest launch
 2026-09-10), the email permission is still Applied (§4), the social preview
 and README GIF are done (§2), the optional demo env experiments are live (§1).
-**0.2.2 is cut on the git side** — what remains is Achraf's publish + tag
-(§0), the Zenn article after 2026-09-10 (§2) and the §4 re-check. 0.2.2 can wait until
+**0.2.2 is released** (npm + GHCR, §0). What remains: the Zenn article after
+2026-09-10 (§2), the §4 re-check, the LIFF phone shot (§2, optional) — then v0.3. 0.2.2 can wait until
 another patch lands or the launch is near.
 
 ## Where things stand (end of 2026-08-30)
@@ -32,7 +32,7 @@ another patch lands or the launch is near.
 - 159 tests green; lint / typecheck / build / docs pass. `main` = `4ccd8b5`.
 - **Live #40 confirmation done** (§1): Achraf's `/dev` login on the demo shows
   `line:linked: true` with all `line:*` claims.
-- **One patch changeset pending → 0.2.2** (#44, 2026-08-30): `/dev` borrowed
+- **0.2.2 released 2026-08-30** (`renkei-server` + `renkei` CLI; #44): `/dev` borrowed
   `clients[0]` when `RENKEI_CLIENTS` had no `renkei-dev` client, so the demo's
   login button died with `invalid_redirect_uri` / `client_id=jobmatch`. Now the
   dev clients are appended when `RENKEI_DEV=true`, and `/dev` 503s with an
@@ -48,7 +48,7 @@ another patch lands or the launch is near.
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.2.2  — IN PROGRESS 2026-08-30 (0.2.1 done the same way)
+## 0. Cut 0.2.2  — DONE 2026-08-30 (0.2.1 done the same way)
 
 Same flow as 0.2.0/0.2.1. Split so Claude does the git side and Achraf the
 passkey side. Achraf's terminal is **`cmd.exe`** — join commands with `&&`,
@@ -58,10 +58,13 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
 
 - [x] Claude: `release/0.2.2` — `pnpm changeset version` → lint/typecheck/test/build
       green → DCO commit → PR (merge blocked by the classifier, Achraf merges).
-- [ ] Achraf, in cmd on `main`: `git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
-- [ ] Achraf: `git tag -a v0.2.2 -m "v0.2.2" && git push origin v0.2.2`, then
+- [x] Achraf, in cmd on `main`: `git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
+- [x] Achraf: `git tag -a v0.2.2 -m "v0.2.2" && git push origin v0.2.2`, then
       Claude watches `release.yml` and reads the GHCR tags from the run log.
-- [ ] Claude: tick here + ROADMAP.md, confirm `npm view renkei-server version` = 0.2.2.
+- [x] Claude: tick here + ROADMAP.md, confirm `npm view renkei-server version` = 0.2.2.
+      (PR #49; `renkei-server` / `renkei` 0.2.2 on npm, `renkei-core` /
+      `renkei-storage-postgres` 0.2.1; release.yml run 33292392776 pushed
+      `ghcr.io/achrafreyani/renkei:0.2.2` / `:0.2` / `:latest`.)
 
 ### 0.2.1 — DONE 2026-08-30
 

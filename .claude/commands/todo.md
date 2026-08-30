@@ -17,7 +17,7 @@ context. Then:
 Context (as of 2026-08-30): v0.2.1 is published (npm + GHCR) with the two patch
 fixes (#38, #40) and #40 is confirmed live; the repo is public; one patch
 changeset (#44, `/dev` client selection) is pending for a later 0.2.2 — not
-urgent — and 0.2.2 is cut on the git side (PR #49), publish + tag are Achraf's. Left:
+urgent — 0.2.2 is released (npm + GHCR, 2026-08-30). Left:
 the LINE email-permission re-check (§4, still Applied on 2026-08-30) and the Zenn
 article (§2, not before 2026-09-10); social preview, README GIF and the demo env experiments are done. `docs/NEXT.md`
 has the exact split of who runs what (Achraf's terminal is `cmd.exe`: `&&`, not
