@@ -6,9 +6,9 @@ steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
 **Pick up here (session ended 2026-08-30 ~04:30 JST):** everything urgent is
 done — 0.2.1 shipped, the demo login works, #40 is confirmed live. The
-remaining list is optional/launch/time-gated. First ask: the **§3 dogfood
-dates** (one line from Achraf), then the **§4 email-permission check** (needs
-the LINE console logged in), then §2 launch steps. 0.2.2 can wait until
+remaining list is optional/launch/time-gated. Dogfood dates are set (§3: 2026-08-27 → earliest launch
+2026-09-10). Next: the **§4 email-permission check** (needs the LINE console
+logged in), then §2 launch steps. 0.2.2 can wait until
 another patch lands or the launch is near.
 
 ## Where things stand (end of 2026-08-30)
@@ -90,15 +90,16 @@ with `&&`, never `;`.
       LINE screens are blocked for Claude, so Achraf records them.
 - [x] **Flip the repo public** — already PUBLIC as of 2026-08-30 (`gh repo view`).
 - [ ] Run LAUNCH.md §2 (publish the Zenn article — draft is
-      `drafts/zenn-account-linking.md`) — after the dogfood clock.
+      `drafts/zenn-account-linking.md`) — not before **2026-09-10** (§3).
 
 ## 3. Dogfooding (two weeks, calendar time)
 
-- [ ] renkei already brokers LINE login on the job-matching-platform in prod
+- [~] renkei already brokers LINE login on the job-matching-platform in prod
       (see the [[jobmatch-renkei-integration]] memory). Just let it run and log
-      bugs as issues. Start date: ______  Earliest launch date: ______
-      (Suggestion: start = 2026-08-27, the day v0.2.0 shipped → earliest
-      launch 2026-09-10. Achraf to confirm.)
+      bugs as issues. **Start date: 2026-08-27** (the day v0.2.0 shipped)
+      **Earliest launch date: 2026-09-10** (confirmed by Achraf 2026-08-30).
+      Tick this and ROADMAP.md "Dogfooded in one real app" on/after 2026-09-10
+      if no unresolved login bug is open against renkei.
 
 ## 4. LINE email permission
 

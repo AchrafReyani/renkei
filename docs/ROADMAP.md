@@ -104,7 +104,8 @@ Order matters: each item is what the next needs.
 - [x] Discussions enabled with a 「はじめに / Welcome」 thread
 
 **proof**
-- [ ] Dogfooded in one real app for two weeks
+- [~] Dogfooded in one real app for two weeks — job-matching-platform in prod,
+      clock started 2026-08-27 (v0.2.0); earliest launch 2026-09-10
 
 ## v0.2 — account linking
 
