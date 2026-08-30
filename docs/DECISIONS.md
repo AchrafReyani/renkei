@@ -259,3 +259,29 @@ was already ours. Future packages follow the same pattern: `renkei-client`,
 "official"; the repo and docs are the source of truth for which packages
 are real. `pnpm changeset`'s `linked` group is now `renkei-*`, which
 excludes the `renkei` CLI (same as before).
+
+## 11. SQLite storage on Node's built-in `node:sqlite` (2026-08-30)
+
+**Decision.** `renkei-storage-sqlite` uses `node:sqlite` (`DatabaseSync`),
+which Node ships unflagged from 22.13. The package has zero runtime
+dependencies. A three-method `SqliteDriver` interface (`exec` / `prepare` /
+`close`) is the only thing the stores touch, so `better-sqlite3` and Bun's
+`bun:sqlite` satisfy it structurally via `createSqliteDriverStorage()`.
+`renkei-server` selects it with `DATABASE_URL=sqlite:<file>`.
+
+**Why.** The honest objection to renkei versus raw LINE Login is setup cost:
+a server *and* a Postgres *and* six env vars before the first login. For a
+single-box deploy the database is the part that can go. A native module
+(`better-sqlite3`) would reintroduce a compile step and platform prebuilds
+in the Docker image; the built-in binding has neither.
+
+**Schema.** Same tables and column names as Postgres (`renkei_identity`,
+`renkei_line_account`, `renkei_payload`); timestamps are epoch milliseconds,
+booleans 0/1, JSON as TEXT. Versioned with `PRAGMA user_version`, one
+transaction per version, append-only. WAL mode, `foreign_keys = ON`,
+`busy_timeout = 5000` are set on open.
+
+**Cost.** Node ≥ 22.13 for the built-in driver (22.5–22.12 need
+`--experimental-sqlite`; the package's vitest config adds it automatically so
+older 22.x still runs the tests). Single writer: SQLite is for one process on
+one disk — multi-instance deploys stay on Postgres, and the docs say so.

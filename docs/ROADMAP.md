@@ -70,7 +70,9 @@ Order matters: each item is what the next needs.
 
 **storage**
 - [x] `storage-postgres` (Drizzle, migrations) incl. the `oidc-provider` adapter — tested on PGlite
-- [ ] `storage-sqlite` (dev) — deprioritised: memory storage covers dev, PGlite covers tests
+- [x] `storage-sqlite` — shipped 2026-08-30 as the first v0.3 item (see below): Node's
+      built-in `node:sqlite`, zero dependencies, `DATABASE_URL=sqlite:<file>`; same
+      contract tests as Postgres plus file persistence / reopen / FK cascade
 
 **deploy**
 - [x] Dockerfile (node:22-alpine, pnpm deploy --prod, 301 MB) — verified standalone 2026-08-26;
@@ -134,6 +136,11 @@ Order matters: each item is what the next needs.
 
 ## v0.3 — SDKs and edge targets
 
+- [x] `renkei-storage-sqlite` — single-file storage with no database server (Node
+      22.13+ `node:sqlite`; `better-sqlite3` / Bun via `createSqliteDriverStorage`).
+      Motivation: renkei's setup cost (Postgres + env vars) is the main objection
+      versus raw LINE Login; this removes the database from a single-box deploy
+      (2026-08-30, DECISIONS.md §11)
 - [ ] `renkei-client`: `loginUrl()`, `exchangeLiffToken()`, session helpers
 - [ ] `renkei-next`: App Router helpers, middleware, `<LineLoginButton />`
 - [ ] Cloudflare Workers deploy target via `httpServerHandler` + KV/D1 or Hyperdrive adapter

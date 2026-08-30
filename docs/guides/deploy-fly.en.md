@@ -13,6 +13,8 @@ Either works — all renkei needs is one `DATABASE_URL`.
 
 renkei runs its migrations on boot (`autoMigrate`).
 
+If you would rather not run a Postgres at all, SQLite works too: `fly volumes create data --region nrt --size 1`, mount it at `/data` under `[mounts]` in `fly.toml`, and set `DATABASE_URL=sqlite:/data/renkei.db` (single-machine setups only).
+
 ## 2. Create the app
 
 The repo root has a `fly.toml`. Change `app` and `ISSUER` to yours, then:
