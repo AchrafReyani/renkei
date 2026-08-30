@@ -9,9 +9,11 @@ done — 0.2.1 shipped, the demo login works, #40 is confirmed live. The
 remaining list is optional/launch/time-gated. Dogfood dates are set (§3: 2026-08-27 → earliest launch
 2026-09-10), the email permission is still Applied (§4), the social preview
 and README GIF are done (§2), the optional demo env experiments are live (§1).
-**0.2.2 is released** (npm + GHCR, §0). What remains: the Zenn article after
-2026-09-10 (§2), the §4 re-check, the LIFF phone shot (§2, optional) — then v0.3. 0.2.2 can wait until
-another patch lands or the launch is near.
+**0.2.2 is released** (npm + GHCR, §0). **0.2.3 is in flight** (§0: the #51
+account-link fix, all four packages → 0.2.3; the PR is Claude's, the npm
+publish + tag are Achraf's). What remains after that: confirm #51 from the
+phone (§1), the Zenn article after 2026-09-10 (§2), the §4 re-check, the LIFF
+phone shot (§2, optional) — then v0.3.
 
 ## Where things stand (end of 2026-08-30)
 
@@ -39,6 +41,14 @@ another patch lands or the launch is near.
   explanation rather than impersonating a real client. Live on the demo
   (`/dev` → `client_id=renkei-dev` → `/interaction/…`). Not urgent to release:
   only affects `RENKEI_DEV=true` + `RENKEI_CLIENTS` deployments.
+- **#51 merged 2026-08-30** (`renkei-core` patch, unreleased until 0.2.3):
+  with no `LINE_MESSAGING_CHANNEL_ID`, a completed account link is recorded by
+  flipping the login row's `kind` to `messaging`, and the *next* login or LIFF
+  exchange upserted `kind: login`/`liff` over it, so `line:linked` silently
+  went back to `false`. Found live: `/dev` said `true` (session reuse, no
+  upsert), the LIFF exchange from Achraf's phone said `false`.
+  `upsertIdentityFromLine` now preserves a `messaging` kind. Same population
+  as #40 (any 0.2.x deployment without a messaging channel ID).
 - Demo config on Render now has `LINE_MESSAGING_CHANNEL_SECRET`,
   `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`, `RENKEI_ADMIN_TOKEN`. Achraf's
   identity on the demo: sub `j_QoAMmfl7tyAG-SFrz1XfE3YY04RdU0`, LINE userId
@@ -48,7 +58,22 @@ another patch lands or the launch is near.
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.2.2  — DONE 2026-08-30 (0.2.1 done the same way)
+## 0. Cut 0.2.3  — IN FLIGHT 2026-08-30 (#51 account-link fix)
+
+Same split as 0.2.1/0.2.2. The changeset is on `renkei-core`; the `linked`
+group + `updateInternalDependencies: patch` carry `renkei-server`,
+`renkei-storage-postgres` and the `renkei` CLI along, so **all four land on
+0.2.3** (core skips 0.2.2). Achraf's terminal is `cmd.exe` — `&&`, never `;`.
+
+- [x] Claude: `release/0.2.3` — `pnpm changeset version` → lint / typecheck /
+      160 tests / forced build green → DCO commit → PR (classifier blocks
+      `gh pr merge`; Achraf merges).
+- [ ] Achraf, in cmd on `main`: `git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
+- [ ] Achraf: `git tag -a v0.2.3 -m "v0.2.3" && git push origin v0.2.3`, then
+      Claude watches `release.yml` and reads the GHCR tags from the run log.
+- [ ] Claude: tick here + ROADMAP.md, confirm `npm view renkei-core version` = 0.2.3.
+
+### 0.2.2 — DONE 2026-08-30 (0.2.1 done the same way)
 
 Same flow as 0.2.0/0.2.1. Split so Claude does the git side and Achraf the
 passkey side. Achraf's terminal is **`cmd.exe`** — join commands with `&&`,
@@ -98,6 +123,11 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
 - [x] **JSON logs** live (`RENKEI_LOG_FORMAT=json`): an unsigned webhook POST
       produced `{"level":"warn","msg":"[renkei] webhook signature verification failed"}`
       in Render logs. The boot banner stays plain text by design.
+- [ ] **Confirm the #51 fix live** (needs Achraf's phone): the demo redeployed
+      with #51 on merge. Open the LIFF app, exchange, and check the response
+      shows `line:linked: true` (before #51 it said `false` right after a
+      `/dev` login had said `true`). `/inspect` → lookup by LINE userId should
+      show the row's `kind` still `messaging` after the exchange.
 - [ ] (Optional) **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`) — not set:
       nothing exists to receive the POST. Needs a downstream endpoint first.
 

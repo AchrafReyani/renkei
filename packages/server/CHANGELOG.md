@@ -1,5 +1,13 @@
 # renkei-server
 
+## 0.2.3
+
+### Patch Changes
+
+- Updated dependencies [bae62c7]
+  - renkei-core@0.2.3
+  - renkei-storage-postgres@0.2.3
+
 ## 0.2.2
 
 ### Patch Changes
