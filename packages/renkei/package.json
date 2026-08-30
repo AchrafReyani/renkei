@@ -1,6 +1,6 @@
 {
   "name": "renkei",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "renkei (連携) — self-hosted identity broker for LINE. `npx renkei` starts the server.",
   "license": "Apache-2.0",
   "author": "Achraf Reyani",
