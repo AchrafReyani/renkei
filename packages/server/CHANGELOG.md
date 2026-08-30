@@ -1,5 +1,17 @@
 # renkei-server
 
+## 0.3.0
+
+### Minor Changes
+
+- f05994c: New `renkei-storage-sqlite`: single-file storage on Node's built-in `node:sqlite` (Node 22.13+), with zero runtime dependencies, WAL mode and migrations applied on boot; `better-sqlite3` and Bun's `bun:sqlite` plug in through `createSqliteDriverStorage()`. `renkei-server` selects it with `DATABASE_URL=sqlite:./data/renkei.db` (`sqlite::memory:` for a throwaway database), so a single-box deploy no longer needs a Postgres.
+
+### Patch Changes
+
+- 3e9f07e: `npx renkei init` writes a ready-to-run `.env` — signing keys and cookie keys generated, `DATABASE_URL=sqlite:./data/renkei.db`, the `/dev` test page on — so a first run is `renkei init`, paste the LINE channel ID and secret, `renkei`. `npx renkei add-client <id> --redirect <url> [--preset authjs|supabase|public]` generates a client secret, adds the client to `RENKEI_CLIENTS` in `.env` (validated with the server's schema) and prints what to paste on the app side: the Auth.js provider block, Supabase's Keycloak fields and `config.toml`, or plain OIDC values. `renkei-server` now exports `oidcClientSchema`.
+- Updated dependencies [f05994c]
+  - renkei-storage-sqlite@0.3.0
+
 ## 0.2.3
 
 ### Patch Changes

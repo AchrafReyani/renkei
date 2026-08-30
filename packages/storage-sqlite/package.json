@@ -1,6 +1,6 @@
 {
   "name": "renkei-storage-sqlite",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "SQLite storage for renkei. Zero dependencies on Node 22.13+ (built-in node:sqlite); better-sqlite3 and Bun via a 3-method driver interface.",
   "license": "Apache-2.0",
   "repository": {
