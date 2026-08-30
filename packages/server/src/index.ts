@@ -10,6 +10,7 @@ export {
 export {
   type LineChannelConfig,
   type OidcClientConfig,
+  oidcClientSchema,
   parseConfig,
   type RenkeiConfig,
   type RenkeiConfigInput,

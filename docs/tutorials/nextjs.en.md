@@ -17,6 +17,13 @@ Time: 10 minutes. Prerequisite: a running renkei ([README quickstart](../../READ
 Add the Next.js app to renkei's `RENKEI_CLIENTS`. Auth.js's callback path is
 `/api/auth/callback/<provider id>` (provider id `renkei` below).
 
+```sh
+npx renkei add-client my-next-app --redirect http://localhost:3400/api/auth/callback/renkei --preset authjs
+```
+
+That generates the secret, writes the entry below into `.env`, and prints the `.env.local` lines and
+provider block for step 2. The equivalent by hand:
+
 ```json
 [{
   "clientId": "my-next-app",

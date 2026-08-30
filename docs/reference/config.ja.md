@@ -52,7 +52,10 @@ Messaging API チャネルはログインチャネルと**同一の LINE プロ�
 
 ## 下流クライアント（`RENKEI_CLIENTS`）
 
-renkei に OIDC でログインしに来るアプリ／IdP の一覧。JSON 配列。
+renkei に OIDC でログインしに来るアプリ／IdP の一覧。JSON 配列。手で書くより
+`npx renkei add-client <id> --redirect <url> [--preset authjs|supabase|public]` が楽です:
+シークレットを生成して `.env` の `RENKEI_CLIENTS` に追記し、アプリ側（Auth.js の provider / Supabase の Keycloak 欄）に貼る設定を表示します。
+`--replace` で上書き、`--print` で書き込まずに表示。
 
 ```json
 [
@@ -89,6 +92,8 @@ renkei に OIDC でログインしに来るアプリ／IdP の一覧。JSON 配�
 `ttl.accessToken` 3600 秒、`ttl.idToken` 3600、`ttl.refreshToken` 14 日、`ttl.session` 14 日、`ttl.interaction` 600。
 
 ## 署名鍵を作る
+
+`npx renkei init` が `RENKEI_JWKS` と `RENKEI_COOKIE_KEYS` を生成した `.env` を書きます。手動なら:
 
 ```sh
 node -e "

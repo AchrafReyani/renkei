@@ -45,6 +45,8 @@ services:
   `https://<project-ref>.supabase.co/auth/v1/callback`, local CLI
   `http://127.0.0.1:54321/auth/v1/callback`.
 - Read [§4](#4-about-email-addresses-read-this) before you decide on `placeholderEmailDomain`.
+- Running renkei from `.env` instead of compose? `npx renkei add-client supabase --redirect <callback URL> --preset supabase`
+  writes this client for you and prints the dashboard / `config.toml` values for step 2.
 - Register `${ISSUER}/line/callback` as a **Callback URL** in the LINE Developers Console.
 
 Check it's up:

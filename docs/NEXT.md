@@ -13,8 +13,8 @@ and README GIF are done (§2), the optional demo env experiments are live (§1).
 account-link fix in all four packages). The auto-mode allow rules for
 `gh pr merge` / `git push origin` are in place, so Claude now merges and tags
 itself; only the npm passkey publish stays with Achraf. #51 is confirmed live
-from the phone (§1). **v0.3 has started** (§5): `renkei-storage-sqlite` is
-merged, release pending. Still open: the Zenn article after 2026-09-10 (§2),
+from the phone (§1). **v0.3 has started** (§5): `renkei-storage-sqlite` and
+`renkei init` / `add-client` are merged, 0.3.0 release pending. Still open: the Zenn article after 2026-09-10 (§2),
 the §4 re-check (still Applied 2026-08-30 evening), the LIFF phone shot (§2,
 optional).
 
@@ -214,8 +214,15 @@ six env vars"), breadth (TW/TH, MINI App) after.
       `pnpm dev:server` with a `sqlite:` URL (tests already pass the flag).
 - [ ] Cut **0.3.0** (same split as §0: Claude branches/merges/tags, Achraf
       publishes with the passkey). Not urgent — bundle with the next item.
-- [ ] "3 env vars and go" quickstart: `renkei add-client` (prints the OIDC
-      config for Supabase / Auth.js) so `RENKEI_CLIENTS` is not hand-written JSON.
+- [x] "3 env vars and go" quickstart — `renkei init` (writes `.env` with generated
+      `RENKEI_JWKS` / `RENKEI_COOKIE_KEYS`, `DATABASE_URL=sqlite:…`, `RENKEI_DEV=true`;
+      refuses to overwrite) and `renkei add-client <id> --redirect <url>
+      [--preset authjs|supabase|public] [--replace] [--print]` (secret generated,
+      merged into `RENKEI_CLIENTS`, validated with the server's zod schema, app-side
+      snippet printed). 15 CLI tests; live: the generated `.env` + real channel booted
+      on :8787 with no key warning, `/dev` up, the registered client accepted at
+      `/oidc/auth`. Docs: README ja/en quickstart, config reference, Next.js +
+      Supabase tutorials, CLI README (2026-08-30).
 - [ ] Then the ROADMAP v0.3 list: `renkei-client` / `renkei-next` SDKs,
       Cloudflare Workers (KV/D1) + Supabase Edge targets, LINE MINI App channel
       support, multi-region tutorial. Scope each with Achraf before starting.

@@ -1,7 +1,7 @@
 {
   "name": "renkei",
   "version": "0.2.3",
-  "description": "renkei (連携) — self-hosted identity broker for LINE. `npx renkei` starts the server.",
+  "description": "renkei (連携) — self-hosted identity broker for LINE. `npx renkei init` writes a ready-to-run .env, `npx renkei` starts the server, `renkei add-client` registers your app.",
   "license": "Apache-2.0",
   "author": "Achraf Reyani",
   "repository": {
@@ -27,11 +27,13 @@
   },
   "files": [
     "bin",
+    "lib",
     "index.js",
     "README.md"
   ],
   "scripts": {
-    "typecheck": "node --check bin/renkei.js"
+    "typecheck": "node --check bin/renkei.js && node --check lib/cli.js && node --check lib/env-file.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "renkei-server": "workspace:*"
