@@ -1,16 +1,15 @@
 import { defineProject } from 'vitest/config';
 
-// The e2e suite also runs on renkei-storage-sqlite; node:sqlite is unflagged from Node 22.13.
+// node:sqlite is unflagged from Node 22.13; older 22.x still ships it behind a flag.
 const [major = 0, minor = 0] = process.versions.node.split('.').map(Number);
 const needsFlag = major === 22 && minor < 13;
 
 export default defineProject({
   resolve: { conditions: ['development'] },
   test: {
-    name: 'server',
+    name: 'storage-sqlite',
     include: ['test/**/*.test.ts'],
     environment: 'node',
-    testTimeout: 30_000,
     ...(needsFlag ? { execArgv: ['--experimental-sqlite'] } : {}),
   },
 });

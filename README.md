@@ -103,7 +103,7 @@ const { id_token } = await res.json()   // renkei が署名した id_token（RS2
 | `RENKEI_CLIENTS` | 下流クライアントの JSON 配列（`clientId`, `clientSecret`, `redirectUris`, `placeholderEmailDomain` …） |
 | `RENKEI_COOKIE_KEYS` | Cookie 署名鍵（カンマ区切り、ローテーション可） |
 | `RENKEI_JWKS` | トークン署名鍵（JWK の JSON 配列）。未設定なら起動ごとに生成（開発用） |
-| `DATABASE_URL` | Postgres。未設定ならインメモリ（開発用） |
+| `DATABASE_URL` | `postgres://…` または `sqlite:./data/renkei.db`（Node 22.13+ 組み込みの SQLite、依存ゼロ）。未設定ならインメモリ（開発用） |
 
 ## エンドポイント
 

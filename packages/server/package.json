@@ -36,11 +36,12 @@
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",
-    "renkei-core": "workspace:*",
-    "renkei-storage-postgres": "workspace:*",
     "hono": "^4.13.4",
     "jose": "^6.2.10",
     "oidc-provider": "^9.11.5",
+    "renkei-core": "workspace:*",
+    "renkei-storage-postgres": "workspace:*",
+    "renkei-storage-sqlite": "workspace:*",
     "zod": "^4.4.3"
   },
   "devDependencies": {

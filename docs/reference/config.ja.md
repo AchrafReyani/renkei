@@ -18,7 +18,7 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 |---|---|---|
 | `ISSUER` | `http://localhost:3000` | renkei の公開 URL。**OIDC の issuer になり、全ての絶対 URL の元になります。** 末尾スラッシュなし。プロキシの内側にいる場合も外から見える URL を入れてください |
 | `PORT` | `ISSUER` のポート、無ければ `3000` | 待ち受けポート |
-| `DATABASE_URL` | なし | Postgres の接続文字列。未設定なら**インメモリ**（再起動で全消去、複数プロセス不可。開発専用） |
+| `DATABASE_URL` | なし | `postgres://…` なら Postgres、`sqlite:./data/renkei.db` なら SQLite（Node 22.13+ 組み込みの `node:sqlite`。依存ゼロ、DB サーバー不要、1 プロセス向け。ファイルは永続ディスクに置くこと）。未設定なら**インメモリ**（再起動で全消去、複数プロセス不可。開発専用） |
 | `RENKEI_COOKIE_KEYS` | 起動ごとに生成 | Cookie 署名鍵。カンマ区切りで複数。ローテーションは先頭に新しい鍵を追加。**本番では必ず設定** |
 | `RENKEI_JWKS` | 起動ごとに生成 | トークン署名用の秘密鍵（JWK の JSON 配列、`kid` と `alg` 付き）。未設定だと再起動で全トークンが無効になり、複数インスタンスで動きません。**本番では必ず設定**（[鍵の作り方](#署名鍵を作る)） |
 | `RENKEI_DEV` | `RENKEI_CLIENTS` と `DATABASE_URL` が両方未設定なら `true` | `/dev` の動作確認用リライングパーティを有効化。`RENKEI_CLIENTS` と併用時は `renkei-dev` / `renkei-dev-liff` クライアントが自動で追加される。**本番では無効に** |
@@ -106,9 +106,11 @@ console.log(JSON.stringify([{ ...jwk, kid: 'k' + Date.now().toString(36), alg: '
 ```ts
 import { createRenkei } from 'renkei-server';
 import { createPostgresStorage } from 'renkei-storage-postgres';
+// または SQLite: import { createSqliteStorage } from 'renkei-storage-sqlite';
 
 const renkei = await createRenkei({
   storage: createPostgresStorage({ connectionString: process.env.DATABASE_URL! }),
+  // storage: createSqliteStorage({ filename: './data/renkei.db' }),
   config: {
     issuer: 'https://auth.example.com',
     channels: [

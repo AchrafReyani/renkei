@@ -1,0 +1,37 @@
+{
+  "name": "renkei-storage-sqlite",
+  "version": "0.2.3",
+  "description": "SQLite storage for renkei. Zero dependencies on Node 22.13+ (built-in node:sqlite); better-sqlite3 and Bun via a 3-method driver interface.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AchrafReyani/renkei.git",
+    "directory": "packages/storage-sqlite"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "development": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "renkei-core": "workspace:*"
+  }
+}

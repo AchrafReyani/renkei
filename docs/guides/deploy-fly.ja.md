@@ -13,6 +13,8 @@ Docker イメージをそのまま Fly.io（東京リージョン `nrt`）で動
 
 マイグレーションは renkei が起動時に自動で流します（`autoMigrate`）。
 
+Postgres を持ちたくない場合は SQLite でも動きます: `fly volumes create data --region nrt --size 1` でボリュームを作り、`fly.toml` の `[mounts]` で `/data` にマウントして `DATABASE_URL=sqlite:/data/renkei.db` を設定します（1 マシン構成のみ）。
+
 ## 2. アプリを作る
 
 リポジトリのルートに `fly.toml` があります。`app` 名と `ISSUER` を自分のものに書き換えてから:

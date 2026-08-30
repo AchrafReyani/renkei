@@ -13,9 +13,10 @@ and README GIF are done (§2), the optional demo env experiments are live (§1).
 account-link fix in all four packages). The auto-mode allow rules for
 `gh pr merge` / `git push origin` are in place, so Claude now merges and tags
 itself; only the npm passkey publish stays with Achraf. #51 is confirmed live
-from the phone (§1). What remains: the Zenn article after 2026-09-10 (§2),
+from the phone (§1). **v0.3 has started** (§5): `renkei-storage-sqlite` is
+merged, release pending. Still open: the Zenn article after 2026-09-10 (§2),
 the §4 re-check (still Applied 2026-08-30 evening), the LIFF phone shot (§2,
-optional) — then v0.3.
+optional).
 
 ## Where things stand (end of 2026-08-30)
 
@@ -190,10 +191,33 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
   trailers inline (see the [[renkei-project]] memory); the squash-merge
   message is free-form.
 
-## After all of the above → v0.3
+## 5. v0.3 — in progress (started 2026-08-30)
 
-Next real coding milestone (ROADMAP.md → v0.3): `renkei-client` /
-`renkei-next` SDKs, Cloudflare Workers + Supabase Edge deploy targets, LINE
-MINI App channel support, multi-region tutorial. Scope with Achraf before
-starting. Candidate from today's findings: model account linkage as a flag on
-the LINE account row instead of overloading `kind` (needs a migration).
+Direction agreed with Achraf: attack the setup cost first (the honest
+objection to renkei versus raw LINE Login is "a server plus Postgres plus
+six env vars"), breadth (TW/TH, MINI App) after.
+
+- [x] `renkei-storage-sqlite` — Node's built-in `node:sqlite`, zero deps,
+      `DATABASE_URL=sqlite:./data/renkei.db`; `createSqliteDriverStorage()` for
+      better-sqlite3 / Bun. 14 tests (shared contract + persistence/reopen/FK);
+      the server e2e suite (fake LINE) now runs on memory **and** sqlite. **Live-
+      verified 2026-08-30**: `pnpm dev:server` on :8787 with `DATABASE_URL=sqlite:…`,
+      real LINE login via `/dev` → id_token + userinfo with all `line:*` claims;
+      the file held the identity, the `login` account row (friend, raw profile)
+      and the AccessToken / AuthorizationCode / Grant / Session payloads.
+      Wired into `renkei-server`, docs (config reference ja/en, README ja/en,
+      deploy-fly note, `.env.example`), DECISIONS.md §11. Minor changeset →
+      **0.3.0** for `renkei-storage-sqlite` + `renkei-server` (+ CLI via the
+      linked group) at the next release.
+- [ ] Achraf: upgrade local Node to 22.13+ (`winget upgrade OpenJS.NodeJS.LTS`
+      in cmd, then `node -v`) — 22.12 needs `--experimental-sqlite` for
+      `pnpm dev:server` with a `sqlite:` URL (tests already pass the flag).
+- [ ] Cut **0.3.0** (same split as §0: Claude branches/merges/tags, Achraf
+      publishes with the passkey). Not urgent — bundle with the next item.
+- [ ] "3 env vars and go" quickstart: `renkei add-client` (prints the OIDC
+      config for Supabase / Auth.js) so `RENKEI_CLIENTS` is not hand-written JSON.
+- [ ] Then the ROADMAP v0.3 list: `renkei-client` / `renkei-next` SDKs,
+      Cloudflare Workers (KV/D1) + Supabase Edge targets, LINE MINI App channel
+      support, multi-region tutorial. Scope each with Achraf before starting.
+      Candidate from the #51 findings: model account linkage as a flag on the
+      LINE account row instead of overloading `kind` (needs a migration).

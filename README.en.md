@@ -103,7 +103,7 @@ Environment variables (`.env`). Full reference: [config](docs/reference/config.e
 | `RENKEI_CLIENTS` | JSON array of downstream clients (`clientId`, `clientSecret`, `redirectUris`, `placeholderEmailDomain`, …) |
 | `RENKEI_COOKIE_KEYS` | cookie signing keys (comma-separated, rotatable) |
 | `RENKEI_JWKS` | token signing keys (JSON array of JWKs); generated per boot if unset (dev only) |
-| `DATABASE_URL` | Postgres; in-memory if unset (dev only) |
+| `DATABASE_URL` | `postgres://…` or `sqlite:./data/renkei.db` (Node 22.13+ built-in SQLite, zero dependencies); in-memory if unset (dev only) |
 
 ## Endpoints
 

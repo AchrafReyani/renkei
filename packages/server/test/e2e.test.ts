@@ -6,9 +6,16 @@
  */
 
 import { createLocalJWKSet, jwtVerify, SignJWT } from 'jose';
-import { createMemoryStorage } from 'renkei-core';
+import { createMemoryStorage, type Storage } from 'renkei-core';
+import { createSqliteStorage } from 'renkei-storage-sqlite';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createRenkei, type Renkei } from '../src/index.js';
+
+/** The whole suite runs once per storage adapter that ships in the server image. */
+const STORAGES: Array<[name: string, make: () => Storage]> = [
+  ['memory', () => createMemoryStorage()],
+  ['sqlite', () => createSqliteStorage({ filename: ':memory:' })],
+];
 
 const ISSUER = 'http://renkei.test';
 const CHANNEL = {
@@ -163,9 +170,10 @@ class Browser {
 async function boot(
   line: FakeLine,
   extra: Partial<Parameters<typeof createRenkei>[0]['config']> = {},
+  storage: Storage = createMemoryStorage(),
 ) {
   return createRenkei({
-    storage: createMemoryStorage(),
+    storage,
     fetch: line.fetch,
     logger: { info() {}, warn() {}, error() {} },
     config: {
@@ -201,14 +209,14 @@ async function loginThroughRenkei(
   return { lineUrl, back };
 }
 
-describe('renkei end to end', () => {
+describe.each(STORAGES)('renkei end to end (%s storage)', (_name, makeStorage) => {
   let line: FakeLine;
   let renkei: Renkei;
   let jwks: ReturnType<typeof createLocalJWKSet>;
 
   beforeAll(async () => {
     line = fakeLine({ userId: 'Uabc', name: 'テスト太郎', picture: 'https://p/1', friend: true });
-    renkei = await boot(line);
+    renkei = await boot(line, {}, makeStorage());
     const keys = await (await renkei.fetch(new Request(`${ISSUER}/oidc/jwks`))).json();
     jwks = createLocalJWKSet(keys);
   });
@@ -417,7 +425,11 @@ describe('renkei end to end', () => {
       email: 'mail@example.com',
       friend: false,
     });
-    const r = await boot(emailLine, { channels: [{ ...CHANNEL, requestEmail: true }] });
+    const r = await boot(
+      emailLine,
+      { channels: [{ ...CHANNEL, requestEmail: true }] },
+      makeStorage(),
+    );
     const b = new Browser(r);
     const auth = new URL('/oidc/auth', ISSUER);
     auth.search = new URLSearchParams({
@@ -527,7 +539,7 @@ describe('renkei end to end', () => {
       redirectUris: ['http://supa.test/cb'],
       placeholderEmailDomain: 'line-users.example.com',
     };
-    const r = await boot(noEmailLine, { clients: [APP, SUPA] });
+    const r = await boot(noEmailLine, { clients: [APP, SUPA] }, makeStorage());
     const keys = await (await r.fetch(new Request(`${ISSUER}/oidc/jwks`))).json();
     const localJwks = createLocalJWKSet(keys);
 
