@@ -76,12 +76,12 @@ Order matters: each item is what the next needs.
 - [x] Dockerfile (node:22-alpine, pnpm deploy --prod, 301 MB) — verified standalone 2026-08-26;
       GHCR publish workflow written (`release.yml`, runs on `v*` tags — first
       exercised on `v0.2.0`, 2026-08-27: `:0.2.0` / `:0.2` / `:latest`;
-      `v0.2.1` and `v0.2.2` on 2026-08-30)
+      `v0.2.1`, `v0.2.2` and `v0.2.3` on 2026-08-30)
 - [x] `docker-compose.yml` with Postgres — verified: migrations run at boot, healthz 200
 - [x] npm publish via Changesets (`changeset version` on a PR, then `pnpm -r publish`
       interactively — passkey 2FA); 0.2.0 published 2026-08-27, 0.2.1 (patches
       #38 / #40) and 0.2.2 (#44, server + CLI only) 2026-08-30; 0.2.3 (#51,
-      all four packages) versioned 2026-08-30, publish pending. `renkei` CLI =
+      all four packages) published 2026-08-30. `renkei` CLI =
       `npx renkei` ready
 - [x] Demo instance running (Render free tier, cold-start disclaimer in README) — 2026-08-26
 
