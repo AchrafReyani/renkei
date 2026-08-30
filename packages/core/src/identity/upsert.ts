@@ -37,13 +37,17 @@ export interface UpsertResult {
  *    scope must not erase what an earlier login granted.
  * 4. Friendship is recorded when known; absence of information leaves the
  *    previous value alone.
+ * 5. A row that already records an account link (`kind: 'messaging'`) keeps
+ *    it: a later login or LIFF exchange on the same (channelId, lineUserId)
+ *    refreshes the row but never downgrades the kind, or the link would be
+ *    lost on the next login.
  */
 export async function upsertIdentityFromLine(
   storage: Storage,
   params: UpsertFromLineParams,
 ): Promise<UpsertResult> {
   const { channelId, claims, profile } = params;
-  const kind = params.kind ?? 'login';
+  const requestedKind = params.kind ?? 'login';
   const now = params.now ?? (() => new Date());
   const lineUserId = claims.sub;
 
@@ -55,8 +59,13 @@ export async function upsertIdentityFromLine(
 
   let identity = await storage.identities.findIdentityByLineAccount(channelId, lineUserId);
   let created = false;
+  let kind: LineAccountKind = requestedKind;
   if (identity) {
     identity = await storage.identities.updateIdentity(identity.sub, patch);
+    // Rule 5: when the messaging channelId is not configured, the accountLink
+    // handler records the link on this very row by flipping its kind. Keep it.
+    const existing = await storage.identities.findLineAccount(channelId, lineUserId);
+    if (existing?.kind === 'messaging') kind = 'messaging';
   } else {
     const sub = (params.generateSub ?? (() => randomToken(24)))();
     identity = await storage.identities.createIdentity({ sub, ...patch });

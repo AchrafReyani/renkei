@@ -91,6 +91,29 @@ describe('upsertIdentityFromLine', () => {
     expect(tw.identity.sub).not.toBe(jp.identity.sub);
   });
 
+  it('keeps a collapsed link (kind messaging) across later logins and LIFF exchanges', async () => {
+    // Seen live on renkei-demo 2026-08-30: after linking without a configured
+    // messaging channelId the login row's kind is 'messaging'; the next LIFF
+    // exchange upserted kind 'liff' over it and line:linked went back to false.
+    const s = createMemoryStorage();
+    await upsertIdentityFromLine(s, { channelId, claims, generateSub: () => 'sub-A' });
+    await s.identities.upsertLineAccount({
+      identitySub: 'sub-A',
+      channelId,
+      lineUserId: 'Uaaa',
+      kind: 'messaging',
+    });
+    const liff = await upsertIdentityFromLine(s, { channelId, claims, kind: 'liff', friend: true });
+    expect(liff.created).toBe(false);
+    expect(liff.account).toMatchObject({ kind: 'messaging', friend: true });
+    const login = await upsertIdentityFromLine(s, { channelId, claims });
+    expect(login.account.kind).toBe('messaging');
+    const identity = await s.identities.findIdentity('sub-A');
+    if (!identity) throw new Error('identity missing');
+    const c = buildClaims(identity, await s.identities.listLineAccounts('sub-A'));
+    expect(c).toMatchObject({ [LINE_CLAIMS.userId]: 'Uaaa', [LINE_CLAIMS.linked]: true });
+  });
+
   it('leaves friendship untouched when the call did not check it', async () => {
     const s = createMemoryStorage();
     await upsertIdentityFromLine(s, { channelId, claims, friend: true });
