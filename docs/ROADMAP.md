@@ -83,8 +83,9 @@ Order matters: each item is what the next needs.
 - [x] npm publish via Changesets (`changeset version` on a PR, then `pnpm -r publish`
       interactively — passkey 2FA); 0.2.0 published 2026-08-27, 0.2.1 (patches
       #38 / #40) and 0.2.2 (#44, server + CLI only) 2026-08-30; 0.2.3 (#51,
-      all four packages) published 2026-08-30. `renkei` CLI =
-      `npx renkei` ready
+      all four packages) published 2026-08-30; 0.3.0 (`renkei`, `renkei-server`,
+      first publish of `renkei-storage-sqlite`) versioned 2026-08-30, publish pending.
+      `renkei` CLI = `npx renkei` ready
 - [x] Demo instance running (Render free tier, cold-start disclaimer in README) — 2026-08-26
 
 **docs (JA primary, EN mirror in the same PR)**
