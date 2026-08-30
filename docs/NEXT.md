@@ -12,9 +12,10 @@ and README GIF are done (§2), the optional demo env experiments are live (§1).
 **0.2.2 and 0.2.3 are released** (npm + GHCR, §0; 0.2.3 carries the #51
 account-link fix in all four packages). The auto-mode allow rules for
 `gh pr merge` / `git push origin` are in place, so Claude now merges and tags
-itself; only the npm passkey publish stays with Achraf. What remains: confirm
-#51 from the phone (§1), the Zenn article after 2026-09-10 (§2), the §4
-re-check, the LIFF phone shot (§2, optional) — then v0.3.
+itself; only the npm passkey publish stays with Achraf. #51 is confirmed live
+from the phone (§1). What remains: the Zenn article after 2026-09-10 (§2),
+the §4 re-check (still Applied 2026-08-30 evening), the LIFF phone shot (§2,
+optional) — then v0.3.
 
 ## Where things stand (end of 2026-08-30)
 
@@ -129,11 +130,10 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
 - [x] **JSON logs** live (`RENKEI_LOG_FORMAT=json`): an unsigned webhook POST
       produced `{"level":"warn","msg":"[renkei] webhook signature verification failed"}`
       in Render logs. The boot banner stays plain text by design.
-- [ ] **Confirm the #51 fix live** (needs Achraf's phone): the demo redeployed
-      with #51 on merge. Open the LIFF app, exchange, and check the response
-      shows `line:linked: true` (before #51 it said `false` right after a
-      `/dev` login had said `true`). `/inspect` → lookup by LINE userId should
-      show the row's `kind` still `messaging` after the exchange.
+- [x] **#51 confirmed live** (2026-08-30, Achraf's phone): the LIFF app
+      (`liff.line.me/2011257262-OKRFVulZ` → demo `/dev/liff` → `POST
+      /liff/exchange`) now returns `line:linked: true` on 0.2.3, where the same
+      exchange said `false` the morning before the fix.
 - [ ] (Optional) **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`) — not set:
       nothing exists to receive the POST. Needs a downstream endpoint first.
 
