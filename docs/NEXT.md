@@ -104,7 +104,7 @@ with `&&`, never `;`.
 ## 4. LINE email permission
 
 - [ ] Check the Login channel (Basic settings → Email address permission).
-      *Last checked 2026-08-26: still 申請済み (Applied).* Claude can check this
+      *Last checked 2026-08-30 (Claude, console): still 申請済み (Applied).* Claude can check this
       in Chrome once Achraf has logged the console in (see quirks). When
       **Approved**: set `RENKEI_REQUEST_EMAIL=true`, log in once with email
       consent, confirm `email` in the id_token, note in DEV_SETUP.md. Until
