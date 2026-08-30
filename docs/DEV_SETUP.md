@@ -14,7 +14,7 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
 | Provider | **renkei** — ID `2005473999` | developers.line.biz/console/provider/2005473999 |
 | LINE Login channel | **renkei-dev-jp** — ID `2011257262`, region **Japan**, status **Published** (since 2026-08-26, irreversible), Web app enabled, 2FA on | /console/channel/2011257262 |
 | Callback URLs | `http://localhost:3000/line/callback` · `http://localhost:8787/line/callback` · `http://127.0.0.1:3000/line/callback` | LINE Login tab |
-| LIFF app | **renkei-dev** — ID `2011257262-OKRFVulZ`, Full, scopes `openid profile`, add-friend **On (Aggressive)**, endpoint currently a **Cloudflare quick-tunnel URL** (`…trycloudflare.com/dev/liff`, ephemeral — update whenever the tunnel restarts) | LIFF tab |
+| LIFF app | **renkei-dev** — ID `2011257262-OKRFVulZ`, Full, scopes `openid profile`, add-friend **On (Aggressive)**, endpoint **`https://renkei-demo.onrender.com/dev/liff`** (the demo; since 2026-08-30 — for local LIFF work point it at a `cloudflared` quick tunnel and put it back afterwards) | LIFF tab |
 | LINE Official Account | display name "Achraf" (rename to "renkei dev" in OA Manager when convenient), basic ID `@360trecn`, industry 個人 | manager.line.biz/account/@360trecn |
 | Messaging API channel | ID `2011257490`, **provider renkei** ✔ | OA Manager → Settings → Messaging API; also visible in Developers Console |
 | Login ↔ OA link | renkei-dev-jp → Linked LINE Official Account = `@360trecn` ✔ | Login channel → Basic settings → Add friend option |

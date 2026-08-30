@@ -35,6 +35,10 @@ LINE Platform ──────▶  renkei (self-hosted)  ──────▶
 
 ![The /dev login flow: click login → LINE → an id_token with line:* claims](docs/images/dev-flow.gif)
 
+The same id_token from inside the LINE app (LIFF) — open `https://liff.line.me/2011257262-OKRFVulZ` in LINE on a phone to see the `/liff/exchange` result:
+
+<img src="docs/images/liff-phone.png" alt="The LIFF exchange result inside the LINE app: inClient true and a renkei id_token with line:* claims" width="320">
+
 > **Free-hosting caveat (Render Free + Neon Free)**: the instance sleeps after 15 idle minutes, so **the first request can take up to a minute**. It can also **return 404 or not respond at all** for reasons on the hosting side. That is not a renkei bug — wait a bit and reload, or run it locally with "Try it in 5 minutes" below (which is the real experience).
 
 ## Try it in 5 minutes

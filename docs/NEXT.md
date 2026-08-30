@@ -9,8 +9,9 @@ done — 0.2.1 shipped, the demo login works, #40 is confirmed live. The
 remaining list is optional/launch/time-gated. Dogfood dates are set (§3: 2026-08-27 → earliest launch
 2026-09-10), the email permission is still Applied (§4), the social preview
 and README GIF are done (§2), the optional demo env experiments are live (§1).
-**0.2.2 is released** (npm + GHCR, §0). What remains: the Zenn article after
-2026-09-10 (§2), the §4 re-check, the LIFF phone shot (§2, optional) — then v0.3. 0.2.2 can wait until
+**0.2.2 is released** (npm + GHCR, §0); #51 (`renkei-core` patch) is pending
+for a 0.2.3. What remains: the Zenn article after 2026-09-10 (§2), the §4
+re-check — then v0.3. 0.2.2 can wait until
 another patch lands or the launch is near.
 
 ## Where things stand (end of 2026-08-30)
@@ -32,6 +33,13 @@ another patch lands or the launch is near.
 - 159 tests green; lint / typecheck / build / docs pass. `main` = `4ccd8b5`.
 - **Live #40 confirmation done** (§1): Achraf's `/dev` login on the demo shows
   `line:linked: true` with all `line:*` claims.
+- **One patch changeset pending → 0.2.3** (#51, 2026-08-30, `renkei-core`):
+  a link collapsed onto the login row (`kind: messaging`, no
+  `LINE_MESSAGING_CHANNEL_ID`) was overwritten by the next login / LIFF
+  exchange (`kind: login`/`liff`) and `line:linked` fell back to `false`.
+  `upsertIdentityFromLine` now keeps a `messaging` kind. Found by the LIFF
+  phone shot; verified live after Achraf re-linked. Not urgent: deployments
+  with `LINE_MESSAGING_CHANNEL_ID` set store a separate row and never hit it.
 - **0.2.2 released 2026-08-30** (`renkei-server` + `renkei` CLI; #44): `/dev` borrowed
   `clients[0]` when `RENKEI_CLIENTS` had no `renkei-dev` client, so the demo's
   login button died with `invalid_redirect_uri` / `client_id=jobmatch`. Now the
@@ -109,7 +117,11 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
       320 KB, recorded on renkei-demo — LINE's consent screen is skipped
       because Chrome's LINE SSO auto-approved; it shows Achraf's `line:user_id`,
       which NEXT.md already lists). Linked from both READMEs.
-- [ ] (Optional) In-app **LIFF phone shot** — only Achraf's phone can take it.
+- [x] In-app **LIFF phone shot** — `docs/images/liff-phone.png` (Achraf, Android,
+      2026-08-30), linked from both READMEs. `LIFF_ID` is set on Render and the
+      LIFF app's endpoint now points at the demo. The first shot showed
+      `line:linked: false` → bug #51 (below); the retake after the fix + a
+      re-link shows `true`.
 - [x] **Flip the repo public** — already PUBLIC as of 2026-08-30 (`gh repo view`).
 - [ ] Run LAUNCH.md §2 (publish the Zenn article — draft is
       `drafts/zenn-account-linking.md`) — not before **2026-09-10** (§3).
@@ -133,6 +145,14 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
       then, Supabase-style downstreams rely on `placeholderEmailDomain`.
 
 ## Things learned on 2026-08-27/30 (don't relearn)
+
+- oidc-provider **reuses its session cookie**: a second `/dev` login in the same
+  browser never reaches `/line/callback`, so it cannot catch upsert bugs — the
+  LIFF exchange (`/liff/exchange`) always upserts and can. Test both paths.
+- The Claude-in-Chrome classifier blocks typing LIFF IDs / URLs into Render
+  and LINE-console fields (reads them as credentials); leave the field open in
+  edit mode and hand Achraf the value. Chrome's LINE SSO auto-approves, so
+  Claude can run and record the full `/dev` flow on the demo.
 
 - `RENKEI_CLIENTS` on the demo holds the jobmatch client **secret**; the
   Claude-in-Chrome classifier blocks every scripted or typed edit of that Render
