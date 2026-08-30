@@ -14,8 +14,7 @@ account-link fix in all four packages). The auto-mode allow rules for
 `gh pr merge` / `git push origin` are in place, so Claude now merges and tags
 itself; only the npm passkey publish stays with Achraf. #51 is confirmed live
 from the phone (§1). **v0.3 has started** (§5): `renkei-storage-sqlite` and
-`renkei init` / `add-client` are merged and **0.3.0 is versioned** (§0: publish
-is Achraf's, tag + GHCR check are Claude's). Still open: the Zenn article after 2026-09-10 (§2),
+`renkei init` / `add-client` shipped as **0.3.0** (npm + GHCR, §0). Still open: the Zenn article after 2026-09-10 (§2),
 the §4 re-check (still Applied 2026-08-30 evening), the LIFF phone shot (§2,
 optional).
 
@@ -45,6 +44,10 @@ optional).
   explanation rather than impersonating a real client. Live on the demo
   (`/dev` → `client_id=renkei-dev` → `/interaction/…`). Not urgent to release:
   only affects `RENKEI_DEV=true` + `RENKEI_CLIENTS` deployments.
+- **0.3.0 released 2026-08-30** (`renkei`, `renkei-server`, first publish of
+  `renkei-storage-sqlite`; PR #58; tag `v0.3.0`; release.yml run 33308564860 pushed
+  `ghcr.io/achrafreyani/renkei:0.3.0` / `:0.3` / `:latest`). Carries #56 (SQLite
+  storage on `node:sqlite`) and #57 (`renkei init` / `add-client`).
 - **0.2.3 released 2026-08-30** (all four packages on npm; PR #53; tag
   `v0.2.3`; release.yml run 33305915772 pushed `ghcr.io/achrafreyani/renkei:0.2.3`
   / `:0.2` / `:latest`). It carries **#51** (`renkei-core` patch):
@@ -64,7 +67,7 @@ optional).
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.3.0 — IN FLIGHT 2026-08-30 (storage-sqlite + CLI init/add-client)
+## 0. Cut 0.3.0 — DONE 2026-08-30 (storage-sqlite + CLI init/add-client)
 
 Same split as 0.2.x. `renkei`, `renkei-server` and the new `renkei-storage-sqlite`
 go to **0.3.0**; `renkei-core` and `renkei-storage-postgres` have no changeset and
@@ -74,12 +77,13 @@ publish** — same `--access public`, nothing else special. Achraf's terminal is
 
 - [x] Claude: `release/0.3.0` — `pnpm changeset version` → lint / typecheck /
       198 tests / build / docs:build green → DCO commit → PR → squash-merge.
-- [ ] Achraf, in cmd on `main`: `git checkout main && git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
+- [x] Achraf, in cmd on `main`: `git checkout main && git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
       (passkey once per package — three this time).
-- [ ] Claude: `git tag -a v0.3.0 -m "v0.3.0" && git push origin v0.3.0`, watch
-      `release.yml`, read the GHCR tags from the run log (`:0.3.0` / `:0.3` / `:latest`).
-- [ ] Claude: tick here + ROADMAP.md, confirm `npm view renkei version` = 0.3.0 and
-      `npm view renkei-storage-sqlite version` = 0.3.0.
+- [x] Claude: tagged and pushed `v0.3.0`; `release.yml` run 33308564860 succeeded and
+      pushed `ghcr.io/achrafreyani/renkei:0.3.0` / `:0.3` / `:latest`.
+- [x] Claude: ticked here + ROADMAP.md; `npm view` = 0.3.0 for `renkei`,
+      `renkei-server` and `renkei-storage-sqlite`, 0.2.3 for `renkei-core` and
+      `renkei-storage-postgres`.
 
 ### 0.2.3 — DONE 2026-08-30 (#51 account-link fix)
 
@@ -230,8 +234,7 @@ six env vars"), breadth (TW/TH, MINI App) after.
 - [ ] Achraf: upgrade local Node to 22.13+ (`winget upgrade OpenJS.NodeJS.LTS`
       in cmd, then `node -v`) — 22.12 needs `--experimental-sqlite` for
       `pnpm dev:server` with a `sqlite:` URL (tests already pass the flag).
-- [~] Cut **0.3.0** — versioned on `release/0.3.0` (see §0); Achraf's publish + the
-      tag are the open steps.
+- [x] Cut **0.3.0** — released 2026-08-30 (§0).
 - [x] "3 env vars and go" quickstart — `renkei init` (writes `.env` with generated
       `RENKEI_JWKS` / `RENKEI_COOKIE_KEYS`, `DATABASE_URL=sqlite:…`, `RENKEI_DEV=true`;
       refuses to overwrite) and `renkei add-client <id> --redirect <url>
