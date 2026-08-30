@@ -231,9 +231,10 @@ six env vars"), breadth (TW/TH, MINI App) after.
       deploy-fly note, `.env.example`), DECISIONS.md §11. Minor changeset →
       **0.3.0** for `renkei-storage-sqlite` + `renkei-server` (+ CLI via the
       linked group) at the next release.
-- [ ] Achraf: upgrade local Node to 22.13+ (`winget upgrade OpenJS.NodeJS.LTS`
-      in cmd, then `node -v`) — 22.12 needs `--experimental-sqlite` for
-      `pnpm dev:server` with a `sqlite:` URL (tests already pass the flag).
+- [x] Achraf: local Node upgraded 22.12 → 22.23.2 (2026-08-30, `winget upgrade
+      OpenJS.NodeJS.22` — the MSI install is registered under that ID, not
+      `OpenJS.NodeJS.LTS`). `sqlite:` URLs now work without `--experimental-sqlite`;
+      Node 22 still prints a cosmetic ExperimentalWarning for `node:sqlite`.
 - [x] Cut **0.3.0** — released 2026-08-30 (§0).
 - [x] "3 env vars and go" quickstart — `renkei init` (writes `.env` with generated
       `RENKEI_JWKS` / `RENKEI_COOKIE_KEYS`, `DATABASE_URL=sqlite:…`, `RENKEI_DEV=true`;
