@@ -33,6 +33,8 @@ LINE Platform ──────▶  renkei (self-hosted)  ──────▶
 
 **<https://renkei-demo.onrender.com/dev>** — "LINEでログイン" → friend-add screen → an id_token with `line:*` claims, right there. You log in with your own LINE account (the only side effect is one row in the demo DB mapping to your LINE user ID).
 
+![The /dev login flow: click login → LINE → an id_token with line:* claims](docs/images/dev-flow.gif)
+
 > **Free-hosting caveat (Render Free + Neon Free)**: the instance sleeps after 15 idle minutes, so **the first request can take up to a minute**. It can also **return 404 or not respond at all** for reasons on the hosting side. That is not a renkei bug — wait a bit and reload, or run it locally with "Try it in 5 minutes" below (which is the real experience).
 
 ## Try it in 5 minutes

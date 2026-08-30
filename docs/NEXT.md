@@ -7,8 +7,10 @@ steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 **Pick up here (session ended 2026-08-30 ~04:30 JST):** everything urgent is
 done — 0.2.1 shipped, the demo login works, #40 is confirmed live. The
 remaining list is optional/launch/time-gated. Dogfood dates are set (§3: 2026-08-27 → earliest launch
-2026-09-10). Next: the **§4 email-permission check** (needs the LINE console
-logged in), then §2 launch steps. 0.2.2 can wait until
+2026-09-10), the email permission is still Applied (§4), the social preview
+and README GIF are done (§2), the optional demo env experiments are live (§1).
+**0.2.2 is cut on the git side** — what remains is Achraf's publish + tag
+(§0), the Zenn article after 2026-09-10 (§2) and the §4 re-check. 0.2.2 can wait until
 another patch lands or the launch is near.
 
 ## Where things stand (end of 2026-08-30)
@@ -46,12 +48,22 @@ another patch lands or the launch is near.
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.2.1  — DONE 2026-08-30
+## 0. Cut 0.2.2  — IN PROGRESS 2026-08-30 (0.2.1 done the same way)
 
-Same flow as 0.2.0; reuse it verbatim for **0.2.2** when the time comes
-(one changeset already pending, #44). Split so Claude does the git side and
-Achraf the passkey side. Achraf's terminal is **`cmd.exe`** — join commands
-with `&&`, never `;`.
+Same flow as 0.2.0/0.2.1. Split so Claude does the git side and Achraf the
+passkey side. Achraf's terminal is **`cmd.exe`** — join commands with `&&`,
+never `;`. Only `renkei-server` and the `renkei` CLI move to **0.2.2**
+(#44); `renkei-core` / `renkei-storage-postgres` have no changeset and stay
+at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
+
+- [x] Claude: `release/0.2.2` — `pnpm changeset version` → lint/typecheck/test/build
+      green → DCO commit → PR (merge blocked by the classifier, Achraf merges).
+- [ ] Achraf, in cmd on `main`: `git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
+- [ ] Achraf: `git tag -a v0.2.2 -m "v0.2.2" && git push origin v0.2.2`, then
+      Claude watches `release.yml` and reads the GHCR tags from the run log.
+- [ ] Claude: tick here + ROADMAP.md, confirm `npm view renkei-server version` = 0.2.2.
+
+### 0.2.1 — DONE 2026-08-30
 
 - [x] Claude: branch → `pnpm changeset version` → check all four packages land
       on **0.2.1** (the `linked` group keeps them in step) → `pnpm lint &&
@@ -74,20 +86,27 @@ with `&&`, never `;`.
       #44): Achraf's `/dev` login showed `line:linked: true` **and**
       `line:user_id`, `line:friend: true`, `line:channel_id`, `line:region` in
       both the id_token and userinfo, `aud: renkei-dev`.
-- [ ] (Optional, cleaner data model) set `LINE_MESSAGING_CHANNEL_ID=2011257490`
-      on Render so the link is stored as its own `messaging` row instead of
-      flipping the login row's `kind`. Not required after #40.
-- [ ] (Optional) Try **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`),
-      **session mode** (`RENKEI_SESSION_COOKIE=true` → `/login`/`/session`),
-      and **JSON logs** (`RENKEI_LOG_FORMAT=json`) on the demo. Each is a
-      Render env change by Achraf + a redeploy.
+- [x] `LINE_MESSAGING_CHANNEL_ID=2011257490` set on Render (2026-08-30, Claude
+      via the dashboard; deploy dep-da9qprss728c73eiauog live). The separate
+      `messaging` row only appears on the *next* link — Achraf's existing link
+      keeps the flipped-`kind` row until he re-links.
+- [x] **Session mode** live on the demo (`RENKEI_SESSION_COOKIE=true`): `GET /login`
+      302 → LINE, `GET /session` 401 without a cookie, `POST /logout` 204.
+- [x] **JSON logs** live (`RENKEI_LOG_FORMAT=json`): an unsigned webhook POST
+      produced `{"level":"warn","msg":"[renkei] webhook signature verification failed"}`
+      in Render logs. The boot banner stays plain text by design.
+- [ ] (Optional) **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`) — not set:
+      nothing exists to receive the POST. Needs a downstream endpoint first.
 
 ## 2. Launch / UI steps  (Achraf, GitHub UI)
 
-- [ ] Upload `.github/social-preview.png` (repo is public now, so the setting
-      should be visible under Settings → General → Social preview).
-- [ ] (Optional) README GIF of the `/dev` flow + the in-app LIFF phone shot —
-      LINE screens are blocked for Claude, so Achraf records them.
+- [x] `.github/social-preview.png` uploaded (2026-08-30, Claude via Chrome;
+      persists after reload under Settings → General → Social preview).
+- [x] README GIF of the `/dev` flow: `docs/images/dev-flow.gif` (4 frames,
+      320 KB, recorded on renkei-demo — LINE's consent screen is skipped
+      because Chrome's LINE SSO auto-approved; it shows Achraf's `line:user_id`,
+      which NEXT.md already lists). Linked from both READMEs.
+- [ ] (Optional) In-app **LIFF phone shot** — only Achraf's phone can take it.
 - [x] **Flip the repo public** — already PUBLIC as of 2026-08-30 (`gh repo view`).
 - [ ] Run LAUNCH.md §2 (publish the Zenn article — draft is
       `drafts/zenn-account-linking.md`) — not before **2026-09-10** (§3).

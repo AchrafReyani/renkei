@@ -99,8 +99,8 @@ Order matters: each item is what the next needs.
 **hygiene** — full list in LAUNCH.md §3
 - [x] CONTRIBUTING (ja/en), CoC, SECURITY, templates, CODEOWNERS, labels
 - [x] 20 issues seeded (#1–#20), 6 `good first issue`
-- [~] Social preview image generated (`.github/social-preview.png`) — upload is UI-only;
-      topics + description set; homepage link at launch
+- [x] Social preview image generated (`.github/social-preview.png`) and uploaded
+      (2026-08-30); topics + description set; homepage link at launch
 - [x] Discussions enabled with a 「はじめに / Welcome」 thread
 
 **proof**
