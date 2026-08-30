@@ -4,19 +4,21 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
-**Pick up here (session ended 2026-08-30 ~04:30 JST):** everything urgent is
-done — 0.2.1 shipped, the demo login works, #40 is confirmed live. The
-remaining list is optional/launch/time-gated. Dogfood dates are set (§3: 2026-08-27 → earliest launch
-2026-09-10), the email permission is still Applied (§4), the social preview
-and README GIF are done (§2), the optional demo env experiments are live (§1).
-**0.2.2 and 0.2.3 are released** (npm + GHCR, §0; 0.2.3 carries the #51
-account-link fix in all four packages). The auto-mode allow rules for
-`gh pr merge` / `git push origin` are in place, so Claude now merges and tags
-itself; only the npm passkey publish stays with Achraf. #51 is confirmed live
-from the phone (§1). **v0.3 has started** (§5): `renkei-storage-sqlite` and
-`renkei init` / `add-client` shipped as **0.3.0** (npm + GHCR, §0). Still open: the Zenn article after 2026-09-10 (§2),
-the §4 re-check (still Applied 2026-08-30 evening), the LIFF phone shot (§2,
-optional).
+**Pick up here (session ended 2026-08-30 ~21:00 JST, main `92500b9`):**
+**0.3.0 is released** (npm + GHCR) with the first two v0.3 items —
+`renkei-storage-sqlite` (no Postgres needed) and `renkei init` /
+`renkei add-client` (no hand-written `.env` or `RENKEI_CLIENTS`). Everything
+from 0.2.x is done and live-confirmed (#51 from the phone). Achraf's Node is
+22.23.2. Claude merges PRs and pushes tags itself now (allow rules in
+`.claude/settings.local.json`); only the npm passkey publish is Achraf's.
+
+**Next to build (§5):** `renkei-client` — a tiny browser/Node SDK so an app
+does not hand-assemble OIDC URLs: `loginUrl()`, `exchangeLiffToken()`, session
+helpers, typed `line:*` claims. Scope it with Achraf first (10 minutes), then
+build → tests → live check → docs ja/en → PR. After that: `renkei-next`.
+Time-gated / Achraf-only leftovers: Zenn article after 2026-09-10 (§2), the
+email-permission re-check (§4, still Applied), the LIFF phone shot (§2,
+optional), Option B forward (§1, optional).
 
 ## Where things stand (end of 2026-08-30)
 
@@ -245,8 +247,19 @@ six env vars"), breadth (TW/TH, MINI App) after.
       on :8787 with no key warning, `/dev` up, the registered client accepted at
       `/oidc/auth`. Docs: README ja/en quickstart, config reference, Next.js +
       Supabase tutorials, CLI README (2026-08-30).
-- [ ] Then the ROADMAP v0.3 list: `renkei-client` / `renkei-next` SDKs,
-      Cloudflare Workers (KV/D1) + Supabase Edge targets, LINE MINI App channel
-      support, multi-region tutorial. Scope each with Achraf before starting.
-      Candidate from the #51 findings: model account linkage as a flag on the
-      LINE account row instead of overloading `kind` (needs a migration).
+- [ ] **`renkei-client`** (next, agreed 2026-08-30 as the order: SDKs → targets
+      → breadth). Sketch to confirm with Achraf: `packages/client`, zero deps,
+      works in browsers, Node, Workers; `createRenkeiClient({ issuer, clientId })`
+      → `loginUrl({ redirectUri, state, nonce, scope?, botPrompt? })`,
+      `exchangeLiffToken({ idToken, accessToken })` (wraps `POST /liff/exchange`),
+      `session()` / `logout()` for `RENKEI_SESSION_COOKIE` mode, a typed
+      `RenkeiClaims` (`line:user_id`, `line:friend`, …) and `decodeClaims()`.
+      Then `renkei add-client` prints the SDK snippet too. Tests against the
+      server's fake-LINE e2e harness; live check on :8787.
+- [ ] `renkei-next`: App Router helpers, middleware, `<LineLoginButton />`
+      (button must follow LINE's design guideline — see issue #19).
+- [ ] Then the rest of the ROADMAP v0.3 list: Cloudflare Workers (KV/D1) +
+      Supabase Edge targets, LINE MINI App channel support, multi-region
+      tutorial. Scope each with Achraf before starting. Candidate from the #51
+      findings: model account linkage as a flag on the LINE account row instead
+      of overloading `kind` (needs a migration).

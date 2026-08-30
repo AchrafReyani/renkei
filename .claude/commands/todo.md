@@ -14,14 +14,16 @@ context. Then:
    another — then work it one at a time, ticking `docs/NEXT.md` and committing
    as each completes.
 
-Context (as of 2026-08-30): v0.2.1 is published (npm + GHCR) with the two patch
-fixes (#38, #40) and #40 is confirmed live; the repo is public; one patch
-changeset (#44, `/dev` client selection) is pending for a later 0.2.2 — not
-urgent — 0.2.2 is released (npm + GHCR, 2026-08-30). Left:
-the LINE email-permission re-check (§4, still Applied on 2026-08-30) and the Zenn
-article (§2, not before 2026-09-10); social preview, README GIF and the demo env experiments are done. `docs/NEXT.md`
-has the exact split of who runs what (Achraf's terminal is `cmd.exe`: `&&`, not
-`;`). Then optional live checks, launch/UI/time-gated steps. Don't re-implement
+Context (as of 2026-08-30 evening): **0.3.0 is released** (npm + GHCR) —
+`renkei-storage-sqlite` (Node's built-in `node:sqlite`, `DATABASE_URL=sqlite:…`)
+and `renkei init` / `renkei add-client` shipped; 0.2.x is fully done and
+live-confirmed. The repo is public. **Next to build is `renkei-client`**
+(NEXT.md §5 has the sketch — confirm the scope with Achraf, then build), then
+`renkei-next`. Time-gated / Achraf-only: the Zenn article (§2, not before
+2026-09-10), the LINE email-permission re-check (§4, still Applied), the LIFF
+phone shot. Claude merges PRs and pushes tags itself (allow rules are in
+`.claude/settings.local.json`); only `pnpm -r publish` (npm passkey) is
+Achraf's, and his terminal is `cmd.exe` (`&&`, not `;`). Don't re-implement
 finished features; confirm against `main` before suggesting work.
 Follow the DCO single-paragraph commit rule and the branch→PR→merge flow already
 in use (see the [[renkei-project]] memory for the CI/DCO gotchas).
