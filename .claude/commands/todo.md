@@ -17,9 +17,9 @@ context. Then:
 Context (as of 2026-08-30): v0.2.1 is published (npm + GHCR) with the two patch
 fixes (#38, #40) and #40 is confirmed live; the repo is public; one patch
 changeset (#44, `/dev` client selection) is pending for a later 0.2.2 — not
-urgent. Nothing blocking remains: what's left is the dogfood dates (§3), the
-LINE email-permission check (§4, console login by Achraf first), and the launch
-steps (§2). Start by asking for the dogfood dates. `docs/NEXT.md`
+urgent — and 0.2.2 is cut on the git side (PR #49), publish + tag are Achraf's. Left:
+the LINE email-permission re-check (§4, still Applied on 2026-08-30) and the Zenn
+article (§2, not before 2026-09-10); social preview, README GIF and the demo env experiments are done. `docs/NEXT.md`
 has the exact split of who runs what (Achraf's terminal is `cmd.exe`: `&&`, not
 `;`). Then optional live checks, launch/UI/time-gated steps. Don't re-implement
 finished features; confirm against `main` before suggesting work.
