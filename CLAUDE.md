@@ -19,6 +19,11 @@ provider. Monorepo: `packages/core` (LINE + identity logic, no HTTP),
   user-facing text, with an English mirror (`*.ja.md` / `*.en.md`, README.md /
   README.en.md) updated in the same change. See DECISIONS.md §3.
 - Commits are DCO signed-off (`git commit -s`). CI enforces it on PRs.
+- `main` is protected by a GitHub ruleset (no bypass, admins included):
+  changes land only through a PR, squash-merged, with the `lint · typecheck ·
+  test` and `DCO sign-off` checks green; no force-push, no deletion. `v*`
+  tags can be created but not deleted or moved. Merged PR branches are deleted
+  automatically. Never try to push to `main` directly.
 - Never put "LINE" in package/product names. Keep the trademark note.
 - Secrets live only in `.env` (gitignored). Channel/LIFF IDs are fine in docs.
 
