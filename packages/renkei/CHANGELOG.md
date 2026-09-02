@@ -1,5 +1,12 @@
 # renkei
 
+## 0.4.0
+
+### Patch Changes
+
+- 24d8358: `renkei add-client` gains `--preset next`: registers a confidential client for a `renkei-next` app, hints the `<app origin>/api/renkei/callback` redirect URI, and prints the `.env.local` values plus the three files (`renkei.ts`, the `[...renkei]` route, `proxy.ts`) to paste.
+- ff893a4: `renkei add-client` (no preset, or `--preset public`) now also prints a `renkei-client` snippet with the issuer, client ID and redirect URI filled in, next to the raw OIDC client settings.
+
 ## 0.3.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "renkei-next",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Next.js (App Router) helpers for renkei: route handlers for the OIDC login/callback/logout, an encrypted session cookie, getSession(), a proxy/middleware guard, and a LINE-guideline-compliant <LineLoginButton />.",
   "license": "Apache-2.0",
   "repository": {
