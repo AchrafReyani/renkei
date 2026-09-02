@@ -25,13 +25,13 @@ cookie, `getSession()`, `proxy()` guard, `<LineLoginButton />` with LINE's offic
 icon; `renkei add-client --preset next`; `examples/nextjs-renkei-next`. 15 tests;
 **live-checked**: the example on :3500 against renkei on :8787 with the real
 channel (button → LINE consent → `/account` with all `line:*` claims → logout).
-Changesets staged for `renkei-client` (minor), `renkei-next` (minor) and `renkei`
-(2 patches) → **next release is 0.4.0** (§0). `renkei-client` and `renkei-next` are
-first publishes.
+Released together as **0.4.0** the same day (§0).
 
-**Next: cut 0.4.0 (§0)**, then the remaining v0.3 targets in §5 (Cloudflare
+**0.4.0 is released (2026-09-03, §0)**: `renkei`, `renkei-client`, `renkei-next` on npm,
+tag `v0.4.0`, GHCR `:0.4.0`. **Next: the remaining v0.3 targets in §5** (Cloudflare
 Workers KV/D1, Supabase Edge, LINE MINI App channel, multi-region tutorial) —
-scope each with Achraf before starting. Time-gated / Achraf-only leftovers: Zenn
+scope each with Achraf before starting; the `/dev` page could also adopt the
+guideline button CSS to close #19 fully. Time-gated / Achraf-only leftovers: Zenn
 article after 2026-09-10 (§2), the email-permission re-check (§4, still Applied),
 the LIFF phone shot (§2, optional), Option B forward (§1, optional).
 
@@ -61,6 +61,11 @@ the LIFF phone shot (§2, optional), Option B forward (§1, optional).
   explanation rather than impersonating a real client. Live on the demo
   (`/dev` → `client_id=renkei-dev` → `/interaction/…`). Not urgent to release:
   only affects `RENKEI_DEV=true` + `RENKEI_CLIENTS` deployments.
+- **0.4.0 released 2026-09-03** (`renkei` CLI, first publishes of `renkei-client` and
+  `renkei-next`; PR #65; tag `v0.4.0`; release.yml run 33650835497 pushed
+  `ghcr.io/achrafreyani/renkei:0.4.0` / `:0.4` / `:latest`). Carries #63 (renkei-client)
+  and #64 (renkei-next, `--preset next`). `renkei-server` stays 0.3.0 — the image is
+  unchanged apart from the CLI.
 - **0.3.0 released 2026-08-30** (`renkei`, `renkei-server`, first publish of
   `renkei-storage-sqlite`; PR #58; tag `v0.3.0`; release.yml run 33308564860 pushed
   `ghcr.io/achrafreyani/renkei:0.3.0` / `:0.3` / `:latest`). Carries #56 (SQLite
@@ -84,7 +89,7 @@ the LIFF phone shot (§2, optional), Option B forward (§1, optional).
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.4.0 — TODO (renkei-client + renkei-next + CLI presets)
+## 0. Cut 0.4.0 — DONE 2026-09-03 (renkei-client + renkei-next + CLI presets)
 
 Same flow as 0.3.0. Changesets on `main`: `renkei-client` minor, `renkei-next` minor,
 `renkei` patch ×2 → the linked group puts **`renkei`, `renkei-client` and
@@ -94,16 +99,16 @@ Same flow as 0.3.0. Changesets on `main`: `renkei-client` minor, `renkei-next` m
 already in their `publishConfig`). `pnpm -r publish` orders them topologically
 (`renkei-next` depends on `renkei-client`). Achraf's terminal is `cmd.exe` — `&&`, never `;`.
 
-- [ ] Claude: `release/0.4.0` — `pnpm changeset version` → check the three packages land on
-      **0.4.0** and nothing else moves → lint / typecheck / 233 tests / build / docs:build
-      green → single-paragraph DCO commit → PR → squash-merge.
-- [ ] Achraf, in cmd on `main`: `git checkout main && git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
-      (passkey once per package — three this time).
-- [ ] Claude: `git tag -a v0.4.0 -m "v0.4.0" && git push origin v0.4.0`, watch `release.yml`
-      and read the GHCR tags from the run log (`:0.4.0` / `:0.4` / `:latest`; the image is
-      renkei-server 0.3.0 + CLI 0.4.0).
-- [ ] Claude: tick here + ROADMAP.md; `npm view` = 0.4.0 for `renkei`, `renkei-client`,
-      `renkei-next`.
+- [x] Claude: `release/0.4.0` — `pnpm changeset version` → the three packages landed on
+      **0.4.0** and nothing else moved → lint / typecheck / 233 tests / build / docs:build
+      green → DCO commit → PR #65 → squash-merge (`8a47239`).
+- [x] Achraf, in cmd on `main`: `git checkout main && git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
+      (passkey once per package — three this time). Done 2026-09-03.
+- [x] Claude: tagged and pushed `v0.4.0`; `release.yml` run 33650835497 succeeded and pushed
+      `ghcr.io/achrafreyani/renkei:0.4.0` / `:0.4` / `:latest` (renkei-server 0.3.0 + CLI 0.4.0).
+- [x] Claude: ticked here + ROADMAP.md; `npm view` = 0.4.0 for `renkei`, `renkei-client`,
+      `renkei-next`; 0.3.0 for `renkei-server` / `renkei-storage-sqlite`; 0.2.3 for
+      `renkei-core` / `renkei-storage-postgres`.
 
 ### 0.3.0 — DONE 2026-08-30 (storage-sqlite + CLI init/add-client)
 

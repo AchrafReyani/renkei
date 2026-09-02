@@ -14,12 +14,12 @@ context. Then:
    another — then work it one at a time, ticking `docs/NEXT.md` and committing
    as each completes.
 
-Context (as of 2026-09-03): **0.3.0 is released** (npm + GHCR). **`renkei-client`
-and `renkei-next` are merged on `main` but unreleased**, both live-checked;
-changesets are staged so the next release is **0.4.0** (`renkei`, `renkei-client`,
-`renkei-next`; both SDKs are first publishes). **Next is cutting 0.4.0** (NEXT.md
-§0 has the split), then the remaining v0.3 targets in §5 (Workers KV/D1,
-Supabase Edge, MINI App, multi-region) — scope each with Achraf first. Time-gated / Achraf-only: the Zenn article (§2, not before
+Context (as of 2026-09-03): **0.4.0 is released** (npm + GHCR) — `renkei` CLI plus
+the first publishes of `renkei-client` (zero-dep SDK) and `renkei-next` (App Router
+handlers, JWE session, proxy guard, guideline `<LineLoginButton />`), both
+live-checked; `renkei-server` stays 0.3.0. **Next: the remaining v0.3 targets in
+NEXT.md §5** (Workers KV/D1, Supabase Edge, LINE MINI App, multi-region tutorial)
+— scope each with Achraf first; nothing is staged for release. Time-gated / Achraf-only: the Zenn article (§2, not before
 2026-09-10), the LINE email-permission re-check (§4, still Applied), the LIFF
 phone shot. Claude merges PRs and pushes tags itself (allow rules are in
 `.claude/settings.local.json`); only `pnpm -r publish` (npm passkey) is
