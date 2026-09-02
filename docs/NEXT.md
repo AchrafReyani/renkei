@@ -4,7 +4,7 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
-**Pick up here (session ended 2026-08-30 ~21:00 JST, main `92500b9`):**
+**Pick up here (session of 2026-09-02; before it, 2026-08-30 ended at main `92500b9`):**
 **0.3.0 is released** (npm + GHCR) with the first two v0.3 items —
 `renkei-storage-sqlite` (no Postgres needed) and `renkei init` /
 `renkei add-client` (no hand-written `.env` or `RENKEI_CLIENTS`). Everything
@@ -12,13 +12,21 @@ from 0.2.x is done and live-confirmed (#51 from the phone). Achraf's Node is
 22.23.2. Claude merges PRs and pushes tags itself now (allow rules in
 `.claude/settings.local.json`); only the npm passkey publish is Achraf's.
 
-**Next to build (§5):** `renkei-client` — a tiny browser/Node SDK so an app
-does not hand-assemble OIDC URLs: `loginUrl()`, `exchangeLiffToken()`, session
-helpers, typed `line:*` claims. Scope it with Achraf first (10 minutes), then
-build → tests → live check → docs ja/en → PR. After that: `renkei-next`.
-Time-gated / Achraf-only leftovers: Zenn article after 2026-09-10 (§2), the
-email-permission re-check (§4, still Applied), the LIFF phone shot (§2,
-optional), Option B forward (§1, optional).
+**Done 2026-09-02:** `renkei-client` shipped (§5) — zero-dep SDK, 20 tests,
+live-checked on :8787 against the real channel (PKCE login via `loginUrl()` →
+`exchangeCode()` → id_token with all `line:*` claims → `userinfo()`; session
+mode `sessionLoginUrl()` → cookie → `/session` 200 → `/logout` 204). Changesets
+are staged: `renkei-client` minor + `renkei` patch, so the next `pnpm changeset
+version` produces **0.4.0** for the packages that have a changeset (linked
+group; `renkei-client` is a first publish).
+
+**Next to build (§5): `renkei-next`** — scope it with Achraf first (10 minutes):
+App Router helpers, a middleware built on `renkei-client`'s `session()`, and
+`<LineLoginButton />` following LINE's button guideline (issue #19). Then cut
+0.4.0 (same split as 0.3.0; `renkei-client` is a first publish). Time-gated /
+Achraf-only leftovers: Zenn article after 2026-09-10 (§2), the email-permission
+re-check (§4, still Applied), the LIFF phone shot (§2, optional), Option B
+forward (§1, optional).
 
 ## Where things stand (end of 2026-08-30)
 
@@ -247,8 +255,15 @@ six env vars"), breadth (TW/TH, MINI App) after.
       on :8787 with no key warning, `/dev` up, the registered client accepted at
       `/oidc/auth`. Docs: README ja/en quickstart, config reference, Next.js +
       Supabase tutorials, CLI README (2026-08-30).
-- [ ] **`renkei-client`** (next, agreed 2026-08-30 as the order: SDKs → targets
-      → breadth). Sketch to confirm with Achraf: `packages/client`, zero deps,
+- [x] **`renkei-client`** — shipped 2026-09-02 (scope = the sketch below, confirmed by
+      Achraf; zero deps; `decodeClaims` is deliberately named `decodeClaimsUnverified()`,
+      DECISIONS.md §12; also got `exchangeCode()`, `userinfo()`, `sessionLoginUrl()` and
+      PKCE helpers). 20 tests (unit + fake-LINE e2e against renkei-server; 218 total).
+      **Live on :8787 with the real channel:** PKCE login → code on the SDK's redirect URI
+      → `exchangeCode()` → id_token with nonce match and all `line:*` claims → `userinfo()`;
+      `sessionLoginUrl()` → cookie → `/session` 200 → `/logout` 204 → `no_session`.
+      Docs: `docs/reference/client.{ja,en}.md` (+ sidebar), README ja/en §4, pointers in
+      the endpoints reference, `renkei add-client` prints the SDK snippet. Original sketch: `packages/client`, zero deps,
       works in browsers, Node, Workers; `createRenkeiClient({ issuer, clientId })`
       → `loginUrl({ redirectUri, state, nonce, scope?, botPrompt? })`,
       `exchangeLiffToken({ idToken, accessToken })` (wraps `POST /liff/exchange`),
@@ -256,8 +271,9 @@ six env vars"), breadth (TW/TH, MINI App) after.
       `RenkeiClaims` (`line:user_id`, `line:friend`, …) and `decodeClaims()`.
       Then `renkei add-client` prints the SDK snippet too. Tests against the
       server's fake-LINE e2e harness; live check on :8787.
-- [ ] `renkei-next`: App Router helpers, middleware, `<LineLoginButton />`
-      (button must follow LINE's design guideline — see issue #19).
+- [ ] `renkei-next` (next): App Router helpers, middleware on `renkei-client`'s
+      `session()`, `<LineLoginButton />` (button must follow LINE's design guideline —
+      see issue #19). Scope with Achraf first.
 - [ ] Then the rest of the ROADMAP v0.3 list: Cloudflare Workers (KV/D1) +
       Supabase Edge targets, LINE MINI App channel support, multi-region
       tutorial. Scope each with Achraf before starting. Candidate from the #51

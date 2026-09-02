@@ -58,6 +58,18 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
+  packages/client:
+    devDependencies:
+      jose:
+        specifier: ^6.2.10
+        version: 6.2.10
+      renkei-core:
+        specifier: workspace:*
+        version: link:../core
+      renkei-server:
+        specifier: workspace:*
+        version: link:../server
+
   packages/core:
     dependencies:
       jose:

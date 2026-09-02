@@ -65,6 +65,8 @@ LIFF SDK が持つ LINE のトークンを renkei の id_token に交換しま�
 
 ブラウザから直接呼ぶ場合は `RENKEI_CORS_ORIGINS` に LIFF アプリのオリジンを設定します。
 
+`renkei-client` の `exchangeLiffToken()` がこの呼び出しをラップします → [クライアント SDK](client.ja.md)。
+
 ## LINE との接点
 
 | パス | 内容 |
@@ -96,6 +98,8 @@ renkei を**直接**使うアプリ（自前の OIDC クライアントを持た
 | `POST /logout` | セッションを破棄しクッキーを削除（`204`） |
 
 クッキーは `cookieKeys[0]` で署名され、`HttpOnly` / `SameSite=Lax`、issuer が HTTPS なら `Secure`。`return_to` はオープンリダイレクト防止のため検証されます。これは OIDC フローの代替であり置き換えではありません — 多くの統合は `/oidc/*` を使うべきです。
+
+`renkei-client` の `sessionLoginUrl()` / `session()` / `logout()` がこれらをラップします → [クライアント SDK](client.ja.md)。
 
 ## その他
 

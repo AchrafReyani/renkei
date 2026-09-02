@@ -148,7 +148,12 @@ Order matters: each item is what the next needs.
       Supabase (Keycloak fields, placeholder email domain) and public/PKCE clients,
       printing the app-side config. First run is `npx renkei init && npx renkei`
       (2026-08-30)
-- [ ] `renkei-client`: `loginUrl()`, `exchangeLiffToken()`, session helpers
+- [x] `renkei-client`: zero-dependency SDK (browsers / Node / Workers) — `loginUrl()`
+      with `bot_prompt` / `line_region` / PKCE, `exchangeCode()`, `userinfo()`,
+      `exchangeLiffToken()`, `sessionLoginUrl()` / `session()` / `logout()`, typed
+      `RenkeiClaims` + `decodeClaimsUnverified()`, `generatePkce()`; 20 tests
+      against the fake-LINE server; `renkei add-client` prints the SDK snippet
+      (2026-09-02, DECISIONS.md §12)
 - [ ] `renkei-next`: App Router helpers, middleware, `<LineLoginButton />`
 - [ ] Cloudflare Workers deploy target via `httpServerHandler` + KV/D1 or Hyperdrive adapter
 - [ ] Supabase Edge Function deploy target — `adapters/fetch-to-node.ts` from the spike shim (+ host-header fix, Postgres adapter)
