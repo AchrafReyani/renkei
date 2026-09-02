@@ -1,6 +1,8 @@
 # Next.js アプリに LINE ログインを追加する（Auth.js + renkei）
 
 > English: [nextjs.en.md](nextjs.en.md) · 動くコード: [`examples/nextjs`](../../examples/nextjs)
+>
+> Auth.js を使わない場合は [`renkei-next`](../reference/next.ja.md)（ルートハンドラ + 暗号化セッション + ガイドライン準拠のボタン）もあります。
 
 renkei は標準の OpenID Connect プロバイダーなので、Next.js 側は **Auth.js（next-auth v5）の汎用 OIDC プロバイダー**を
 設定するだけです。LINE 固有のことは何も書きません。友だち追加も LIFF も renkei 側で済んでいます。

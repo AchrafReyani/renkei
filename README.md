@@ -81,6 +81,8 @@ renkei は OpenID Connect プロバイダーです。ディスカバリは `http
 `line` スコープで `line:user_id` / `line:friend` / `line:channel_id` / `line:region` が id_token と userinfo に入ります。
 → [Next.js チュートリアル](docs/tutorials/nextjs.ja.md)
 
+Auth.js を使わない Next.js アプリには **`renkei-next`**: ルートハンドラ・暗号化セッション・`proxy.ts` ガード・LINE ガイドライン準拠の `<LineLoginButton />`（`npx renkei add-client … --preset next`）。→ [renkei-next リファレンス](docs/reference/next.ja.md)
+
 ### 2. Supabase から
 
 Supabase Auth 標準の **Keycloak プロバイダー**に renkei の URL を入れるだけ（ローカル CLI でも動きます）。

@@ -1,0 +1,23 @@
+{
+  "name": "example-nextjs-renkei-next",
+  "private": true,
+  "description": "Next.js App Router + renkei-next: route handlers, encrypted session, proxy guard and the LINE login button — no Auth.js",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3500",
+    "build": "next build",
+    "start": "next start -p 3500",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^16.3.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "renkei-next": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "typescript": "^5.9.0"
+  }
+}

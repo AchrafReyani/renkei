@@ -154,7 +154,11 @@ Order matters: each item is what the next needs.
       `RenkeiClaims` + `decodeClaimsUnverified()`, `generatePkce()`; 20 tests
       against the fake-LINE server; `renkei add-client` prints the SDK snippet
       (2026-09-02, DECISIONS.md §12)
-- [ ] `renkei-next`: App Router helpers, middleware, `<LineLoginButton />`
+- [x] `renkei-next`: `createRenkeiAuth()` route handlers (login/callback/logout/session,
+      PKCE, JWKS-verified id_token, JWE session cookie), `getSession()`, `proxy()` /
+      `middleware()` guard, `<LineLoginButton />` following LINE's button guideline with
+      the official icon; `renkei add-client --preset next`; `examples/nextjs-renkei-next`
+      (2026-09-03, DECISIONS.md §13)
 - [ ] Cloudflare Workers deploy target via `httpServerHandler` + KV/D1 or Hyperdrive adapter
 - [ ] Supabase Edge Function deploy target — `adapters/fetch-to-node.ts` from the spike shim (+ host-header fix, Postgres adapter)
 - [ ] LINE MINI App channel support (LINE is folding LIFF into MINI App; new apps should be MINI App channels under the same provider) — service messages prerequisites, `liff.permanentLink`
