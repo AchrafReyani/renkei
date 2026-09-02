@@ -256,6 +256,10 @@ describe('renkei add-client', () => {
       ]),
     ).toBe(0);
     expect(h.out()).toContain('https://i.example.com/.well-known/openid-configuration');
+    expect(h.out()).toContain(
+      "createRenkeiClient({ issuer: 'https://i.example.com', clientId: 'q' })",
+    );
+    expect(h.out()).toContain("redirectUri: 'https://q/cb', state, nonce });");
     h.lines.length = 0;
     expect(await h.run(['add-client', 'q', '--redirect', 'https://q/cb'])).toBe(1);
     expect(h.out()).toContain('renkei init');

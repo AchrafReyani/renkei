@@ -264,6 +264,17 @@ export function snippet(preset, c, issuer) {
   else lines.push('  public client       no secret; PKCE (S256) is required');
   lines.push(`  redirect_uri        ${c.redirectUris.join(', ')}`);
   lines.push('  scope               openid profile email line');
+  lines.push('');
+  lines.push('renkei-client (npm i renkei-client) — browsers / Node / Workers:');
+  lines.push("  import { createRenkeiClient } from 'renkei-client';");
+  lines.push(
+    `  const renkei = createRenkeiClient({ issuer: '${issuer}', clientId: '${c.clientId}' });`,
+  );
+  lines.push(
+    `  location.href = renkei.loginUrl({ redirectUri: '${c.redirectUris[0]}', state, nonce${
+      c.clientSecret ? '' : ', codeChallenge'
+    } });`,
+  );
   return lines;
 }
 

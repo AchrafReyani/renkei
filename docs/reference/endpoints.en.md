@@ -65,6 +65,8 @@ Errors: `401 invalid_client` / `401 invalid_token` (token from another channel, 
 
 For direct browser calls, list the LIFF app's origin in `RENKEI_CORS_ORIGINS`.
 
+`renkei-client`'s `exchangeLiffToken()` wraps this call → [Client SDK](client.en.md).
+
 ## LINE-facing
 
 | Path | What |
@@ -96,6 +98,8 @@ For an app that uses renkei **directly** (no OIDC client of its own). Enabled wi
 | `POST /logout` | Destroys the session and clears the cookie (`204`) |
 
 The cookie is signed with `cookieKeys[0]`, `HttpOnly`, `SameSite=Lax`, and `Secure` when the issuer is HTTPS. `return_to` is validated to prevent open redirects. This is an alternative to the OIDC flow, not a replacement — most integrations should use `/oidc/*`.
+
+`renkei-client`'s `sessionLoginUrl()` / `session()` / `logout()` wrap these → [Client SDK](client.en.md).
 
 ## Other
 

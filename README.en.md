@@ -98,6 +98,28 @@ const res = await fetch('https://auth.example.com/liff/exchange', {
 const { id_token } = await res.json()   // signed by renkei (RS256, verifiable via JWKS)
 ```
 
+### 4. With the SDK (`renkei-client`)
+
+If you would rather not hand-assemble URLs and requests, use the zero-dependency `renkei-client` (browsers / Node / Workers).
+
+```ts
+import { createRenkeiClient, generatePkce, randomString } from 'renkei-client';
+
+const renkei = createRenkeiClient({ issuer: 'https://auth.example.com', clientId: 'my-app' });
+
+// Start an OIDC login (keep state / nonce / verifier in your session, compare on return)
+const state = randomString(), nonce = randomString(), { verifier, challenge } = await generatePkce();
+location.href = renkei.loginUrl({ redirectUri: 'https://app.example.com/cb', state, nonce, codeChallenge: challenge, botPrompt: 'normal' });
+
+// LIFF: LINE tokens → renkei id_token with typed line:* claims
+const { idToken, claims } = await renkei.exchangeLiffToken({ idToken: liff.getIDToken(), accessToken: liff.getAccessToken() });
+
+// Session-cookie mode (RENKEI_SESSION_COOKIE=true)
+const me = await renkei.session(); // RenkeiClaims | null
+```
+
+→ [Client SDK reference](docs/reference/client.en.md)
+
 ## Configuration
 
 Environment variables (`.env`). Full reference: [config](docs/reference/config.en.md).

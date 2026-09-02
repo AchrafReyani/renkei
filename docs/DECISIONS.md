@@ -285,3 +285,23 @@ transaction per version, append-only. WAL mode, `foreign_keys = ON`,
 `--experimental-sqlite`; the package's vitest config adds it automatically so
 older 22.x still runs the tests). Single writer: SQLite is for one process on
 one disk — multi-instance deploys stay on Postgres, and the docs say so.
+
+## 12. `renkei-client` is dependency-free and does not verify tokens (2026-09-02)
+
+**Decision.** The SDK builds URLs and wraps renkei's HTTP endpoints; it has
+zero runtime dependencies and runs wherever `fetch`, `URL` and Web Crypto
+exist. Its only token helper is `decodeClaimsUnverified()`, named so nobody
+mistakes it for verification. The `line:*` claim names are duplicated from
+renkei-core (a test keeps the two equal) instead of importing core, so a
+browser bundle never pulls in `jose`.
+
+**Why.** Verification belongs to the backend that *trusts* the token, and
+every backend ecosystem already has a mature verifier (jose, openid-client,
+Auth.js, the framework's OIDC layer). Bundling one into a browser SDK would
+add weight and a false sense of security — a browser cannot trust its own
+verification anyway. What apps actually hand-write today, and get subtly
+wrong, is the authorize URL (`bot_prompt`, PKCE, scope), the LIFF exchange
+body and the session-cookie calls; that is what the SDK covers.
+
+**Cost.** Five duplicated constants. Anyone using the SDK on a backend must
+bring a verifier, which the reference page says on its first screen.

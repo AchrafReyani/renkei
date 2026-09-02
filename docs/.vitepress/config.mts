@@ -69,6 +69,7 @@ export default defineConfig({
             items: [
               { text: '設定', link: '/reference/config' },
               { text: 'エンドポイントとクレーム', link: '/reference/endpoints' },
+              { text: 'クライアント SDK（renkei-client）', link: '/reference/client' },
             ],
           },
         ],
@@ -109,6 +110,7 @@ export default defineConfig({
             items: [
               { text: 'Configuration', link: '/en/reference/config' },
               { text: 'Endpoints and claims', link: '/en/reference/endpoints' },
+              { text: 'Client SDK (renkei-client)', link: '/en/reference/client' },
             ],
           },
         ],
