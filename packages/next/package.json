@@ -1,0 +1,59 @@
+{
+  "name": "renkei-next",
+  "version": "0.3.0",
+  "description": "Next.js (App Router) helpers for renkei: route handlers for the OIDC login/callback/logout, an encrypted session cookie, getSession(), a proxy/middleware guard, and a LINE-guideline-compliant <LineLoginButton />.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AchrafReyani/renkei.git",
+    "directory": "packages/next"
+  },
+  "keywords": [
+    "line",
+    "line-login",
+    "nextjs",
+    "oidc",
+    "openid-connect",
+    "renkei"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./button": {
+      "types": "./dist/button.d.ts",
+      "import": "./dist/button.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/button.tsx --format esm --dts --clean --sourcemap --external next --external react",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "jose": "^6.2.10",
+    "renkei-client": "workspace:*"
+  },
+  "peerDependencies": {
+    "next": ">=15",
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "next": "^16.3.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "renkei-core": "workspace:*",
+    "renkei-server": "workspace:*"
+  }
+}

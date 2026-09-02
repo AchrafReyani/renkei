@@ -81,6 +81,8 @@ Register a client with `npx renkei add-client my-app --redirect <callback URL> -
 The `line` scope adds `line:user_id` / `line:friend` / `line:channel_id` / `line:region` to the id_token and userinfo.
 → [Next.js tutorial](docs/tutorials/nextjs.en.md)
 
+For a Next.js app without Auth.js there is **`renkei-next`**: route handlers, an encrypted session, a `proxy.ts` guard and a LINE-guideline-compliant `<LineLoginButton />` (`npx renkei add-client … --preset next`). → [renkei-next reference](docs/reference/next.en.md)
+
 ### 2. From Supabase
 
 Enter renkei's URL in Supabase Auth's built-in **Keycloak** provider. Works in the local CLI too.

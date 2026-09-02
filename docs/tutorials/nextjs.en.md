@@ -1,6 +1,8 @@
 # Add LINE Login to a Next.js app (Auth.js + renkei)
 
 > 日本語: [nextjs.ja.md](nextjs.ja.md) · Runnable code: [`examples/nextjs`](../../examples/nextjs)
+>
+> Not using Auth.js? [`renkei-next`](../reference/next.en.md) gives you route handlers, an encrypted session and a guideline-compliant button instead.
 
 renkei is a standard OpenID Connect provider, so on the Next.js side you configure
 **Auth.js (next-auth v5)'s generic OIDC provider** and nothing else. No LINE-specific

@@ -261,6 +261,23 @@ describe('renkei add-client', () => {
     );
     expect(h.out()).toContain("redirectUri: 'https://q/cb', state, nonce });");
     h.lines.length = 0;
+    expect(
+      await h.run([
+        'add-client',
+        'n',
+        '--redirect',
+        'https://n.example.com/api/renkei/callback',
+        '--preset',
+        'next',
+        '--print',
+        '--issuer',
+        'https://i.example.com',
+      ]),
+    ).toBe(0);
+    expect(h.out()).toContain('RENKEI_ISSUER=https://i.example.com');
+    expect(h.out()).toContain('createRenkeiAuth({');
+    expect(h.out()).toMatch(/RENKEI_NEXT_SECRET=[A-Za-z0-9_-]{43}/);
+    h.lines.length = 0;
     expect(await h.run(['add-client', 'q', '--redirect', 'https://q/cb'])).toBe(1);
     expect(h.out()).toContain('renkei init');
   });

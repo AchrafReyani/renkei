@@ -305,3 +305,30 @@ body and the session-cookie calls; that is what the SDK covers.
 
 **Cost.** Five duplicated constants. Anyone using the SDK on a backend must
 bring a verifier, which the reference page says on its first screen.
+
+## 13. `renkei-next` owns its session; it is an OIDC client, not a proxy for renkei's cookie (2026-09-03)
+
+**Decision.** `renkei-next` makes the Next.js app a normal OIDC client of
+renkei: its route handlers run the code flow (PKCE always on), verify the
+id_token against renkei's JWKS with `jose`, and keep the claims in a
+JWE-encrypted (`dir` / `A256GCM`) first-party cookie that `getSession()` and
+the `proxy()` guard decrypt locally. It does **not** use renkei's
+session-cookie mode (`RENKEI_SESSION_COOKIE`) and does not depend on Auth.js.
+`<LineLoginButton />` ships in `renkei-next/button` with LINE's official icon
+embedded from the button template, so the default rendering already follows
+the design guideline.
+
+**Why.** renkei's session cookie belongs to renkei's origin; a Next.js app on
+another origin can neither read it in `proxy.ts` nor send it with
+`credentials: 'include'` without a CORS story renkei deliberately does not
+have. The OIDC code flow is what renkei is for, and an app that adopts
+`renkei-next` instead of Auth.js wants fewer moving parts, not a second
+framework. Verification stays on the server side (see §12), which is exactly
+where these handlers run.
+
+**Cost.** `jose` becomes a runtime dependency of `renkei-next` (it already is
+one of `renkei-server`). The session is a snapshot of the claims at login:
+`line:friend` changes are only seen at the next login, or through renkei's
+webhook forwarding on the app side. Session-cookie mode remains available for
+same-origin deployments (renkei reverse-proxied under the app's origin), via
+`renkei-client` directly.

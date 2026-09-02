@@ -11,7 +11,7 @@ npx renkei add-client my-app --redirect https://app.example.com/api/auth/callbac
 #   → RENKEI_CLIENTS に登録し、アプリ側に貼る設定を表示 / registers the client and prints the app-side config
 ```
 
-`--preset authjs | supabase | public`（Auth.js / Supabase の Keycloak プロバイダー / PKCE のパブリッククライアント）。
+`--preset authjs | supabase | public | next`（Auth.js / Supabase の Keycloak プロバイダー / PKCE のパブリッククライアント / Next.js の renkei-next）。
 Node 22.13+（組み込み SQLite）。/ Node 22.13+ (built-in SQLite).
 
 Docs / ドキュメント: https://github.com/AchrafReyani/renkei

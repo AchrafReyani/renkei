@@ -20,13 +20,20 @@ are staged: `renkei-client` minor + `renkei` patch, so the next `pnpm changeset
 version` produces **0.4.0** for the packages that have a changeset (linked
 group; `renkei-client` is a first publish).
 
-**Next to build (§5): `renkei-next`** — scope it with Achraf first (10 minutes):
-App Router helpers, a middleware built on `renkei-client`'s `session()`, and
-`<LineLoginButton />` following LINE's button guideline (issue #19). Then cut
-0.4.0 (same split as 0.3.0; `renkei-client` is a first publish). Time-gated /
-Achraf-only leftovers: Zenn article after 2026-09-10 (§2), the email-permission
-re-check (§4, still Applied), the LIFF phone shot (§2, optional), Option B
-forward (§1, optional).
+**Done 2026-09-03:** `renkei-next` shipped (§5) — route handlers, JWE session
+cookie, `getSession()`, `proxy()` guard, `<LineLoginButton />` with LINE's official
+icon; `renkei add-client --preset next`; `examples/nextjs-renkei-next`. 15 tests;
+**live-checked**: the example on :3500 against renkei on :8787 with the real
+channel (button → LINE consent → `/account` with all `line:*` claims → logout).
+Changesets staged for `renkei-client` (minor), `renkei-next` (minor) and `renkei`
+(2 patches) → **next release is 0.4.0** (§0). `renkei-client` and `renkei-next` are
+first publishes.
+
+**Next: cut 0.4.0 (§0)**, then the remaining v0.3 targets in §5 (Cloudflare
+Workers KV/D1, Supabase Edge, LINE MINI App channel, multi-region tutorial) —
+scope each with Achraf before starting. Time-gated / Achraf-only leftovers: Zenn
+article after 2026-09-10 (§2), the email-permission re-check (§4, still Applied),
+the LIFF phone shot (§2, optional), Option B forward (§1, optional).
 
 ## Where things stand (end of 2026-08-30)
 
@@ -77,7 +84,28 @@ forward (§1, optional).
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.3.0 — DONE 2026-08-30 (storage-sqlite + CLI init/add-client)
+## 0. Cut 0.4.0 — TODO (renkei-client + renkei-next + CLI presets)
+
+Same flow as 0.3.0. Changesets on `main`: `renkei-client` minor, `renkei-next` minor,
+`renkei` patch ×2 → the linked group puts **`renkei`, `renkei-client` and
+`renkei-next` on 0.4.0**; `renkei-core` / `renkei-storage-postgres` (0.2.3),
+`renkei-server` / `renkei-storage-sqlite` (0.3.0) have no changeset and stay.
+`renkei-client` and `renkei-next` are **first publishes** (`--access public`,
+already in their `publishConfig`). `pnpm -r publish` orders them topologically
+(`renkei-next` depends on `renkei-client`). Achraf's terminal is `cmd.exe` — `&&`, never `;`.
+
+- [ ] Claude: `release/0.4.0` — `pnpm changeset version` → check the three packages land on
+      **0.4.0** and nothing else moves → lint / typecheck / 233 tests / build / docs:build
+      green → single-paragraph DCO commit → PR → squash-merge.
+- [ ] Achraf, in cmd on `main`: `git checkout main && git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
+      (passkey once per package — three this time).
+- [ ] Claude: `git tag -a v0.4.0 -m "v0.4.0" && git push origin v0.4.0`, watch `release.yml`
+      and read the GHCR tags from the run log (`:0.4.0` / `:0.4` / `:latest`; the image is
+      renkei-server 0.3.0 + CLI 0.4.0).
+- [ ] Claude: tick here + ROADMAP.md; `npm view` = 0.4.0 for `renkei`, `renkei-client`,
+      `renkei-next`.
+
+### 0.3.0 — DONE 2026-08-30 (storage-sqlite + CLI init/add-client)
 
 Same split as 0.2.x. `renkei`, `renkei-server` and the new `renkei-storage-sqlite`
 go to **0.3.0**; `renkei-core` and `renkei-storage-postgres` have no changeset and
@@ -271,9 +299,19 @@ six env vars"), breadth (TW/TH, MINI App) after.
       `RenkeiClaims` (`line:user_id`, `line:friend`, …) and `decodeClaims()`.
       Then `renkei add-client` prints the SDK snippet too. Tests against the
       server's fake-LINE e2e harness; live check on :8787.
-- [ ] `renkei-next` (next): App Router helpers, middleware on `renkei-client`'s
-      `session()`, `<LineLoginButton />` (button must follow LINE's design guideline —
-      see issue #19). Scope with Achraf first.
+- [x] **`renkei-next`** — shipped 2026-09-03 (scope confirmed by Achraf). `createRenkeiAuth()`
+      → route handlers `/api/renkei/{login,callback,logout,session}` (PKCE always, id_token
+      verified with renkei's JWKS, claims in a JWE `A256GCM` cookie), `getSession()`,
+      `getSessionFromRequest()`, `proxy()` / `middleware()` guard, `loginPath()` / `logoutPath()`;
+      `renkei-next/button` → `<LineLoginButton />` per LINE's guideline with the official icon
+      embedded from LINE's template (issue #19 — the component half; `/dev` still uses plain
+      links). Deliberately an OIDC client with its own session, not renkei's session-cookie
+      mode (DECISIONS.md §13). `renkei add-client --preset next`; `examples/nextjs-renkei-next`
+      (:3500); docs `reference/next.{ja,en}.md`. 15 tests (fake-LINE e2e + button SSR).
+      **Live 2026-09-03**: example → button → LINE consent → `/account` with `line:user_id`,
+      `friend: true`, `region: jp` → logout → guard redirects again. Note: `renkei-client` and
+      `renkei-next` ship **no `development` export condition** (Turbopack cannot resolve
+      TS-style `./x.js` imports from source); `pnpm build` before running the example.
 - [ ] Then the rest of the ROADMAP v0.3 list: Cloudflare Workers (KV/D1) +
       Supabase Edge targets, LINE MINI App channel support, multi-region
       tutorial. Scope each with Achraf before starting. Candidate from the #51

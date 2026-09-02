@@ -13,7 +13,7 @@ usage: renkei                          start the server (reads .env / environmen
        renkei init [--issuer URL] [--db URL] [--print]
                                        write a ready-to-run .env (keys, SQLite storage);
                                        you only paste the LINE channel ID and secret
-       renkei add-client <id> --redirect <url> [--preset authjs|supabase|public]
+       renkei add-client <id> --redirect <url> [--preset authjs|supabase|public|next]
                            [--placeholder-email-domain <domain>] [--region jp]
                            [--replace] [--print]
                                        register an OIDC client in RENKEI_CLIENTS and
@@ -80,7 +80,7 @@ export async function init(argv, io) {
     'LINE_LOGIN_CHANNEL_SECRET=',
     `# 2. On the same channel, LINE Login tab → Callback URL: ${issuer}/line/callback`,
     `# 3. \`npx renkei\` and open ${issuer}/dev to log in with LINE.`,
-    '# 4. `renkei add-client <id> --redirect <url> --preset authjs|supabase|public` registers your app.',
+    '# 4. `renkei add-client <id> --redirect <url> --preset authjs|supabase|public|next` registers your app.',
     '',
     '# Public URL of renkei (the OIDC issuer). No trailing slash.',
     `ISSUER=${issuer}`,
@@ -124,7 +124,7 @@ async function generateJwks() {
 
 // ── add-client ──────────────────────────────────────────────────────────────
 
-const PRESETS = /** @type {const} */ (['authjs', 'supabase', 'public']);
+const PRESETS = /** @type {const} */ (['authjs', 'supabase', 'public', 'next']);
 
 /** @param {string[]} argv @param {Io & { stdout: (line: string) => void }} io */
 export async function addClient(argv, io) {
@@ -154,7 +154,9 @@ export async function addClient(argv, io) {
           ? 'Supabase: https://<project-ref>.supabase.co/auth/v1/callback (local CLI: http://127.0.0.1:54321/auth/v1/callback)'
           : preset === 'authjs'
             ? 'Auth.js: <app origin>/api/auth/callback/renkei'
-            : 'Example: https://app.example.com/callback'
+            : preset === 'next'
+              ? 'Next.js (renkei-next): <app origin>/api/renkei/callback'
+              : 'Example: https://app.example.com/callback'
       }`,
     );
   }
@@ -236,6 +238,26 @@ export function snippet(preset, c, issuer) {
       '',
       `Users without a LINE email get <sub>@${c.placeholderEmailDomain} (email_placeholder: true) —`,
       'read docs/tutorials/supabase.en.md §4 before going live.',
+    ];
+  }
+  if (preset === 'next') {
+    return [
+      'renkei-next — .env.local of the Next.js app:',
+      `  RENKEI_ISSUER=${issuer}`,
+      `  RENKEI_CLIENT_ID=${c.clientId}`,
+      `  RENKEI_CLIENT_SECRET=${c.clientSecret}`,
+      `  RENKEI_NEXT_SECRET=${randomBytes(32).toString('base64url')}`,
+      '',
+      'renkei.ts:',
+      "  import { createRenkeiAuth } from 'renkei-next';",
+      '  export const renkei = createRenkeiAuth({',
+      '    issuer: process.env.RENKEI_ISSUER!, clientId: process.env.RENKEI_CLIENT_ID!,',
+      '    clientSecret: process.env.RENKEI_CLIENT_SECRET, secret: process.env.RENKEI_NEXT_SECRET!,',
+      '  });',
+      '',
+      'app/api/renkei/[...renkei]/route.ts:   export const { GET, POST } = renkei.handlers;',
+      "proxy.ts (middleware.ts on Next ≤ 15): export default renkei.proxy({ protect: ['/account'] });",
+      "any page:                              import { LineLoginButton } from 'renkei-next/button';",
     ];
   }
   if (preset === 'authjs') {
