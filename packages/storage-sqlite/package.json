@@ -1,7 +1,7 @@
 {
   "name": "renkei-storage-sqlite",
   "version": "0.3.0",
-  "description": "SQLite storage for renkei. Zero dependencies on Node 22.13+ (built-in node:sqlite); better-sqlite3 and Bun via a 3-method driver interface.",
+  "description": "SQLite storage for renkei. Zero dependencies on Node 22.13+ (built-in node:sqlite); better-sqlite3 and Bun via a 3-method driver interface; Cloudflare D1 via renkei-storage-sqlite/d1.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -14,7 +14,14 @@
     ".": {
       "development": "./src/index.ts",
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./d1": {
+      "development": "./src/d1.ts",
+      "types": "./dist/d1.d.ts",
+      "import": "./dist/d1.js",
+      "default": "./dist/d1.js"
     }
   },
   "publishConfig": {
@@ -27,11 +34,14 @@
     "node": ">=22.13"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --clean --sourcemap",
+    "build": "tsup src/index.ts src/d1.ts --format esm --dts --clean --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
     "renkei-core": "workspace:*"
+  },
+  "devDependencies": {
+    "miniflare": "^4.20260730.0"
   }
 }

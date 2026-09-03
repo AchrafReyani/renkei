@@ -6,15 +6,27 @@
  */
 
 import { createLocalJWKSet, jwtVerify, SignJWT } from 'jose';
+import { Miniflare } from 'miniflare';
 import { createMemoryStorage, type Storage } from 'renkei-core';
 import { createSqliteStorage } from 'renkei-storage-sqlite';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { createD1Storage, type D1DatabaseLike } from 'renkei-storage-sqlite/d1';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createRenkei, type Renkei } from '../src/index.js';
 
-/** The whole suite runs once per storage adapter that ships in the server image. */
+// A real D1 (workerd, via Miniflare) for the Workers target.
+const mf = new Miniflare({
+  modules: true,
+  script: 'export default { fetch() { return new Response("ok"); } };',
+  d1Databases: { DB: 'renkei-e2e' },
+});
+const d1 = (await mf.getD1Database('DB')) as unknown as D1DatabaseLike;
+afterAll(() => mf.dispose());
+
+/** The whole suite runs once per storage adapter that ships in the server image / Worker. */
 const STORAGES: Array<[name: string, make: () => Storage]> = [
   ['memory', () => createMemoryStorage()],
   ['sqlite', () => createSqliteStorage({ filename: ':memory:' })],
+  ['d1', () => createD1Storage(d1)],
 ];
 
 const ISSUER = 'http://renkei.test';

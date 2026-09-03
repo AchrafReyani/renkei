@@ -30,3 +30,7 @@ CLAUDE.local.md
 
 # Claude Code personal settings
 .claude/settings.local.json
+
+# Cloudflare Workers (examples/cloudflare-workers)
+.dev.vars
+.wrangler/

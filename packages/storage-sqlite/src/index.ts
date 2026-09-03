@@ -4,7 +4,13 @@ import type { Storage } from 'renkei-core';
 import type { SqliteDriver } from './driver.js';
 import { createSqliteDriverStorage, type SqliteStorageOptions } from './storage.js';
 
-export type { Row, SqliteDriver, SqliteStatement, SqliteValue } from './driver.js';
+export type {
+  Row,
+  SqliteDriver,
+  SqliteMigrationSupport,
+  SqliteStatement,
+  SqliteValue,
+} from './driver.js';
 export { migrateSqlite, migrations, readUserVersion, schemaVersion } from './schema.js';
 export { createSqliteDriverStorage, type SqliteStorageOptions } from './storage.js';
 
@@ -20,6 +26,8 @@ export interface SqliteStorageConfig extends SqliteStorageOptions {
  *
  * On Bun or with `better-sqlite3`, open the database yourself and pass it to
  * `createSqliteDriverStorage()` instead — the driver interface is the same.
+ * On Cloudflare Workers, import `createD1Storage` from `renkei-storage-sqlite/d1`
+ * (this entry touches `node:fs`, that one does not).
  */
 export function createSqliteStorage(config: SqliteStorageConfig): Storage {
   const { filename, ...options } = config;

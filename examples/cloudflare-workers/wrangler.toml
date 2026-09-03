@@ -1,0 +1,24 @@
+# renkei on Cloudflare Workers. Docs: docs/guides/deploy-cloudflare-workers.{ja,en}.md
+name = "renkei"
+main = "src/index.ts"
+# oidc-provider is a Node library; nodejs_compat provides node:events / node:stream / node:crypto.
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Non-secret configuration. Same variable names as the Node entry (docs/reference/config).
+# Secrets (LINE_LOGIN_CHANNEL_ID, LINE_LOGIN_CHANNEL_SECRET, RENKEI_JWKS, RENKEI_COOKIE_KEYS,
+# RENKEI_CLIENTS) go in .dev.vars locally and `wrangler secret put` in production.
+[vars]
+ISSUER = "http://localhost:8787"
+RENKEI_DEV = "true"
+
+# Storage. `wrangler d1 create renkei` prints the database_id; the placeholder is enough
+# for `wrangler dev`, which uses a local D1 under .wrangler/. renkei creates its tables on
+# first request (idempotent), so no migration step is needed.
+[[d1_databases]]
+binding = "DB"
+database_name = "renkei"
+database_id = "00000000-0000-0000-0000-000000000000"
+
+[observability]
+enabled = true

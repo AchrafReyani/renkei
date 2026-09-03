@@ -1,0 +1,14 @@
+# Copy to .dev.vars (gitignored). `wrangler dev` loads it as secrets.
+# In production: `wrangler secret put <NAME>` for each.
+
+# LINE Login channel (LINE Developers Console → channel → Basic settings)
+LINE_LOGIN_CHANNEL_ID=
+LINE_LOGIN_CHANNEL_SECRET=
+
+# Pin both. Workers run many isolates; keys generated per isolate would not match across them.
+# Generate with `npx renkei init --print` in any directory, or see docs/reference/config.
+RENKEI_JWKS=
+RENKEI_COOKIE_KEYS=
+
+# Your apps, once you go beyond the /dev test page (JSON array; see docs/reference/config):
+# RENKEI_CLIENTS=[{"clientId":"my-app","clientSecret":"…","redirectUris":["https://my-app.example.com/api/renkei/callback"]}]

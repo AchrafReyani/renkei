@@ -27,6 +27,25 @@ icon; `renkei add-client --preset next`; `examples/nextjs-renkei-next`. 15 tests
 channel (button → LINE consent → `/account` with all `line:*` claims → logout).
 Released together as **0.4.0** the same day (§0).
 
+**Done 2026-09-04:** **Cloudflare Workers target** (§5, issue #6) — `renkei-server/workers`
+(`createWorker()`; boots once per isolate from vars + secrets, 500 + retry on a failed boot,
+warns when `RENKEI_JWKS` / `RENKEI_COOKIE_KEYS` are not pinned) and `renkei-storage-sqlite/d1`
+(`createD1Storage(env.DB)`: the SQLite adapter's SQL on D1's async API; schema version in
+`renkei_meta` because D1 refuses `PRAGMA user_version` / `BEGIN`; DDL batched atomically).
+The driver interface is async-capable now (`migrateSqlite()` / `readUserVersion()` return
+Promises). Tests: the storage contract + the server e2e suite run against **real workerd D1**
+via Miniflare (260 tests). `examples/cloudflare-workers` (`wrangler deploy --dry-run` bundles
+1.98 MB / 343 KB gzip, no `pg`), guide `docs/guides/deploy-cloudflare-workers.{ja,en}.md`,
+DECISIONS.md §14. KV skipped on purpose (no secondary lookups, eventual consistency).
+**Live-verified on `wrangler dev` :8787 with the real channel** (Achraf completed the LINE
+leg in the browser): `/dev` → LINE → `/dev/callback` with an id_token (`kid` = the pinned key)
+carrying `line:user_id`, `line:friend: true`, `line:channel_id`, `line:region: jp`, `aud:
+renkei-dev`, plus `/oidc/me`; the local D1 holds the identity, the `login` account row
+(`friend: 1`), AccessToken / AuthorizationCode / Grant / Session payloads and
+`renkei_meta.schema_version = 1`. The Node entry (`pnpm dev:server`) still boots and serves
+discovery after the `configFromEnv()` refactor. Changesets staged: `renkei-storage-sqlite` minor +
+`renkei-server` minor (plus the #67 patch), so the next release is **0.5.0** for the linked group.
+
 **0.4.0 is released (2026-09-03, §0)**: `renkei`, `renkei-client`, `renkei-next` on npm,
 tag `v0.4.0`, GHCR `:0.4.0`. **Next: the remaining v0.3 targets in §5** (Cloudflare
 Workers KV/D1, Supabase Edge, LINE MINI App channel, multi-region tutorial) —
@@ -200,6 +219,10 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
       (`liff.line.me/2011257262-OKRFVulZ` → demo `/dev/liff` → `POST
       /liff/exchange`) now returns `line:linked: true` on 0.2.3, where the same
       exchange said `false` the morning before the fix.
+- [x] **Workers target live** (2026-09-04): `wrangler dev` on :8787 + real channel, Achraf
+      logged in; `/dev/callback` showed all `line:*` claims and the local D1 held the rows
+      (see the top of this file). `examples/cloudflare-workers/.dev.vars` stays on disk
+      (gitignored) for the next run.
 - [ ] (Optional) **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`) — not set:
       nothing exists to receive the POST. Needs a downstream endpoint first.
 
@@ -317,8 +340,12 @@ six env vars"), breadth (TW/TH, MINI App) after.
       `friend: true`, `region: jp` → logout → guard redirects again. Note: `renkei-client` and
       `renkei-next` ship **no `development` export condition** (Turbopack cannot resolve
       TS-style `./x.js` imports from source); `pnpm build` before running the example.
-- [ ] Then the rest of the ROADMAP v0.3 list: Cloudflare Workers (KV/D1) +
-      Supabase Edge targets, LINE MINI App channel support, multi-region
+- [x] **Cloudflare Workers target** — shipped 2026-09-04 (see the top of this file;
+      DECISIONS.md §14; closes #6). D1 only; Hyperdrive + Postgres documented via
+      `createWorker({ storage })`, untested.
+- [ ] Then the rest of the ROADMAP v0.3 list: Supabase Edge target (the fetch→node
+      bridge already lives in `renkei-server`; what is missing is a `Deno.serve` entry,
+      the Postgres wiring and a guide), LINE MINI App channel support, multi-region
       tutorial. Scope each with Achraf before starting. Candidate from the #51
       findings: model account linkage as a flag on the LINE account row instead
       of overloading `kind` (needs a migration).
