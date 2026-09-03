@@ -54,6 +54,7 @@ export default defineConfig({
               { text: 'LINE Developers Console の準備', link: '/guides/line-console' },
               { text: 'Render にデプロイする（無料枠）', link: '/guides/deploy-render' },
               { text: 'Fly.io にデプロイする', link: '/guides/deploy-fly' },
+              { text: 'Cloudflare Workers にデプロイする', link: '/guides/deploy-cloudflare-workers' },
             ],
           },
           {
@@ -96,6 +97,7 @@ export default defineConfig({
               { text: 'LINE Developers Console', link: '/en/guides/line-console' },
               { text: 'Deploying to Render (free)', link: '/en/guides/deploy-render' },
               { text: 'Deploying to Fly.io', link: '/en/guides/deploy-fly' },
+              { text: 'Deploying to Cloudflare Workers', link: '/en/guides/deploy-cloudflare-workers' },
             ],
           },
           {

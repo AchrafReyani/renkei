@@ -136,7 +136,7 @@ Environment variables (`.env`). Full reference: [config](docs/reference/config.e
 | `RENKEI_CLIENTS` | JSON array of downstream clients (`clientId`, `clientSecret`, `redirectUris`, `placeholderEmailDomain`, …) |
 | `RENKEI_COOKIE_KEYS` | cookie signing keys (comma-separated, rotatable) |
 | `RENKEI_JWKS` | token signing keys (JSON array of JWKs); generated per boot if unset (dev only) |
-| `DATABASE_URL` | `postgres://…` or `sqlite:./data/renkei.db` (Node 22.13+ built-in SQLite, zero dependencies); in-memory if unset (dev only) |
+| `DATABASE_URL` | `postgres://…` or `sqlite:./data/renkei.db` (Node 22.13+ built-in SQLite, zero dependencies); in-memory if unset (dev only). On Cloudflare Workers a D1 binding takes its place ([guide](docs/guides/deploy-cloudflare-workers.en.md)) |
 
 ## Endpoints
 
@@ -153,7 +153,7 @@ Environment variables (`.env`). Full reference: [config](docs/reference/config.e
 
 ## Runtimes
 
-Node.js 22+. The same code is verified on **Node / Docker, Deno, Cloudflare Workers and Supabase Edge Functions**
+Node.js 22+. The same code is verified on **Node / Docker, Deno, Cloudflare Workers and Supabase Edge Functions**. Cloudflare Workers is a supported target with D1 storage (`renkei-server/workers`, [deploy guide](docs/guides/deploy-cloudflare-workers.en.md))
 ([spike record](docs/SPIKE-oidc-provider-runtimes.md)). v0.1 ships a Docker image and npm packages; v0.3 packages the edge deploys.
 
 ## Non-goals

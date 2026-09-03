@@ -19,7 +19,7 @@ programmatic use, pass the same settings as an object to
 |---|---|---|
 | `ISSUER` | `http://localhost:3000` | renkei's public URL. **Becomes the OIDC issuer and the base for every absolute URL.** No trailing slash. Behind a proxy, use the externally visible URL |
 | `PORT` | port of `ISSUER`, else `3000` | listen port |
-| `DATABASE_URL` | none | `postgres://…` selects Postgres, `sqlite:./data/renkei.db` selects SQLite (Node 22.13+ built-in `node:sqlite`: zero dependencies, no database server, single process; keep the file on a persistent disk). Unset = **in-memory** (wiped on restart, single process; development only) |
+| `DATABASE_URL` | none | `postgres://…` selects Postgres, `sqlite:./data/renkei.db` selects SQLite (Node 22.13+ built-in `node:sqlite`: zero dependencies, no database server, single process; keep the file on a persistent disk). Unset = **in-memory** (wiped on restart, single process; development only). Not used on Cloudflare Workers, where the D1 binding `DB` is the storage ([guide](../guides/deploy-cloudflare-workers.en.md)) |
 | `RENKEI_COOKIE_KEYS` | generated per boot | cookie signing keys, comma-separated. Rotate by prepending. **Set in production** |
 | `RENKEI_JWKS` | generated per boot | private signing keys (JSON array of JWKs with `kid` and `alg`). Unset means tokens die on restart and multi-instance deployments break. **Set in production** ([how to generate](#generating-signing-keys)) |
 | `RENKEI_DEV` | `true` only if both `RENKEI_CLIENTS` and `DATABASE_URL` are unset | mounts the `/dev` test relying party; its `renkei-dev` / `renkei-dev-liff` clients are appended to `RENKEI_CLIENTS` when both are set. **Off in production** |
@@ -113,6 +113,7 @@ Put the output in `RENKEI_JWKS`. To rotate, prepend a new key and keep the old o
 import { createRenkei } from 'renkei-server';
 import { createPostgresStorage } from 'renkei-storage-postgres';
 // or SQLite: import { createSqliteStorage } from 'renkei-storage-sqlite';
+// Cloudflare D1: import { createD1Storage } from 'renkei-storage-sqlite/d1'; → createD1Storage(env.DB)
 
 const renkei = await createRenkei({
   storage: createPostgresStorage({ connectionString: process.env.DATABASE_URL! }),

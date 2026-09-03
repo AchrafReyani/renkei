@@ -332,3 +332,31 @@ one of `renkei-server`). The session is a snapshot of the claims at login:
 webhook forwarding on the app side. Session-cookie mode remains available for
 same-origin deployments (renkei reverse-proxied under the app's origin), via
 `renkei-client` directly.
+
+## 14. Cloudflare Workers: D1 through the SQLite adapter, no KV, no `httpServerHandler` (2026-09-04)
+
+**Decision.** The Workers target is `renkei-server/workers`: a `createWorker()`
+whose `fetch` boots renkei once per isolate from the Worker's vars and secrets
+and hands every request to the existing Hono app. Storage is Cloudflare D1
+through `renkei-storage-sqlite/d1` — the SQLite adapter's SQL and contract
+tests, with the driver interface made async-capable and a small D1 driver that
+batches DDL atomically and keeps the schema version in a `renkei_meta` table
+(D1 refuses `PRAGMA user_version` and SQL `BEGIN`). No KV adapter. Postgres
+via Hyperdrive is a one-liner through `createWorker({ storage })`, documented
+but not tested.
+
+**Why.** The spike (§8) assumed the Workers target would need
+`cloudflare:node`'s `httpServerHandler`, but the fetch→node bridge written for
+Supabase edge-runtime made the Hono app fetch-native on every runtime — the
+Worker is the same `app.fetch` as Node, so there is nothing runtime-specific to
+add. D1 *is* SQLite: reusing the adapter means one schema, one set of contract
+tests (run against real workerd D1 via Miniflare) and no second SQL dialect to
+keep in step. KV was dropped on purpose: `oidc-provider` needs `findByUid` /
+`revokeByGrantId` lookups and consume-once semantics, which KV's eventual
+consistency and lack of secondary indexes cannot give safely.
+
+**Cost.** `migrateSqlite()` and `readUserVersion()` became async (0.x, noted in
+the changeset). Miniflare (workerd) is a devDependency of two packages, so CI
+downloads the workerd binary. Two version stores exist — `PRAGMA user_version`
+on Node, `renkei_meta` on D1 — hidden behind `SqliteDriver.migration`.
+

@@ -18,6 +18,7 @@ export {
   renkeiConfigSchema,
   type SessionCookieConfig,
 } from './config.js';
+export { configFromEnv, type EnvConfig, type EnvConfigOptions, type EnvLike } from './env.js';
 export {
   createWebhookLog,
   inspectRoutes,

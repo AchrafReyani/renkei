@@ -67,13 +67,13 @@ describe('sqlite storage specifics', () => {
     await b.close?.();
   });
 
-  it('records the schema version in PRAGMA user_version', () => {
+  it('records the schema version in PRAGMA user_version', async () => {
     const db = openNodeSqlite(':memory:');
-    expect(readUserVersion(db)).toBe(0);
-    migrateSqlite(db);
-    expect(readUserVersion(db)).toBe(schemaVersion);
-    migrateSqlite(db);
-    expect(readUserVersion(db)).toBe(schemaVersion);
+    expect(await readUserVersion(db)).toBe(0);
+    await migrateSqlite(db);
+    expect(await readUserVersion(db)).toBe(schemaVersion);
+    await migrateSqlite(db);
+    expect(await readUserVersion(db)).toBe(schemaVersion);
     db.close?.();
   });
 

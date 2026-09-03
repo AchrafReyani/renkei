@@ -1,0 +1,19 @@
+{
+  "name": "example-cloudflare-workers",
+  "private": true,
+  "description": "renkei on Cloudflare Workers with D1 storage: the whole Worker is one re-export of renkei-server/workers",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "renkei-server": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "wrangler": "^4.125.0"
+  }
+}

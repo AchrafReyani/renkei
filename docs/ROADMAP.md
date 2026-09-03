@@ -160,7 +160,12 @@ Order matters: each item is what the next needs.
       `middleware()` guard, `<LineLoginButton />` following LINE's button guideline with
       the official icon; `renkei add-client --preset next`; `examples/nextjs-renkei-next`
       (2026-09-03, DECISIONS.md §13)
-- [ ] Cloudflare Workers deploy target via `httpServerHandler` + KV/D1 or Hyperdrive adapter
+- [x] Cloudflare Workers deploy target: `renkei-server/workers` (`createWorker()`, boots once per
+      isolate from vars + secrets) with D1 storage via `renkei-storage-sqlite/d1` — the SQLite
+      adapter's SQL on D1's async API (no `httpServerHandler`: the Hono app is already
+      fetch-native through the fetch→node bridge). KV deliberately skipped (no secondary
+      lookups, eventual consistency); Hyperdrive + Postgres via `createWorker({ storage })`.
+      `examples/cloudflare-workers`, deploy guide ja/en (2026-09-04, DECISIONS.md §14)
 - [ ] Supabase Edge Function deploy target — `adapters/fetch-to-node.ts` from the spike shim (+ host-header fix, Postgres adapter)
 - [ ] LINE MINI App channel support (LINE is folding LIFF into MINI App; new apps should be MINI App channels under the same provider) — service messages prerequisites, `liff.permanentLink`
 - [ ] Multi-region tutorial (JP + TW channels, `line_region` routing)

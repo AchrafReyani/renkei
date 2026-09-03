@@ -19,7 +19,7 @@ export interface SqliteStorageOptions {
 }
 
 /**
- * Wrap any synchronous SQLite binding (see `SqliteDriver`) as renkei Storage.
+ * Wrap any SQLite binding (see `SqliteDriver`) as renkei Storage.
  * `init()` migrates (unless `autoMigrate: false`), `close()` closes the driver.
  */
 export function createSqliteDriverStorage(
@@ -31,12 +31,12 @@ export function createSqliteDriverStorage(
     identities: new SqliteIdentityStore(driver, now),
     payloads: new SqlitePayloadStore(driver, now),
     init: async () => {
-      if (options.autoMigrate !== false) migrateSqlite(driver);
+      if (options.autoMigrate !== false) await migrateSqlite(driver);
     },
   };
   if (driver.close) {
     storage.close = async () => {
-      driver.close?.();
+      await driver.close?.();
     };
   }
   return storage;
@@ -53,6 +53,11 @@ const json = (v: unknown): SqliteValue => (v === undefined ? null : JSON.stringi
 const names = (cols: Col[]) => cols.map(([c]) => c).join(', ');
 const marks = (cols: Col[]) => cols.map(() => '?').join(', ');
 const values = (cols: Col[]) => cols.map(([, v]) => v);
+
+/** `get()` yields `undefined` (node:sqlite, better-sqlite3) or `null` (D1) for no row. */
+const row = async (result: unknown): Promise<Row | undefined> =>
+  ((await result) ?? undefined) as Row | undefined;
+const rows = async (result: unknown): Promise<Row[]> => (await result) as Row[];
 
 function toIdentity(r: Row): Identity {
   return {
@@ -101,21 +106,21 @@ class SqliteIdentityStore implements IdentityStore {
   ) {}
 
   async findIdentity(sub: string) {
-    const row = this.db.prepare('SELECT * FROM renkei_identity WHERE sub = ?').get(sub) as
-      | Row
-      | undefined;
-    return row ? toIdentity(row) : undefined;
+    const r = await row(this.db.prepare('SELECT * FROM renkei_identity WHERE sub = ?').get(sub));
+    return r ? toIdentity(r) : undefined;
   }
 
   async findIdentityByLineAccount(channelId: string, lineUserId: string) {
-    const row = this.db
-      .prepare(
-        `SELECT i.* FROM renkei_line_account a
-         JOIN renkei_identity i ON i.sub = a.identity_sub
-         WHERE a.channel_id = ? AND a.line_user_id = ?`,
-      )
-      .get(channelId, lineUserId) as Row | undefined;
-    return row ? toIdentity(row) : undefined;
+    const r = await row(
+      this.db
+        .prepare(
+          `SELECT i.* FROM renkei_line_account a
+           JOIN renkei_identity i ON i.sub = a.identity_sub
+           WHERE a.channel_id = ? AND a.line_user_id = ?`,
+        )
+        .get(channelId, lineUserId),
+    );
+    return r ? toIdentity(r) : undefined;
   }
 
   async createIdentity(init: IdentityPatch & { sub: string }) {
@@ -126,7 +131,7 @@ class SqliteIdentityStore implements IdentityStore {
       ['created_at', t],
       ['updated_at', t],
     ];
-    this.db
+    await this.db
       .prepare(`INSERT INTO renkei_identity (${names(cols)}) VALUES (${marks(cols)})`)
       .run(...values(cols));
     const created = await this.findIdentity(init.sub);
@@ -137,7 +142,9 @@ class SqliteIdentityStore implements IdentityStore {
   async updateIdentity(sub: string, patch: IdentityPatch) {
     const cols: Col[] = [...identityColumns(patch), ['updated_at', ms(this.now())]];
     const set = cols.map(([c]) => `${c} = ?`).join(', ');
-    this.db.prepare(`UPDATE renkei_identity SET ${set} WHERE sub = ?`).run(...values(cols), sub);
+    await this.db
+      .prepare(`UPDATE renkei_identity SET ${set} WHERE sub = ?`)
+      .run(...values(cols), sub);
     const updated = await this.findIdentity(sub);
     if (!updated) throw new Error(`identity ${sub} not found`);
     return updated;
@@ -164,33 +171,35 @@ class SqliteIdentityStore implements IdentityStore {
       ...update,
     ];
     const set = update.map(([c]) => `${c} = excluded.${c}`).join(', ');
-    this.db
+    await this.db
       .prepare(
         `INSERT INTO renkei_line_account (${names(insert)}) VALUES (${marks(insert)})
          ON CONFLICT (channel_id, line_user_id) DO UPDATE SET ${set}`,
       )
       .run(...values(insert));
-    const row = await this.findLineAccount(record.channelId, record.lineUserId);
-    if (!row) throw new Error('upsert returned no row');
-    return row;
+    const account = await this.findLineAccount(record.channelId, record.lineUserId);
+    if (!account) throw new Error('upsert returned no row');
+    return account;
   }
 
   async listLineAccounts(sub: string) {
-    const rows = this.db
-      .prepare('SELECT * FROM renkei_line_account WHERE identity_sub = ?')
-      .all(sub) as Row[];
-    return rows.map(toAccount);
+    const rs = await rows(
+      this.db.prepare('SELECT * FROM renkei_line_account WHERE identity_sub = ?').all(sub),
+    );
+    return rs.map(toAccount);
   }
 
   async findLineAccount(channelId: string, lineUserId: string) {
-    const row = this.db
-      .prepare('SELECT * FROM renkei_line_account WHERE channel_id = ? AND line_user_id = ?')
-      .get(channelId, lineUserId) as Row | undefined;
-    return row ? toAccount(row) : undefined;
+    const r = await row(
+      this.db
+        .prepare('SELECT * FROM renkei_line_account WHERE channel_id = ? AND line_user_id = ?')
+        .get(channelId, lineUserId),
+    );
+    return r ? toAccount(r) : undefined;
   }
 
   async setFriendship(channelId: string, lineUserId: string, friend: boolean, at = this.now()) {
-    this.db
+    await this.db
       .prepare(
         `UPDATE renkei_line_account SET friend = ?, friend_checked_at = ?, updated_at = ?
          WHERE channel_id = ? AND line_user_id = ?`,
@@ -209,23 +218,27 @@ class SqlitePayloadStore implements PayloadStore {
     private readonly now: () => Date,
   ) {}
 
-  private toRecord(row: Row): PayloadRecord {
-    const p = JSON.parse(row.payload as string) as PayloadRecord;
-    if (row.consumed_at != null) p.consumed = Math.floor(Number(row.consumed_at) / 1000);
+  private toRecord(r: Row): PayloadRecord {
+    const p = JSON.parse(r.payload as string) as PayloadRecord;
+    if (r.consumed_at != null) p.consumed = Math.floor(Number(r.consumed_at) / 1000);
     return p;
   }
 
-  private findOne(column: 'id' | 'uid' | 'user_code', model: string, value: string) {
-    const row = this.db
-      .prepare(`SELECT * FROM renkei_payload WHERE model = ? AND ${column} = ? AND ${NOT_EXPIRED}`)
-      .get(model, value, ms(this.now())) as Row | undefined;
-    return row ? this.toRecord(row) : undefined;
+  private async findOne(column: 'id' | 'uid' | 'user_code', model: string, value: string) {
+    const r = await row(
+      this.db
+        .prepare(
+          `SELECT * FROM renkei_payload WHERE model = ? AND ${column} = ? AND ${NOT_EXPIRED}`,
+        )
+        .get(model, value, ms(this.now())),
+    );
+    return r ? this.toRecord(r) : undefined;
   }
 
   async upsert(model: string, id: string, payload: PayloadRecord, expiresInSeconds?: number) {
     const expiresAt =
       expiresInSeconds !== undefined ? ms(this.now()) + expiresInSeconds * 1000 : null;
-    this.db
+    await this.db
       .prepare(
         `INSERT INTO renkei_payload (model, id, payload, uid, user_code, grant_id, expires_at, consumed_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, NULL)
@@ -257,23 +270,23 @@ class SqlitePayloadStore implements PayloadStore {
   }
 
   async consume(model: string, id: string) {
-    this.db
+    await this.db
       .prepare('UPDATE renkei_payload SET consumed_at = ? WHERE model = ? AND id = ?')
       .run(ms(this.now()), model, id);
   }
 
   async destroy(model: string, id: string) {
-    this.db.prepare('DELETE FROM renkei_payload WHERE model = ? AND id = ?').run(model, id);
+    await this.db.prepare('DELETE FROM renkei_payload WHERE model = ? AND id = ?').run(model, id);
   }
 
   async revokeByGrantId(model: string, grantId: string) {
-    this.db
+    await this.db
       .prepare('DELETE FROM renkei_payload WHERE model = ? AND grant_id = ?')
       .run(model, grantId);
   }
 
   /** Housekeeping: delete expired rows. Call from a cron or on an interval. */
   async purgeExpired() {
-    this.db.prepare('DELETE FROM renkei_payload WHERE expires_at <= ?').run(ms(this.now()));
+    await this.db.prepare('DELETE FROM renkei_payload WHERE expires_at <= ?').run(ms(this.now()));
   }
 }
