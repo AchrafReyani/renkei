@@ -182,6 +182,13 @@ Order matters: each item is what the next needs.
       guide ja/en incl. service-message prerequisites (2026-09-04, DECISIONS.md §16; #8). Live-verified
       on the demo from the LINE app: same `sub` as the web login
 - [ ] Multi-region tutorial (JP + TW channels, `line_region` routing)
+- [ ] Structured configuration for multi-channel setups (`renkei.yaml`, issue #11): a `channels:` list
+      with `kind` / `region` / secret per entry (secrets by env reference so the file is committable) and
+      `renkei add-channel [--miniapp]` writing it the way `add-client` writes clients. Motivation (Achraf,
+      2026-09-04): the env surface is ~20 variables now; two values still start renkei, but a flat
+      namespace hides which secret belongs to which channel, and the comma-paired
+      `LINE_MINIAPP_CHANNEL_ID` / `_SECRET` lists are where env stops being a good interface. Env stays
+      the deploy-time path for the simple cases
 - [ ] zh-TW docs kickoff (community), post in LINE Developers TW channels
 
 ## v0.4 — federation guides and framework examples
