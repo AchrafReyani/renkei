@@ -18,7 +18,9 @@ LINE Developers Console → プロバイダー → **新規チャネル作成 �
 | 審査用（Review） | LY Corporation の審査者 | 同上 |
 | 公開用（Published） | 審査後、エンドユーザー | 同上 |
 
-各ステージの id_token は `aud` に自分のチャネル ID を持つので、使うステージをすべて renkei に登録します。チャネルシークレットは**チャネル基本設定**にあり、コンソールにはチャネルにつき 1 つ表示されます。あるステージのトークンが拒否される場合は、そのステージのシークレットを別に渡してください（後述）。
+各ステージの id_token は `aud` に自分のチャネル ID を持ち、**チャネルシークレットもステージごとに別**です（チャネル基本設定 → チャネルシークレットに開発用・審査用・公開用の 3 つが並びます）。使うステージの ID *と*シークレットを renkei に登録してください。
+
+開発用ステージをスマートフォンで開くには、その端末の LINE アカウントが **LINE Business ID に連携されたアカウント**である必要があります（コンソールのプロフィール → *Business ID プロフィールへ* → LINE アカウントを連携）。Admin / Tester の役割は LINE アカウントで照合され、コンソールのメールアドレスでは照合されません。連携がないと LINE は `400 … user need to have developer role` を返します。
 
 ## 2. ミニアプリをあなたのページに向ける
 
@@ -35,8 +37,8 @@ https://<your-renkei>/dev/liff?liff_id=<開発用 LIFF ID>
 環境変数（Node / Docker / Workers / Supabase 共通）:
 
 ```sh
-LINE_MINIAPP_CHANNEL_ID=2011444277                 # 開発用。公開用も使うなら ,2011444279 のように追加
-LINE_MINIAPP_CHANNEL_SECRET=…                      # 全 ID 共通なら 1 つ、ID ごとなら同じ順でカンマ区切り
+LINE_MINIAPP_CHANNEL_ID=2011444277,2011444279      # 開発用、公開用 — 使うステージ
+LINE_MINIAPP_CHANNEL_SECRET=<開発用シークレット>,<公開用シークレット>   # ID ごとに同じ順で（1 つだけ書くと全 ID に適用）
 ```
 
 プログラムからの設定 — Login チャネルの隣に `kind: 'miniapp'` のチャネルを置きます:
@@ -72,4 +74,5 @@ renkei との交換と並行して、アプリ側で LIFF アクセストーク�
 - **`invalid_token: id_token is not for one of our channels`** — トークンの `aud`（ステージのチャネル ID）が `LINE_MINIAPP_CHANNEL_ID` にない。そのステージを追加
 - **id_token は正しそうなのに `invalid_token`** — そのステージのシークレットが違う。ID ごとにシークレットを渡す
 - **同じ人に別々の `sub` が出る** — チャネルの `provider` が異なる値になっているか、ミニアプリチャネルが別の LINE プロバイダーにある（その場合 LINE のユーザー ID 自体が異なり、対応づけは不可能）
-- **開発用ミニアプリが開かない** — その LINE アカウントがチャネルのテスターではない（Roles タブ）
+- **開発用ミニアプリが開かない（`400`、"developer role"）** — 端末の LINE アカウントが Admin / Tester を持つ Business ID に連携されていない（手順 1）、またはチャネルのテスターではない（Roles タブ）
+- **ミニアプリから `line:friend` が来ない** — 友だち状態の確認はチャネルに連携された公式アカウントに対して行われ、公式アカウント未連携のミニアプリチャネルには値がない。Login チャネルの行には残る

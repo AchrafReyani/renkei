@@ -86,8 +86,8 @@ endpoint URL = `https://renkei-demo.onrender.com/dev/liff?liff_id=2011444277-oYF
 demo. Changesets staged: `renkei-core` minor + `renkei-server` minor → next release **0.6.0**.
 
 **0.4.0 is released (2026-09-03, §0)**: `renkei`, `renkei-client`, `renkei-next` on npm,
-tag `v0.4.0`, GHCR `:0.4.0`. **Next: finish the 0.5.0 release (§0, Achraf's publish), the MINI App live check (§1), then the
-multi-region tutorial (§5, last v0.3 item)** — scope it with Achraf before starting; the `/dev` page could also adopt the
+tag `v0.4.0`, GHCR `:0.4.0`. **Next: the multi-region tutorial (§5, last v0.3 item; issue #9)** — scope it with Achraf before starting
+(needs a TW channel, or a config-only tutorial); 0.5.0 is released and the MINI App is live-verified; the `/dev` page could also adopt the
 guideline button CSS to close #19 fully. Time-gated / Achraf-only leftovers: Zenn
 article after 2026-09-10 (§2), the email-permission re-check (§4, still Applied),
 the LIFF phone shot (§2, optional), Option B forward (§1, optional).
@@ -146,7 +146,7 @@ the LIFF phone shot (§2, optional), Option B forward (§1, optional).
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.5.0 — IN PROGRESS 2026-09-04 (Workers + Supabase Edge targets)
+## 0. Cut 0.5.0 — DONE 2026-09-04 (Workers + Supabase Edge targets)
 
 Same flow as 0.4.0. `renkei`, `renkei-server`, `renkei-storage-sqlite`, `renkei-storage-postgres`,
 `renkei-client` and `renkei-next` are on **0.5.0** on `main`; `renkei-core` stays 0.2.3 and is skipped by
@@ -154,12 +154,13 @@ Same flow as 0.4.0. `renkei`, `renkei-server`, `renkei-storage-sqlite`, `renkei-
 
 - [x] Claude: `release/0.5.0` — `pnpm changeset version` → lint / typecheck / 279 tests / build / docs:build
       green → DCO commit → PR #70 → squash-merge (`11b46fb`).
-- [ ] Achraf, in cmd on `main`: `git checkout main && git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
-      (passkey once per package — six this time).
-- [ ] Claude: `git tag -a v0.5.0 -m "v0.5.0" && git push origin v0.5.0`, watch `release.yml`, read the GHCR
-      tags from the run log (`:0.5.0` / `:0.5` / `:latest`).
-- [ ] Claude: tick here + ROADMAP.md; `npm view` = 0.5.0 for the six packages; confirm
-      `examples/supabase-edge` resolves `npm:renkei-server@^0.5.0/supabase` on the local stack.
+- [x] Achraf, in cmd on `main`: `pnpm -r publish --access public` — done 2026-09-04 (six passkeys).
+- [x] Claude: tagged and pushed `v0.5.0`; `release.yml` run 33877790943 succeeded and pushed
+      `ghcr.io/achrafreyani/renkei:0.5.0` / `:0.5` / `:latest`.
+- [x] Claude: ticked here + ROADMAP.md; `npm view` = 0.5.0 for `renkei`, `renkei-server`,
+      `renkei-storage-sqlite`, `renkei-storage-postgres`, `renkei-client`, `renkei-next`; 0.2.3 for `renkei-core`.
+- [ ] Claude (next session): confirm `examples/supabase-edge` resolves `npm:renkei-server@^0.5.0/supabase`
+      on the local stack now that it is published (the `renkei-local` bundle was the pre-publish path).
 
 ## 0a. Cut 0.4.0 — DONE 2026-09-03 (renkei-client + renkei-next + CLI presets)
 
@@ -276,14 +277,17 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
       logged in; `/dev/callback` showed all `line:*` claims and the local D1 held the rows
       (see the top of this file). `examples/cloudflare-workers/.dev.vars` stays on disk
       (gitignored) for the next run.
-- [ ] **MINI App live check** (added 2026-09-04): Achraf sets `LINE_MINIAPP_CHANNEL_ID=2011444277` and
-      `LINE_MINIAPP_CHANNEL_SECRET=<Basic settings → Channel secret of renkei-dev-miniapp>` on Render
-      (renkei-demo) — the secret is Achraf's to paste, Claude does not move credentials — then, after the
-      redeploy, opens `https://miniapp.line.me/2011444277-oYFL2elQ` on the phone (or in a browser; the
-      Developing stage is open to channel admins/testers). Expected on the page: `line:channel_id:
-      "2011444277"`, `line:user_id: U54de992ad068a07f1d4ef661a0a946bd`, and `sub` **equal to the web
-      login's** `j_QoAMmfl7tyAG-SFrz1XfE3YY04RdU0` (the provider-scoped mapping). If the id_token is
-      rejected, the stage may need its own secret (comma-separated, see the guide).
+- [x] **MINI App live check — done 2026-09-04** (Achraf's phone, Android, in the LINE app): the demo runs
+      with `LINE_MINIAPP_CHANNEL_ID=2011444277` + the Developing secret on Render; `https://miniapp.line.me/2011444277-oYFL2elQ`
+      → `/dev/liff?liff_id=…` → exchange OK: `sub = j_QoAMmfl7tyAG-SFrz1XfE3YY04RdU0` (**equal to the web
+      login's** — provider-scoped mapping confirmed), `line:channel_id: 2011444277`, `line:user_id` the
+      usual, `line:linked: true` (the existing account link carried over), `amr: [liff]`, `inClient: true`.
+      Two things learned: (1) a MINI App has **one channel secret per stage** (Basic settings shows three);
+      (2) opening the Developing stage failed with `400 … user need to have developer role` until Achraf
+      **linked his LINE account to the LINE Business ID** (console profile → Go to Business ID Profile) —
+      the console's Admin/Tester role is matched by LINE account, not by console email. Both are in the
+      guide now. Observation: no `line:friend` claim from the MINI App row — the friendship API answers
+      for the OA linked to the channel and the MINI App channel has none yet; the web-login row keeps it.
 - [ ] (Optional) **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`) — not set:
       nothing exists to receive the POST. Needs a downstream endpoint first.
 
