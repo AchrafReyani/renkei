@@ -1,5 +1,6 @@
 import Provider, { type Configuration, type KoaContextWithOIDC } from 'oidc-provider';
 import { buildClaims, LINE_CLAIMS, LINE_SCOPE, type Storage } from 'renkei-core';
+import { issuerBasePath } from '../base-path.js';
 import type { RenkeiConfig } from '../config.js';
 import { adapterFactory } from './adapter.js';
 import { applyEmailPlaceholder, EMAIL_PLACEHOLDER_CLAIM } from './claims.js';
@@ -44,6 +45,7 @@ export interface ProviderDeps {
 }
 
 export function createProvider({ config, storage, jwks, logger }: ProviderDeps): Provider {
+  const basePath = issuerBasePath(new URL(config.issuer));
   const regionOf = (channelId: string) =>
     config.channels.find((c) => c.channelId === channelId)?.region;
 
@@ -91,7 +93,8 @@ export function createProvider({ config, storage, jwks, logger }: ProviderDeps):
       Grant: config.ttl.session,
     },
     interactions: {
-      url: (_ctx, interaction) => `${INTERACTION_PATH}/${interaction.uid}`,
+      // Absolute path: oidc-provider redirects the browser here, so a prefixed issuer must show.
+      url: (_ctx, interaction) => `${basePath}${INTERACTION_PATH}/${interaction.uid}`,
     },
     async findAccount(ctx, sub) {
       const identity = await storage.identities.findIdentity(sub);

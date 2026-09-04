@@ -166,7 +166,13 @@ Order matters: each item is what the next needs.
       fetch-native through the fetch→node bridge). KV deliberately skipped (no secondary
       lookups, eventual consistency); Hyperdrive + Postgres via `createWorker({ storage })`.
       `examples/cloudflare-workers`, deploy guide ja/en (2026-09-04, DECISIONS.md §14)
-- [ ] Supabase Edge Function deploy target — `adapters/fetch-to-node.ts` from the spike shim (+ host-header fix, Postgres adapter)
+- [x] Supabase Edge Function deploy target: `renkei-server/supabase` (`serve()` / `createEdgeFunction()`,
+      boots once per isolate from `Deno.env`, Postgres from `DATABASE_URL` or the function's own
+      `SUPABASE_DB_URL`, RLS enabled on renkei's tables). Made possible by path-prefixed issuers
+      (`/functions/v1/<name>` kept on every URL, stripped from requests, passed to oidc-provider as
+      its mount path), the bridge overriding `X-Forwarded-Host`, and `renkei-storage-postgres`
+      migrating from an embedded list instead of the filesystem. `examples/supabase-edge`, deploy
+      guide ja/en (2026-09-04, DECISIONS.md §15)
 - [ ] LINE MINI App channel support (LINE is folding LIFF into MINI App; new apps should be MINI App channels under the same provider) — service messages prerequisites, `liff.permanentLink`
 - [ ] Multi-region tutorial (JP + TW channels, `line_region` routing)
 - [ ] zh-TW docs kickoff (community), post in LINE Developers TW channels

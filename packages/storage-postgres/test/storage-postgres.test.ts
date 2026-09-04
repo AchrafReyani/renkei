@@ -5,6 +5,28 @@ import { createPgliteStorage } from './pglite.js';
 storageContract('postgres (PGlite)', () => createPgliteStorage());
 
 describe('postgres storage specifics', () => {
+  it('enables row level security on its tables when asked, and still works as the owner', async () => {
+    const { PGlite } = await import('@electric-sql/pglite');
+    const { drizzle } = await import('drizzle-orm/pglite');
+    const { sql } = await import('drizzle-orm');
+    const { migratePostgres, RENKEI_TABLES } = await import('../src/migrate.js');
+    const { createDrizzleStorage } = await import('../src/storage.js');
+    const client = new PGlite();
+    const db = drizzle(client);
+    await migratePostgres(db, { rowLevelSecurity: true });
+    await migratePostgres(db, { rowLevelSecurity: true }); // idempotent
+    const rows = await db.execute(
+      sql`SELECT relname, relrowsecurity FROM pg_class WHERE relname = ANY(${sql.param([...RENKEI_TABLES])}) ORDER BY relname`,
+    );
+    expect(rows.rows.map((r) => [r.relname, r.relrowsecurity])).toEqual(
+      [...RENKEI_TABLES].sort().map((t) => [t, true]),
+    );
+    const s = createDrizzleStorage(db, {});
+    await s.identities.createIdentity({ sub: 'rls' });
+    expect(await s.identities.findIdentity('rls')).toMatchObject({ sub: 'rls' });
+    await client.close();
+  });
+
   it('expires payloads by the injected clock', async () => {
     let t = 1_000_000;
     const s = await createPgliteStorage(() => new Date(t));

@@ -109,7 +109,7 @@ export default createWorker({
 });
 ```
 
-`renkei-storage-postgres` は `pg` を使い、Cloudflare は `nodejs_compat` 下で `pg` をサポートしています。ただしこの経路は renkei のテストでは検証していません（D1 経路は検証済み）。
+`renkei-storage-postgres` は postgres.js（`postgres`）を使い、Cloudflare は `nodejs_compat` 下でサポートしています。マイグレーションはモジュールに埋め込まれているのでファイルシステムは不要です。ただしこの経路は renkei のテストでは検証していません（D1 経路は検証済み）。
 
 ## よくあるエラー
 

@@ -27,6 +27,14 @@ export interface BridgeOptions {
   protocol?: string;
   /** Rewrite the path before handing it to the handler (e.g. strip a mount prefix). */
   path?: string;
+  /**
+   * Path the handler is mounted under (`/functions/v1/renkei` for a
+   * path-prefixed issuer). Presented as Express-style `originalUrl` =
+   * mountPath + url, which is how oidc-provider recovers its mount path when
+   * it builds absolute URLs (discovery endpoints, interaction redirects, cookie
+   * paths).
+   */
+  mountPath?: string;
   /** Remote address reported to the handler. */
   remoteAddress?: string;
 }
@@ -55,8 +63,13 @@ export async function toNodeRequest(
   const req = Readable.from([body]) as NodeRequestLike;
   req.method = request.method;
   req.url = options.path !== undefined ? options.path + url.search : url.pathname + url.search;
+  if (options.mountPath) req.originalUrl = options.mountPath + req.url;
   req.headers = Object.fromEntries([...request.headers].map(([k, v]) => [k.toLowerCase(), v]));
+  // The issuer decides the public host and scheme. Koa (with `proxy` on) prefers
+  // X-Forwarded-Host / X-Forwarded-Proto, and gateways set them to what *they*
+  // saw (Supabase's Kong sends `127.0.0.1` without the port), so override both.
   req.headers.host = options.host;
+  req.headers['x-forwarded-host'] = options.host;
   req.headers['x-forwarded-proto'] = protocol;
   if (hasBody) req.headers['content-length'] = String(body.byteLength);
   req.httpVersion = '1.1';

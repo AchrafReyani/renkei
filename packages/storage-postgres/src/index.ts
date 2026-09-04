@@ -1,10 +1,11 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
-import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 import type { Storage } from 'renkei-core';
-import { migrationsFolder } from './migrations-path.js';
+import { migratePostgres } from './migrate.js';
 import { createDrizzleStorage } from './storage.js';
 
+export { type MigratePostgresOptions, migratePostgres, RENKEI_TABLES } from './migrate.js';
+export { migrations } from './migrations.js';
 export { migrationsFolder } from './migrations-path.js';
 export * from './schema.js';
 export {
@@ -20,17 +21,38 @@ export interface PostgresStorageConfig {
   autoMigrate?: boolean;
   /** postgres.js pool size. Default 5; use 1 on serverless/edge. */
   max?: number;
+  /**
+   * Seconds an idle connection stays open before postgres.js closes it.
+   * Default: never (long-running servers). Set it on serverless/edge runtimes,
+   * where an isolate may be frozen with its connections still open.
+   */
+  idleTimeout?: number;
+  /** Enable row level security on renkei's tables after migrating (Supabase: keeps the Data API out). Default false. */
+  rowLevelSecurity?: boolean;
 }
 
 /**
  * Storage backed by a real Postgres via postgres.js. `init()` runs the
  * bundled migrations (idempotent), `close()` ends the pool.
+ *
+ * The migrations are embedded in the module (`migrations`), not read from
+ * disk, so the adapter works wherever postgres.js does — Node, Deno / Supabase
+ * Edge Functions, Workers over Hyperdrive — including inside bundles.
  */
 export function createPostgresStorage(config: PostgresStorageConfig): Storage {
-  const client = postgres(config.connectionString, { max: config.max ?? 5, prepare: false });
+  const client = postgres(config.connectionString, {
+    max: config.max ?? 5,
+    prepare: false,
+    ...(config.idleTimeout !== undefined ? { idle_timeout: config.idleTimeout } : {}),
+  });
   const db = drizzle(client);
   return createDrizzleStorage(db, {
-    ...(config.autoMigrate === false ? {} : { migrate: () => migrate(db, { migrationsFolder }) }),
+    ...(config.autoMigrate === false
+      ? {}
+      : {
+          migrate: () =>
+            migratePostgres(db, { rowLevelSecurity: config.rowLevelSecurity ?? false }),
+        }),
     close: () => client.end(),
   });
 }

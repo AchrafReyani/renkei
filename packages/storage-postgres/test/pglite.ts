@@ -1,14 +1,16 @@
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
-import { migrate } from 'drizzle-orm/pglite/migrator';
 import type { Storage } from 'renkei-core';
-import { migrationsFolder } from '../src/migrations-path.js';
+import { migratePostgres } from '../src/migrate.js';
 import { createDrizzleStorage } from '../src/storage.js';
 
-/** A fresh, migrated, in-process Postgres (WASM) per call. */
-export async function createPgliteStorage(now?: () => Date): Promise<Storage> {
+/** A fresh, migrated, in-process Postgres (WASM) per call. Migrates from the embedded list, like `createPostgresStorage()`. */
+export async function createPgliteStorage(
+  now?: () => Date,
+  options: { rowLevelSecurity?: boolean } = {},
+): Promise<Storage> {
   const client = new PGlite();
   const db = drizzle(client);
-  await migrate(db, { migrationsFolder });
+  await migratePostgres(db, options);
   return createDrizzleStorage(db, { ...(now ? { now } : {}), close: () => client.close() });
 }

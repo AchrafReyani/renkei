@@ -55,6 +55,7 @@ export default defineConfig({
               { text: 'Render にデプロイする（無料枠）', link: '/guides/deploy-render' },
               { text: 'Fly.io にデプロイする', link: '/guides/deploy-fly' },
               { text: 'Cloudflare Workers にデプロイする', link: '/guides/deploy-cloudflare-workers' },
+              { text: 'Supabase Edge Functions にデプロイする', link: '/guides/deploy-supabase-edge' },
             ],
           },
           {
@@ -98,6 +99,7 @@ export default defineConfig({
               { text: 'Deploying to Render (free)', link: '/en/guides/deploy-render' },
               { text: 'Deploying to Fly.io', link: '/en/guides/deploy-fly' },
               { text: 'Deploying to Cloudflare Workers', link: '/en/guides/deploy-cloudflare-workers' },
+              { text: 'Deploying to Supabase Edge Functions', link: '/en/guides/deploy-supabase-edge' },
             ],
           },
           {

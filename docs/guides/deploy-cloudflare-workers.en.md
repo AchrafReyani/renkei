@@ -109,7 +109,7 @@ export default createWorker({
 });
 ```
 
-`renkei-storage-postgres` uses `pg`, which Cloudflare supports under `nodejs_compat`. This path is not covered by renkei's tests; the D1 path is.
+`renkei-storage-postgres` uses postgres.js (`postgres`), which Cloudflare supports under `nodejs_compat`; its migrations are embedded in the module, so no filesystem is needed. This path is not covered by renkei's tests; the D1 path is.
 
 ## Common errors
 
