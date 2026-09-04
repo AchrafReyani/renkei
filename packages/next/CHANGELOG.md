@@ -1,5 +1,13 @@
 # renkei-next
 
+## 0.5.0
+
+### Patch Changes
+
+- 44c86d2: Add a `default` condition next to `import` in the package `exports` so CommonJS-side resolvers that ignore the `import` condition (Jest without ESM mode, some bundler configs) can find `renkei-client`, `renkei-next` and `renkei-next/button` — previously `renkei-next/button` failed with "Cannot find module" under next/jest and needed a `moduleNameMapper` entry.
+- Updated dependencies [44c86d2]
+  - renkei-client@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
