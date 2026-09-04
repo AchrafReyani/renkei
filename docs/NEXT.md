@@ -71,9 +71,23 @@ Not done: a deploy to a *hosted* Supabase project (needs Achraf's Supabase accou
 differs only in `supabase secrets set` + `functions deploy`. Changesets staged: `renkei-storage-postgres`
 minor + `renkei-server` minor (on top of the Workers ones) → next release is **0.5.0**.
 
+**Done 2026-09-04 (evening): 0.5.0 cut** (PR #70 merged, `11b46fb`; `renkei`, `renkei-server`,
+`renkei-storage-sqlite`, `renkei-storage-postgres`, `renkei-client`, `renkei-next` → 0.5.0, `renkei-core`
+stays 0.2.3) — **publish + tag still open (§0)**. **LINE MINI App channel support** (§5, issue #8):
+channels carry `kind: 'login' | 'miniapp'` + optional `provider`; `LINE_MINIAPP_CHANNEL_ID` / `_SECRET`
+(comma-separated per stage — a MINI App is three internal channels: Developing 2011444277, Review
+2011444278, Published 2011444279 for ours); `/liff/exchange` accepts MINI App tokens; identities are
+**provider-scoped** (same LINE user ID on a sibling channel → same `sub`, core rule 1);
+`/dev/liff?liff_id=`; guide `docs/guides/line-mini-app.{ja,en}.md` incl. service-message prerequisites;
+DECISIONS.md §16; 286 tests. Console (Claude, approved by Achraf): MINI App channel **renkei-dev-miniapp**
+created under provider renkei (2005473999), Unverified, region Japan, email achraf@reyani.dev; Developing
+endpoint URL = `https://renkei-demo.onrender.com/dev/liff?liff_id=2011444277-oYFL2elQ`; Developing LIFF URL
+`https://miniapp.line.me/2011444277-oYFL2elQ`. **Live check open (§1)**: needs the MINI App secret on the
+demo. Changesets staged: `renkei-core` minor + `renkei-server` minor → next release **0.6.0**.
+
 **0.4.0 is released (2026-09-03, §0)**: `renkei`, `renkei-client`, `renkei-next` on npm,
-tag `v0.4.0`, GHCR `:0.4.0`. **Next: the remaining v0.3 targets in §5** (LINE MINI App channel, multi-region tutorial;
-Cloudflare Workers and Supabase Edge are done) — scope each with Achraf before starting; the `/dev` page could also adopt the
+tag `v0.4.0`, GHCR `:0.4.0`. **Next: finish the 0.5.0 release (§0, Achraf's publish), the MINI App live check (§1), then the
+multi-region tutorial (§5, last v0.3 item)** — scope it with Achraf before starting; the `/dev` page could also adopt the
 guideline button CSS to close #19 fully. Time-gated / Achraf-only leftovers: Zenn
 article after 2026-09-10 (§2), the email-permission re-check (§4, still Applied),
 the LIFF phone shot (§2, optional), Option B forward (§1, optional).
@@ -132,7 +146,22 @@ the LIFF phone shot (§2, optional), Option B forward (§1, optional).
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.4.0 — DONE 2026-09-03 (renkei-client + renkei-next + CLI presets)
+## 0. Cut 0.5.0 — IN PROGRESS 2026-09-04 (Workers + Supabase Edge targets)
+
+Same flow as 0.4.0. `renkei`, `renkei-server`, `renkei-storage-sqlite`, `renkei-storage-postgres`,
+`renkei-client` and `renkei-next` are on **0.5.0** on `main`; `renkei-core` stays 0.2.3 and is skipped by
+`pnpm -r publish`. Achraf's terminal is `cmd.exe` — `&&`, never `;`.
+
+- [x] Claude: `release/0.5.0` — `pnpm changeset version` → lint / typecheck / 279 tests / build / docs:build
+      green → DCO commit → PR #70 → squash-merge (`11b46fb`).
+- [ ] Achraf, in cmd on `main`: `git checkout main && git pull && npm login && npm whoami && pnpm build && pnpm test && pnpm -r publish --access public`
+      (passkey once per package — six this time).
+- [ ] Claude: `git tag -a v0.5.0 -m "v0.5.0" && git push origin v0.5.0`, watch `release.yml`, read the GHCR
+      tags from the run log (`:0.5.0` / `:0.5` / `:latest`).
+- [ ] Claude: tick here + ROADMAP.md; `npm view` = 0.5.0 for the six packages; confirm
+      `examples/supabase-edge` resolves `npm:renkei-server@^0.5.0/supabase` on the local stack.
+
+## 0a. Cut 0.4.0 — DONE 2026-09-03 (renkei-client + renkei-next + CLI presets)
 
 Same flow as 0.3.0. Changesets on `main`: `renkei-client` minor, `renkei-next` minor,
 `renkei` patch ×2 → the linked group puts **`renkei`, `renkei-client` and
@@ -247,6 +276,14 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
       logged in; `/dev/callback` showed all `line:*` claims and the local D1 held the rows
       (see the top of this file). `examples/cloudflare-workers/.dev.vars` stays on disk
       (gitignored) for the next run.
+- [ ] **MINI App live check** (added 2026-09-04): Achraf sets `LINE_MINIAPP_CHANNEL_ID=2011444277` and
+      `LINE_MINIAPP_CHANNEL_SECRET=<Basic settings → Channel secret of renkei-dev-miniapp>` on Render
+      (renkei-demo) — the secret is Achraf's to paste, Claude does not move credentials — then, after the
+      redeploy, opens `https://miniapp.line.me/2011444277-oYFL2elQ` on the phone (or in a browser; the
+      Developing stage is open to channel admins/testers). Expected on the page: `line:channel_id:
+      "2011444277"`, `line:user_id: U54de992ad068a07f1d4ef661a0a946bd`, and `sub` **equal to the web
+      login's** `j_QoAMmfl7tyAG-SFrz1XfE3YY04RdU0` (the provider-scoped mapping). If the id_token is
+      rejected, the stage may need its own secret (comma-separated, see the guide).
 - [ ] (Optional) **Option B** forward (`LINE_ACCOUNTLINK_FORWARD_URL`) — not set:
       nothing exists to receive the POST. Needs a downstream endpoint first.
 
@@ -369,7 +406,11 @@ six env vars"), breadth (TW/TH, MINI App) after.
       `createWorker({ storage })`, untested.
 - [x] **Supabase Edge Functions target** — shipped 2026-09-04 (see the top of this file;
       DECISIONS.md §15; closes #7). Live on the local stack; a hosted deploy is Achraf's to try.
-- [ ] Then the rest of the ROADMAP v0.3 list: LINE MINI App channel support, multi-region
-      tutorial. Scope each with Achraf before starting. Candidate from the #51
+- [x] **LINE MINI App channel support** — shipped 2026-09-04 (see the top of this file; DECISIONS.md
+      §16; #8). Live check is §1's open item.
+- [ ] Then the last ROADMAP v0.3 item: the multi-region tutorial (JP + TW channels, `line_region`,
+      issue #9). Needs a TW channel — LINE Login channels are region-bound to the provider's country,
+      so scope with Achraf whether a real TW channel is obtainable or the tutorial is written against
+      the config alone. Candidate from the #51
       findings: model account linkage as a flag on the LINE account row instead
       of overloading `kind` (needs a migration).

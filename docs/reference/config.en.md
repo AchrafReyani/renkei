@@ -34,6 +34,8 @@ programmatic use, pass the same settings as an object to
 | Variable | Default | Meaning |
 |---|---|---|
 | `LINE_LOGIN_REGION` | `jp` | region this channel serves: `jp` / `tw` / `th` … Used for the `line:region` claim and `line_region` routing |
+| `LINE_MINIAPP_CHANNEL_ID` | none | LINE MINI App channel(s) of the same provider, accepted by `POST /liff/exchange` and mapped onto the same `sub` as the Login channel. Comma-separate one ID per stage (Developing / Review / Published). [Guide](../guides/line-mini-app.en.md) |
+| `LINE_MINIAPP_CHANNEL_SECRET` | none | Secret for the MINI App channel(s): one for all IDs, or one per ID in the same order |
 | `RENKEI_BOT_PROMPT` | `aggressive` | friend-add at login: `aggressive` (dedicated screen) / `normal` (on the consent screen) / `none`. Requires an Official Account linked to the channel |
 | `RENKEI_REQUEST_EMAIL` | `false` | `true` requests the `email` scope from LINE. Without **email permission** on the channel LINE silently drops it (renkei warns at boot) |
 
@@ -122,6 +124,9 @@ const renkei = await createRenkei({
     issuer: 'https://auth.example.com',
     channels: [
       { channelId: '…', channelSecret: '…', region: 'jp', botPrompt: 'aggressive', requestEmail: true },
+      // A LINE MINI App channel next to it (same provider → same sub); `provider` groups channels
+      // per LINE provider and is only needed when one renkei mixes several providers.
+      { channelId: '…', channelSecret: '…', region: 'jp', kind: 'miniapp' },
       { channelId: '…', channelSecret: '…', region: 'tw' },
     ],
     clients: [ /* as above */ ],

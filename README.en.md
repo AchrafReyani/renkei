@@ -90,6 +90,8 @@ Enter renkei's URL in Supabase Auth's built-in **Keycloak** provider. Works in t
 
 ### 3. From a LIFF app / LINE Mini App
 
+A LINE MINI App channel of the same provider is registered with `LINE_MINIAPP_CHANNEL_ID` / `LINE_MINIAPP_CHANNEL_SECRET`; its tokens go through the same exchange and land on the same `sub` as the web login ([guide](docs/guides/line-mini-app.en.md)).
+
 The front-end sends `liff.getIDToken()` / `liff.getAccessToken()` to renkei — never profile JSON.
 
 ```ts

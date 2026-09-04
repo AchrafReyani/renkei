@@ -140,8 +140,13 @@ document.getElementById('out').textContent = JSON.stringify({ query: q, fragment
   );
 
   if (liffId && liffClient) {
-    dev.get('/liff', (c) =>
-      c.html(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>renkei LIFF dev</title>
+    // `?liff_id=` swaps the LIFF app (a MINI App's Developing LIFF, say) without
+    // redeploying; the page and the exchange are otherwise identical.
+    dev.get('/liff', (c) => {
+      const requested = c.req.query('liff_id');
+      const effectiveLiffId =
+        requested && /^\d{10}-[A-Za-z0-9]+$/.test(requested) ? requested : liffId;
+      return c.html(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>renkei LIFF dev</title>
 <body style="font-family:system-ui;max-width:40rem;margin:2rem auto;line-height:1.6;padding:0 1rem">
 <h1>renkei — LIFF exchange</h1>
 <p id="status">LIFF SDK 初期化中… / initialising LIFF…</p>
@@ -152,7 +157,7 @@ const $ = (id) => document.getElementById(id);
 const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
 (async () => {
   try {
-    await liff.init({ liffId: ${JSON.stringify(liffId)} });
+    await liff.init({ liffId: ${JSON.stringify(effectiveLiffId)} });
     if (!liff.isLoggedIn()) { $('status').textContent = 'LINE ログインへ… / redirecting to LINE login…'; liff.login({ redirectUri: location.href }); return; }
     const id_token = liff.getIDToken();
     const access_token = liff.getAccessToken();
@@ -165,11 +170,11 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
     if (!res.ok) { $('status').textContent = '失敗 / failed (' + res.status + ')'; show(body); return; }
     const payload = JSON.parse(atob(body.id_token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
     $('status').textContent = '成功 / OK — renkei id_token payload (in LINE app: ' + liff.isInClient() + ', os: ' + liff.getOS() + ')';
-    show({ liff: { inClient: liff.isInClient(), hadIdToken: !!id_token, hadAccessToken: !!access_token }, response: { expires_in: body.expires_in, sub: body.sub }, payload });
+    show({ liff: { liffId: ${JSON.stringify(effectiveLiffId)}, inClient: liff.isInClient(), hadIdToken: !!id_token, hadAccessToken: !!access_token }, response: { expires_in: body.expires_in, sub: body.sub }, payload });
   } catch (e) { $('status').textContent = 'エラー / error'; show({ error: String(e && e.message || e) }); }
 })();
-</script>`),
-    );
+</script>`);
+    });
   }
 
   dev.get('/login', async (c) => {

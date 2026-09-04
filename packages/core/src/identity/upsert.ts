@@ -12,6 +12,13 @@ export interface UpsertFromLineParams {
   /** Result of the friendship API, if it was called. */
   friend?: boolean;
   kind?: LineAccountKind;
+  /**
+   * Other channels of the same LINE provider (a LINE MINI App channel next to
+   * the Login channel, for instance). LINE issues one user ID per provider, so
+   * a user known through any of them is the same identity; their existing
+   * `sub` is reused and this channel is attached to it.
+   */
+  providerChannelIds?: readonly string[];
   /** Generates new `sub` values. Defaults to a random 32-byte token. */
   generateSub?: () => string;
   now?: () => Date;
@@ -27,9 +34,12 @@ export interface UpsertResult {
 /**
  * The identity-mapping rules of renkei, in one place:
  *
- * 1. Lookup is by (channelId, lineUserId). Never by email — LINE emails are
- *    verified, but linking across channels/regions by email is an opt-in
- *    policy decision, not a default.
+ * 1. Lookup is by (channelId, lineUserId), then by the same lineUserId on the
+ *    other channels of the same provider (`providerChannelIds`) — LINE user
+ *    IDs are provider-scoped, so a MINI App channel and a Login channel of one
+ *    provider see the same user. Never by email — LINE emails are verified, but
+ *    linking across providers/regions by email is an opt-in policy decision,
+ *    not a default.
  * 2. `sub` is minted once and never changes. It is not derived from LINE IDs
  *    so that downstream systems never leak LINE user IDs by accident.
  * 3. Name and picture are refreshed on every login. Email is only ever
@@ -67,9 +77,20 @@ export async function upsertIdentityFromLine(
     const existing = await storage.identities.findLineAccount(channelId, lineUserId);
     if (existing?.kind === 'messaging') kind = 'messaging';
   } else {
-    const sub = (params.generateSub ?? (() => randomToken(24)))();
-    identity = await storage.identities.createIdentity({ sub, ...patch });
-    created = true;
+    // Rule 1, second half: the same user through a sibling channel of the provider.
+    for (const sibling of params.providerChannelIds ?? []) {
+      if (sibling === channelId) continue;
+      const known = await storage.identities.findIdentityByLineAccount(sibling, lineUserId);
+      if (known) {
+        identity = await storage.identities.updateIdentity(known.sub, patch);
+        break;
+      }
+    }
+    if (!identity) {
+      const sub = (params.generateSub ?? (() => randomToken(24)))();
+      identity = await storage.identities.createIdentity({ sub, ...patch });
+      created = true;
+    }
   }
 
   const account = await storage.identities.upsertLineAccount({

@@ -173,7 +173,11 @@ Order matters: each item is what the next needs.
       its mount path), the bridge overriding `X-Forwarded-Host`, and `renkei-storage-postgres`
       migrating from an embedded list instead of the filesystem. `examples/supabase-edge`, deploy
       guide ja/en (2026-09-04, DECISIONS.md §15)
-- [ ] LINE MINI App channel support (LINE is folding LIFF into MINI App; new apps should be MINI App channels under the same provider) — service messages prerequisites, `liff.permanentLink`
+- [x] LINE MINI App channel support: channels carry `kind: 'login' | 'miniapp'` and an optional
+      `provider`; `LINE_MINIAPP_CHANNEL_ID` / `_SECRET` (one ID per stage — a MINI App is three internal
+      channels); `/liff/exchange` accepts MINI App id_tokens / access tokens; identities are provider-scoped
+      (the same LINE user ID on a sibling channel reuses the `sub` — core rule 1); `/dev/liff?liff_id=`;
+      guide ja/en incl. service-message prerequisites (2026-09-04, DECISIONS.md §16; #8)
 - [ ] Multi-region tutorial (JP + TW channels, `line_region` routing)
 - [ ] zh-TW docs kickoff (community), post in LINE Developers TW channels
 

@@ -91,6 +91,39 @@ describe('upsertIdentityFromLine', () => {
     expect(tw.identity.sub).not.toBe(jp.identity.sub);
   });
 
+  it('reuses the identity when the same LINE user arrives through a sibling channel of the provider', async () => {
+    const s = createMemoryStorage();
+    const web = await upsertIdentityFromLine(s, {
+      channelId,
+      claims,
+      generateSub: () => 'sub-web',
+    });
+    // A LINE MINI App channel of the same provider: same LINE user ID, different channel.
+    const mini = await upsertIdentityFromLine(s, {
+      channelId: '2011444277',
+      claims: { ...claims, name: 'Taro (mini)' },
+      kind: 'liff',
+      providerChannelIds: [channelId, '2011444277'],
+      generateSub: () => 'sub-should-not-be-used',
+    });
+    expect(mini.created).toBe(false);
+    expect(mini.identity.sub).toBe(web.identity.sub);
+    expect(mini.identity.displayName).toBe('Taro (mini)');
+    const accounts = await s.identities.listLineAccounts('sub-web');
+    expect(accounts.map((a) => [a.channelId, a.kind]).sort()).toEqual([
+      [channelId, 'login'],
+      ['2011444277', 'liff'],
+    ]);
+    // Without the provider hint (or for a channel outside it) the old rule holds: a new identity.
+    const other = await upsertIdentityFromLine(s, {
+      channelId: '3000000000',
+      claims,
+      generateSub: () => 'sub-other',
+    });
+    expect(other.created).toBe(true);
+    expect(other.identity.sub).toBe('sub-other');
+  });
+
   it('keeps a collapsed link (kind messaging) across later logins and LIFF exchanges', async () => {
     // Seen live on renkei-demo 2026-08-30: after linking without a configured
     // messaging channelId the login row's kind is 'messaging'; the next LIFF
