@@ -35,6 +35,10 @@ LINE Platform ──────▶  renkei（自分でホスト）  ───�
 
 ![/dev のログインフロー: ログインをクリック → LINE → line:* クレーム入りの id_token](docs/images/dev-flow.gif)
 
+LINE アプリ内（LIFF）からも同じ id_token が取れます — `https://liff.line.me/2011257262-OKRFVulZ` をスマホの LINE で開くと `/liff/exchange` の結果が表示されます:
+
+<img src="docs/images/liff-phone.png" alt="LINE アプリ内の LIFF から /liff/exchange を呼んだ結果: inClient true、line:* クレーム入りの renkei id_token" width="320">
+
 > **無料ホスティングの注意（Render Free + Neon Free）**: 15 分アクセスが無いとスリープし、**初回アクセスは起動に最大 1 分**かかります。ホスティング側の都合で **404 や無応答になることもあります**。それは renkei の不具合ではありません — 少し待って再読み込みするか、下の「5分で試す」でローカルに立ててください（そちらが本来の動きです）。
 
 ## 5分で試す

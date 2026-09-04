@@ -310,7 +310,8 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
       320 KB, recorded on renkei-demo — LINE's consent screen is skipped
       because Chrome's LINE SSO auto-approved; it shows Achraf's `line:user_id`,
       which NEXT.md already lists). Linked from both READMEs.
-- [ ] (Optional) In-app **LIFF phone shot** — only Achraf's phone can take it.
+- [x] In-app **LIFF phone shot** — `docs/images/liff-phone.png`, taken by Achraf on 2026-08-30 and
+      linked from both READMEs (rescued from the forgotten PR #52 on 2026-09-04, PR #74).
 - [x] **Flip the repo public** — already PUBLIC as of 2026-08-30 (`gh repo view`).
 - [ ] Run LAUNCH.md §2 (publish the Zenn article — draft is
       `drafts/zenn-account-linking.md`) — not before **2026-09-10** (§3).
