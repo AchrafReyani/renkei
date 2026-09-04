@@ -4,10 +4,13 @@
  * the variable names are the same everywhere:
  *
  *   ISSUER                     public base URL (default http://localhost:3000)
- *   LINE_LOGIN_CHANNEL_ID / LINE_LOGIN_CHANNEL_SECRET / LINE_LOGIN_REGION
+ *   LINE_LOGIN_CHANNEL_ID / LINE_LOGIN_CHANNEL_SECRET / LINE_LOGIN_REGION   (the primary Login channel)
+ *   RENKEI_CHANNELS            JSON array of further channels — a second region, a MINI App, …:
+ *                              [{ channelId, channelSecret, region, kind?, provider?, botPrompt?, requestEmail? }]
  *   LINE_MINIAPP_CHANNEL_ID / LINE_MINIAPP_CHANNEL_SECRET   (a LINE MINI App channel of the same provider, for /liff/exchange;
  *                                                            comma-separate several: one per stage, Developing / Review / Published)
  *   LINE_MESSAGING_CHANNEL_SECRET / LINE_MESSAGING_CHANNEL_ID  (enables POST /line/webhook)
+ *   LINE_MESSAGING_CHANNEL_REGION                              (which Login channel's users its events concern; default LINE_LOGIN_REGION)
  *   LINE_MESSAGING_CHANNEL_ACCESS_TOKEN                        (enables POST /link/start)
  *   LINE_ACCOUNTLINK_FORWARD_URL / LINE_ACCOUNTLINK_FORWARD_SECRET  (forward app-owned accountLink)
  *   RENKEI_BOT_PROMPT          aggressive | normal | none   (default aggressive)
@@ -82,6 +85,43 @@ function miniAppChannels(env: EnvLike): RenkeiConfigInput['channels'] {
   }));
 }
 
+/**
+ * The channel list: the primary `LINE_LOGIN_*` channel, then `RENKEI_CHANNELS`
+ * (further regions, MINI Apps — the full channel schema as JSON), then the
+ * `LINE_MINIAPP_*` shorthand. Either source alone is enough; the first Login
+ * channel in the list is the default when a login names no region.
+ */
+function channelsFrom(env: EnvLike): RenkeiConfigInput['channels'] {
+  const hasPrimary = Boolean(env.LINE_LOGIN_CHANNEL_ID || env.LINE_LOGIN_CHANNEL_SECRET);
+  const extra: RenkeiConfigInput['channels'] = env.RENKEI_CHANNELS
+    ? JSON.parse(env.RENKEI_CHANNELS)
+    : [];
+  if (!hasPrimary && extra.length === 0) {
+    throw new Error(
+      'LINE_LOGIN_CHANNEL_ID is not set — copy .env.example to .env and fill it in, or list your channels in RENKEI_CHANNELS',
+    );
+  }
+  const primary: RenkeiConfigInput['channels'] = hasPrimary
+    ? [
+        {
+          channelId: requiredIn(env, 'LINE_LOGIN_CHANNEL_ID'),
+          channelSecret: requiredIn(env, 'LINE_LOGIN_CHANNEL_SECRET'),
+          region: env.LINE_LOGIN_REGION ?? 'jp',
+          botPrompt:
+            (env.RENKEI_BOT_PROMPT as 'aggressive' | 'normal' | 'none' | undefined) ?? 'aggressive',
+          requestEmail: env.RENKEI_REQUEST_EMAIL === 'true',
+        },
+      ]
+    : [];
+  return [...primary, ...extra, ...miniAppChannels(env)];
+}
+
+function requiredIn(env: EnvLike, name: string): string {
+  const v = env[name];
+  if (!v) throw new Error(`${name} is not set — copy .env.example to .env and fill it in`);
+  return v;
+}
+
 export function configFromEnv(env: EnvLike, options: EnvConfigOptions = {}): EnvConfig {
   const issuer = env.ISSUER ?? 'http://localhost:3000';
   const hasDatabase = options.hasDatabase ?? Boolean(env.DATABASE_URL);
@@ -95,33 +135,17 @@ export function configFromEnv(env: EnvLike, options: EnvConfigOptions = {}): Env
       : JSON.parse(env.RENKEI_CLIENTS)
     : devClientsFor(issuer);
 
-  const required = (name: string): string => {
-    const v = env[name];
-    if (!v) throw new Error(`${name} is not set — copy .env.example to .env and fill it in`);
-    return v;
-  };
-
   const config: RenkeiConfigInput = {
     issuer,
     dev,
-    channels: [
-      {
-        channelId: required('LINE_LOGIN_CHANNEL_ID'),
-        channelSecret: required('LINE_LOGIN_CHANNEL_SECRET'),
-        region: env.LINE_LOGIN_REGION ?? 'jp',
-        botPrompt:
-          (env.RENKEI_BOT_PROMPT as 'aggressive' | 'normal' | 'none' | undefined) ?? 'aggressive',
-        requestEmail: env.RENKEI_REQUEST_EMAIL === 'true',
-      },
-      ...miniAppChannels(env),
-    ],
+    channels: channelsFrom(env),
     clients,
     ...(env.LINE_MESSAGING_CHANNEL_SECRET
       ? {
           messagingChannels: [
             {
               channelSecret: env.LINE_MESSAGING_CHANNEL_SECRET,
-              region: env.LINE_LOGIN_REGION ?? 'jp',
+              region: env.LINE_MESSAGING_CHANNEL_REGION ?? env.LINE_LOGIN_REGION ?? 'jp',
               ...(env.LINE_MESSAGING_CHANNEL_ID
                 ? { channelId: env.LINE_MESSAGING_CHANNEL_ID }
                 : {}),

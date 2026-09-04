@@ -450,3 +450,31 @@ channel: the older identity wins and the newer channel row moves onto it — no
 data is deleted. The provider lookup is one `findIdentityByLineAccount` per
 sibling channel, only on the first visit through a new channel. The
 Review / Published stages are untested live until the MINI App passes review.
+
+## 17. Multi-region: `RENKEI_CHANNELS` for the channel list, first Login channel is the default (2026-09-05)
+
+**Decision.** More than one LINE Login channel is configured through
+`RENKEI_CHANNELS`, a JSON array of the full channel shape appended after the
+primary `LINE_LOGIN_*` channel — or holding the whole list on its own, in which
+case `LINE_LOGIN_*` may be omitted. Routing keeps the rules that already
+existed: `line_region` on the authorization request, else the client's pinned
+`lineRegion`, else **the first Login channel in the list**, which an unknown
+region also falls back to rather than failing the login. A boot check names that
+default when several regions are configured, `LINE_MESSAGING_CHANNEL_REGION`
+says which region a Messaging channel's webhooks concern, and `/dev` grows one
+login link per region.
+
+**Why.** Region routing and per-client `lineRegion` shipped in v0.1, but there
+was no way to configure a second channel outside programmatic use — the env
+surface only ever built one. JSON in one variable matches `RENKEI_CLIENTS`,
+which readers already know, and keeps the deploy-time interface unchanged for
+single-region users. Falling back instead of rejecting an unknown region keeps a
+typo in a query parameter from locking users out of login entirely; the check
+output makes the choice visible.
+
+**Cost.** Two ways to express the same channel (`LINE_LOGIN_*` and an entry in
+`RENKEI_CHANNELS`), which is exactly the sprawl issue #11 is meant to end: the
+YAML config should express channels once and supersede both. Identity across
+regions follows §16's provider rule — same provider means one `sub`, different
+providers mean LINE itself gives different user IDs — so nothing region-specific
+was added to the identity layer.

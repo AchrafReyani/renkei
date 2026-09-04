@@ -13,6 +13,8 @@ Secrets live in `.env` (gitignored). Only IDs are recorded here.
 | Business ID | achrafreyani99@gmail.com (email login, SMS-verified) | account.line.biz |
 | Provider | **renkei** — ID `2005473999` | developers.line.biz/console/provider/2005473999 |
 | LINE Login channel | **renkei-dev-jp** — ID `2011257262`, region **Japan**, status **Published** (since 2026-08-26, irreversible), Web app enabled, 2FA on | /console/channel/2011257262 |
+| LINE Login channel (TW) | **renkei-dev-tw** — ID `2011447387`, region **Taiwan**, company country Japan, status Developing (created 2026-09-04 for the multi-region tutorial) | /console/channel/2011447387 |
+| LINE MINI App channel | **renkei-dev-miniapp** — Developing `2011444277`, Review `2011444278`, Published `2011444279`; one channel secret per stage | /console/channel/2011444277 |
 | Callback URLs | `http://localhost:3000/line/callback` · `http://localhost:8787/line/callback` · `http://127.0.0.1:3000/line/callback` | LINE Login tab |
 | LIFF app | **renkei-dev** — ID `2011257262-OKRFVulZ`, Full, scopes `openid profile`, add-friend **On (Aggressive)**, endpoint **`https://renkei-demo.onrender.com/dev/liff`** (the demo; since 2026-08-30 — for local LIFF work point it at a `cloudflared` quick tunnel and put it back afterwards) | LIFF tab |
 | LINE Official Account | display name "Achraf" (rename to "renkei dev" in OA Manager when convenient), basic ID `@360trecn`, industry 個人 | manager.line.biz/account/@360trecn |

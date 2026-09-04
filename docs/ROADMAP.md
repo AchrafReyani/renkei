@@ -181,7 +181,11 @@ Order matters: each item is what the next needs.
       (the same LINE user ID on a sibling channel reuses the `sub` — core rule 1); `/dev/liff?liff_id=`;
       guide ja/en incl. service-message prerequisites (2026-09-04, DECISIONS.md §16; #8). Live-verified
       on the demo from the LINE app: same `sub` as the web login
-- [ ] Multi-region tutorial (JP + TW channels, `line_region` routing)
+- [x] Multi-region tutorial (JP + TW channels, `line_region` routing) — `docs/tutorials/multi-region.{ja,en}.md`,
+      plus the missing configuration for it: `RENKEI_CHANNELS` (further channels as JSON — a second region,
+      a MINI App, or the whole list) and `LINE_MESSAGING_CHANNEL_REGION`; `/dev` grows a login link per
+      region and passes `line_region` through; a boot check names the default channel. Identity across
+      regions follows the provider rule from §16 (2026-09-05, #9)
 - [ ] Structured configuration for multi-channel setups (`renkei.yaml`, issue #11): a `channels:` list
       with `kind` / `region` / secret per entry (secrets by env reference so the file is committable) and
       `renkei add-channel [--miniapp]` writing it the way `add-client` writes clients. Motivation (Achraf,

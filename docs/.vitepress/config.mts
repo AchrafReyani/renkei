@@ -65,6 +65,7 @@ export default defineConfig({
               { text: 'Supabase', link: '/tutorials/supabase' },
               { text: 'Next.js（Auth.js）', link: '/tutorials/nextjs' },
               { text: 'アカウント連携', link: '/tutorials/account-linking' },
+              { text: '多地域対応（JP + TW）', link: '/tutorials/multi-region' },
             ],
           },
           {
@@ -110,6 +111,7 @@ export default defineConfig({
               { text: 'Supabase', link: '/en/tutorials/supabase' },
               { text: 'Next.js (Auth.js)', link: '/en/tutorials/nextjs' },
               { text: 'Account linking', link: '/en/tutorials/account-linking' },
+              { text: 'Multi-region (JP + TW)', link: '/en/tutorials/multi-region' },
             ],
           },
           {

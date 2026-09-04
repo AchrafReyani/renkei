@@ -116,7 +116,7 @@ Add the <code>renkei-dev</code> client to <code>RENKEI_CLIENTS</code>, or unset 
 <li><a href="${base}/dev/login?bot_prompt=normal">ログイン（bot_prompt=normal）</a></li>
 <li><a href="${base}/dev/login?bot_prompt=none">ログイン（bot_prompt なし）</a></li>
 <li><a href="${base}/dev/login?scope=openid+profile+email+line">ログイン（email scope も要求）</a></li>
-</ul>
+${regionLinks(config, base)}</ul>
 <section style="border:1px solid #ddd;border-radius:8px;padding:1rem;margin:1.5rem 0;background:#fafafa">
 <h2 style="margin-top:0;font-size:1.1rem">メールアドレスの取得について / About your email address</h2>
 <p>LINEログイン時にメールアドレスの提供に同意いただいた場合、renkei はメールアドレスを<strong>アカウントの識別と本人確認、および重要なお知らせの送信</strong>のみに利用します。広告目的での利用や第三者への提供は行いません。同意しなくてもログインできます。</p>
@@ -193,6 +193,8 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
     url.searchParams.set('scope', c.req.query('scope') ?? 'openid profile line');
     url.searchParams.set('state', state);
     url.searchParams.set('nonce', nonce);
+    const region = c.req.query('line_region');
+    if (region) url.searchParams.set('line_region', region);
     const bp = c.req.query('bot_prompt');
     if (bp) url.searchParams.set('bot_prompt', bp);
     return c.redirect(url.toString());
@@ -258,6 +260,21 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
   });
 
   return dev;
+}
+
+/**
+ * With more than one Login channel, one link per region so `line_region`
+ * routing can be exercised from the test page.
+ */
+function regionLinks(config: RenkeiConfig, base: string): string {
+  const logins = config.channels.filter((c) => c.kind === 'login');
+  if (logins.length < 2) return '';
+  return logins
+    .map(
+      (ch) =>
+        `<li><a href="${base}/dev/login?line_region=${encodeURIComponent(ch.region)}">ログイン（line_region=${ch.region} — channel ${ch.channelId}）</a></li>`,
+    )
+    .join('\n');
 }
 
 function page(base: string, title: string, data: unknown) {
