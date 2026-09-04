@@ -79,6 +79,15 @@ export function firstRunChecks(config: RenkeiConfig, ctx: CheckContext): FirstRu
     }
   }
 
+  if (regions.size > 1) {
+    const first = config.channels.find((c) => c.kind === 'login');
+    checks.push({
+      level: 'info',
+      code: 'multi-region',
+      message: `${regions.size} LINE Login channels configured (${[...regions].join(', ')}). A login without \`line_region\` (and a client without \`lineRegion\`) uses "${first?.region}" — the first channel in the list.`,
+    });
+  }
+
   for (const mc of config.messagingChannels) {
     if (mc.region && !regions.has(mc.region)) {
       checks.push({

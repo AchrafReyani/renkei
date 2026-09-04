@@ -33,6 +33,7 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 | 変数 | 既定値 | 説明 |
 |---|---|---|
 | `LINE_LOGIN_REGION` | `jp` | このチャネルが対象とする地域。`jp` / `tw` / `th` など。`line:region` クレームと `line_region` パラメータのルーティングに使います |
+| `RENKEI_CHANNELS` | なし | 主チャネルの後ろに追加するチャネルを JSON で: `[{ channelId, channelSecret, region, kind?, provider?, botPrompt?, requestEmail? }]`。2 つめの地域、ミニアプリ、あるいは全チャネルをここだけに書く（その場合 `LINE_LOGIN_*` は省略でき、先頭のログインチャネルが既定）。ログインチャネルは地域ごとに 1 つ（[チュートリアル](../tutorials/multi-region.ja.md)） |
 | `LINE_MINIAPP_CHANNEL_ID` | なし | 同じプロバイダーの LINE ミニアプリチャネル。`POST /liff/exchange` で受け付け、Login チャネルと同じ `sub` に対応づける。ステージ（開発用 / 審査用 / 公開用）ごとの ID をカンマ区切りで。[ガイド](../guides/line-mini-app.ja.md) |
 | `LINE_MINIAPP_CHANNEL_SECRET` | なし | ミニアプリチャネルのシークレット。全 ID 共通なら 1 つ、ID ごとなら同じ順でカンマ区切り |
 | `RENKEI_BOT_PROMPT` | `aggressive` | ログイン時の友だち追加。`aggressive`（専用画面）/ `normal`（同意画面内）/ `none`。チャネルに LINE 公式アカウントがリンクされていないと効きません |
@@ -46,6 +47,7 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 |---|---|---|
 | `LINE_MESSAGING_CHANNEL_SECRET` | なし | Messaging API チャネルシークレット。設定すると `POST /line/webhook` が有効化（`x-line-signature` を検証し `line:friend` を最新に保つ）。ログインチャネルのシークレットとは**別物** |
 | `LINE_MESSAGING_CHANNEL_ID` | なし | Messaging API チャネル ID。参考情報 |
+| `LINE_MESSAGING_CHANNEL_REGION` | `LINE_LOGIN_REGION` | このチャネルの Webhook イベントがどのログインチャネルのユーザーに関するものか。複数地域のときだけ意味を持ちます |
 | `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` | なし | Messaging API チャネルアクセストークン。設定すると `POST /link/start`（アカウント連携。これを使って一度きりの link token を発行）が有効化 |
 | `LINE_ACCOUNTLINK_FORWARD_URL` | なし | フォワード方式（アプリ主導）の連携: renkei が所有しない nonce の `accountLink` イベントを `{ type, userId, nonce, result, timestamp }` としてここへ POST。nonce → アカウントの対応はアプリ側が管理 |
 | `LINE_ACCOUNTLINK_FORWARD_SECRET` | なし | 上記フォワードの共有シークレット。renkei が本文を署名（base64 HMAC-SHA256）して `x-renkei-signature` ヘッダーに付与するので、アプリは LINE の Webhook と同じ方法で検証できます |

@@ -34,6 +34,7 @@ programmatic use, pass the same settings as an object to
 | Variable | Default | Meaning |
 |---|---|---|
 | `LINE_LOGIN_REGION` | `jp` | region this channel serves: `jp` / `tw` / `th` … Used for the `line:region` claim and `line_region` routing |
+| `RENKEI_CHANNELS` | none | Further channels as JSON, appended after the primary one: `[{ channelId, channelSecret, region, kind?, provider?, botPrompt?, requestEmail? }]`. A second region, a MINI App, or the whole list on its own (then `LINE_LOGIN_*` can be omitted and the first Login channel is the default). One Login channel per region ([tutorial](../tutorials/multi-region.en.md)) |
 | `LINE_MINIAPP_CHANNEL_ID` | none | LINE MINI App channel(s) of the same provider, accepted by `POST /liff/exchange` and mapped onto the same `sub` as the Login channel. Comma-separate one ID per stage (Developing / Review / Published). [Guide](../guides/line-mini-app.en.md) |
 | `LINE_MINIAPP_CHANNEL_SECRET` | none | Secret for the MINI App channel(s): one for all IDs, or one per ID in the same order |
 | `RENKEI_BOT_PROMPT` | `aggressive` | friend-add at login: `aggressive` (dedicated screen) / `normal` (on the consent screen) / `none`. Requires an Official Account linked to the channel |
@@ -47,6 +48,7 @@ Multiple regions (Japan + Taiwan, …) are configured programmatically via the `
 |---|---|---|
 | `LINE_MESSAGING_CHANNEL_SECRET` | none | Messaging API channel secret. Set it to enable `POST /line/webhook` (verifies `x-line-signature`, keeps `line:friend` current). **Not** the Login channel secret |
 | `LINE_MESSAGING_CHANNEL_ID` | none | Messaging API channel ID. Informational |
+| `LINE_MESSAGING_CHANNEL_REGION` | `LINE_LOGIN_REGION` | which Login channel's users this channel's webhook events concern. Only matters with several regions |
 | `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` | none | Messaging API channel access token. Set it to enable `POST /link/start` (account linking mints a one-time link token with it) |
 | `LINE_ACCOUNTLINK_FORWARD_URL` | none | Forwarded (app-owned) linking: `accountLink` events whose nonce renkei doesn't own are POSTed here as `{ type, userId, nonce, result, timestamp }`. Your app owns the nonce → account mapping |
 | `LINE_ACCOUNTLINK_FORWARD_SECRET` | none | Shared secret for the forward. renkei signs the body (base64 HMAC-SHA256) in `x-renkei-signature`, so your app can verify it the same way it would a LINE webhook |

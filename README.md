@@ -37,7 +37,7 @@ LINE Platform ──────▶  renkei（自分でホスト）  ───�
 
 LINE アプリ内（LIFF）からも同じ id_token が取れます — `https://liff.line.me/2011257262-OKRFVulZ` をスマホの LINE で開くと `/liff/exchange` の結果が表示されます:
 
-<img src="docs/images/liff-phone.png" alt="LINE アプリ内の LIFF から /liff/exchange を呼んだ結果: inClient true、line:* クレーム入りの renkei id_token" width="320">
+<img src="./docs/images/liff-phone.png" alt="LINE アプリ内の LIFF から /liff/exchange を呼んだ結果: inClient true、line:* クレーム入りの renkei id_token" width="320">
 
 > **無料ホスティングの注意（Render Free + Neon Free）**: 15 分アクセスが無いとスリープし、**初回アクセスは起動に最大 1 分**かかります。ホスティング側の都合で **404 や無応答になることもあります**。それは renkei の不具合ではありません — 少し待って再読み込みするか、下の「5分で試す」でローカルに立ててください（そちらが本来の動きです）。
 
@@ -158,6 +158,8 @@ const me = await renkei.session(); // RenkeiClaims | null
 → [エンドポイントとクレームのリファレンス](docs/reference/endpoints.ja.md)
 
 ## 動作環境
+
+複数地域（JP + TW など）も 1 つの renkei で動きます。チャネルを並べて `line_region` で振り分けます（[チュートリアル](docs/tutorials/multi-region.ja.md)）。
 
 Node.js 22+。同じコードが **Node / Docker、Deno、Cloudflare Workers、Supabase Edge Functions** で動くことを確認済み。Cloudflare Workers は D1 ストレージ付きで正式対応（`renkei-server/workers`、[デプロイガイド](docs/guides/deploy-cloudflare-workers.ja.md)）、Supabase Edge Functions もプロジェクトの Postgres 付きで正式対応（`renkei-server/supabase`、[デプロイガイド](docs/guides/deploy-supabase-edge.ja.md)）
 （[検証記録](docs/SPIKE-oidc-provider-runtimes.md)）。v0.1 の配布物は Docker イメージと npm パッケージ、v0.3 でエッジ向けデプロイを整備します。

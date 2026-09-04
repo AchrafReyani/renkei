@@ -24,6 +24,9 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+      # The READMEs are pages of the docs site: a bad relative asset path breaks the
+      # site without failing any test (it did, in #74).
+      - run: pnpm docs:build
 
   dco:
     name: DCO sign-off

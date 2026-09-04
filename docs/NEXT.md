@@ -4,7 +4,27 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
-**Pick up here (session of 2026-09-05; 2026-09-04 ended at main after PR #73):**
+**Pick up here (session of 2026-09-05, later half):**
+**Multi-region shipped** (§5, issue #9): `RENKEI_CHANNELS` (further channels as JSON — a second region, a
+MINI App, or the whole list on its own; `LINE_LOGIN_*` then optional), `LINE_MESSAGING_CHANNEL_REGION`,
+a boot check naming the default channel when several regions exist, `/dev` with one login link per region
+and `line_region` passthrough, tutorial `docs/tutorials/multi-region.{ja,en}.md`, DECISIONS.md §17,
+296+10 tests. Console (Claude, standing permission): **renkei-dev-tw** created under provider renkei —
+ID `2011447387`, region **Taiwan**, company country Japan (copied from renkei-dev-jp), callbacks for
+:8787, :3000 and the demo. **Open: the live TW login.** `pnpm dev:server` on :8787 with the TW channel in
+`RENKEI_CHANNELS` (local `.env`, gitignored) redirected correctly to LINE for channel 2011447387, but the
+browser leg was never completed — the tab sits on `access.line.me`, which Claude cannot touch. Finish it
+from Chrome (or a phone) and check `line:region: "tw"`, `line:channel_id: "2011447387"` and the **same
+`sub`** as the JP login. The open question it answers: whether a Japan-registered LINE account may log in
+to a Taiwan-region channel at all — if LINE refuses, that is a finding for the tutorial's "Who can log in"
+note, not a renkei bug.
+
+**Also fixed here:** `pnpm docs:build` was broken on `main` by PR #74 — the LIFF screenshot used
+`<img src="docs/images/…">`, which VitePress cannot resolve from a README page (`./docs/images/…` works).
+CI only ran lint/typecheck/test, so nothing caught it; **`pnpm docs:build` is now a CI step** (the job
+name is unchanged — it is the ruleset's required check).
+
+**Earlier pick-up note (session of 2026-09-05; 2026-09-04 ended at main after PR #73):**
 **Tomorrow's item: the multi-region tutorial (§5, issue #9).** Scope first: a real TW Login channel
 (LINE ties Login channels to the provider's country, so check in the console whether a TW channel can
 be created under the renkei provider or a second provider) versus a tutorial written against the
@@ -424,11 +444,12 @@ six env vars"), breadth (TW/TH, MINI App) after.
       DECISIONS.md §15; closes #7). Live on the local stack; a hosted deploy is Achraf's to try.
 - [x] **LINE MINI App channel support** — shipped 2026-09-04 (see the top of this file; DECISIONS.md
       §16; #8). Live check is §1's open item.
-- [ ] **Multi-region tutorial** (JP + TW channels, `line_region`, issue #9) — tomorrow. Needs a TW
-      channel — LINE Login channels are region-bound to the provider's country, so scope with Achraf
-      whether a real TW channel is obtainable or the tutorial is written against the config alone.
-- [ ] **Structured config** (`renkei.yaml` + `renkei add-channel`, issue #11) — after the tutorial;
-      the tutorial is the multi-channel case where the flat env list hurts, so write it with the YAML
-      shape in mind. Candidate from the #51
+- [x] **Multi-region tutorial** — shipped 2026-09-05 (issue #9; DECISIONS.md §17). A TW Login channel
+      *is* creatable under the same provider (the console asks for the service region and the company's
+      country separately), so `renkei-dev-tw` (2011447387) exists; the live login is the open item above.
+- [ ] **Structured config** (`renkei.yaml` + `renkei add-channel`, issue #11) — next feature. The
+      tutorial now shows the pain first-hand: a channel can be spelled two ways (`LINE_LOGIN_*` or an
+      entry in `RENKEI_CHANNELS`), and secrets sit inline in JSON. YAML should express channels once,
+      with secrets by env reference, and supersede both spellings. Candidate from the #51
       findings: model account linkage as a flag on the LINE account row instead
       of overloading `kind` (needs a migration).
