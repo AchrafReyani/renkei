@@ -1,6 +1,6 @@
 {
   "name": "renkei-client",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Tiny zero-dependency SDK for apps that talk to a renkei server: build the LINE login URL, exchange LIFF tokens, read the session, decode the typed line:* claims. Browsers, Node, Workers.",
   "license": "Apache-2.0",
   "repository": {
