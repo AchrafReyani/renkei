@@ -4,7 +4,18 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
-**Pick up here (session of 2026-09-02; before it, 2026-08-30 ended at main `92500b9`):**
+**Pick up here (session of 2026-09-05; 2026-09-04 ended at main after PR #73):**
+**Tomorrow's item: the multi-region tutorial (§5, issue #9).** Scope first: a real TW Login channel
+(LINE ties Login channels to the provider's country, so check in the console whether a TW channel can
+be created under the renkei provider or a second provider) versus a tutorial written against the
+`channels` config with `line_region` routing and per-client `lineRegion`, verified with the fake-LINE
+e2e only. After it: **structured config** (`renkei.yaml` + `renkei add-channel`, #11 — added to ROADMAP
+v0.3 on 2026-09-04 after Achraf asked whether the env variables piling up is still easier for people;
+see the ROADMAP entry for the reasoning). State: **0.5.0 released** (npm + GHCR), **MINI App
+live-verified** from the phone, Supabase Edge and Workers targets shipped; `examples/supabase-edge`
+still to be re-run against the published `npm:renkei-server@^0.5.0` (§0).
+
+**Earlier pick-up note (session of 2026-09-02; before it, 2026-08-30 ended at main `92500b9`):**
 **0.3.0 is released** (npm + GHCR) with the first two v0.3 items —
 `renkei-storage-sqlite` (no Postgres needed) and `renkei init` /
 `renkei add-client` (no hand-written `.env` or `RENKEI_CLIENTS`). Everything
@@ -412,9 +423,11 @@ six env vars"), breadth (TW/TH, MINI App) after.
       DECISIONS.md §15; closes #7). Live on the local stack; a hosted deploy is Achraf's to try.
 - [x] **LINE MINI App channel support** — shipped 2026-09-04 (see the top of this file; DECISIONS.md
       §16; #8). Live check is §1's open item.
-- [ ] Then the last ROADMAP v0.3 item: the multi-region tutorial (JP + TW channels, `line_region`,
-      issue #9). Needs a TW channel — LINE Login channels are region-bound to the provider's country,
-      so scope with Achraf whether a real TW channel is obtainable or the tutorial is written against
-      the config alone. Candidate from the #51
+- [ ] **Multi-region tutorial** (JP + TW channels, `line_region`, issue #9) — tomorrow. Needs a TW
+      channel — LINE Login channels are region-bound to the provider's country, so scope with Achraf
+      whether a real TW channel is obtainable or the tutorial is written against the config alone.
+- [ ] **Structured config** (`renkei.yaml` + `renkei add-channel`, issue #11) — after the tutorial;
+      the tutorial is the multi-channel case where the flat env list hurts, so write it with the YAML
+      shape in mind. Candidate from the #51
       findings: model account linkage as a flag on the LINE account row instead
       of overloading `kind` (needs a migration).
