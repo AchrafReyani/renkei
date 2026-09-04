@@ -417,3 +417,36 @@ once 0.5.0 is published; the local run bundles the workspace build into a
 gitignored `renkei-local` function (Deno injects Node globals only into `npm:`
 packages, so the bundle polyfills `Buffer`, `process`, `setImmediate` and
 `require` — none of which the published package needs).
+
+## 16. LINE MINI App channels: `kind: 'miniapp'`, provider-scoped identities (2026-09-04)
+
+**Decision.** A LINE MINI App is configured as extra channels next to the Login
+channel — `kind: 'miniapp'`, one per stage the app uses, since Developing /
+Review / Published are three internal channels with their own IDs and their
+id_tokens carry that ID in `aud`. MINI App channels are accepted by
+`POST /liff/exchange` (id_token by `aud`, access token by the verify
+endpoint's `client_id`), share the Login channel's region, and never serve the
+web redirect flow. Identity lookup became **provider-scoped**: after the exact
+(channelId, lineUserId) match, `upsertIdentityFromLine` tries the same LINE
+user ID on every other channel of the same `provider` and, on a hit, attaches
+the new channel to that identity instead of minting a `sub`. Channels with the
+same `provider` value — including all that leave it unset — form one provider.
+Env: `LINE_MINIAPP_CHANNEL_ID` (comma-separated per stage) and
+`LINE_MINIAPP_CHANNEL_SECRET` (one, or one per ID). Service messages are
+documented as prerequisites only; renkei does not send them.
+
+**Why.** LINE issues user IDs per provider, so a person who logs in on the web
+and later opens the MINI App *is* the same user to LINE; giving them two `sub`
+values (the old channel-scoped rule) would push the linking problem onto every
+app. Making "same provider" the default matches LINE's model and costs nothing
+for single-channel deployments; `provider` exists for the rare renkei that
+brokers channels of several providers, where user IDs genuinely differ. A
+channel `kind` keeps the web flow on Login channels without a second config
+list, and lets the same `/liff/exchange` serve LIFF and MINI App alike.
+
+**Cost.** Multi-channel deployments that relied on separate identities per
+channel (none known) change behaviour at the next login of a user on a sibling
+channel: the older identity wins and the newer channel row moves onto it — no
+data is deleted. The provider lookup is one `findIdentityByLineAccount` per
+sibling channel, only on the first visit through a new channel. The
+Review / Published stages are untested live until the MINI App passes review.

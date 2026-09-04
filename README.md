@@ -90,6 +90,8 @@ Supabase Auth 標準の **Keycloak プロバイダー**に renkei の URL を入
 
 ### 3. LIFF / LINE ミニアプリから
 
+同じプロバイダーの LINE ミニアプリチャネルは `LINE_MINIAPP_CHANNEL_ID` / `LINE_MINIAPP_CHANNEL_SECRET` で登録します。トークンは同じ交換エンドポイントを通り、Web ログインと同じ `sub` になります（[ガイド](docs/guides/line-mini-app.ja.md)）。
+
 フロントは `liff.getIDToken()` / `liff.getAccessToken()` を renkei に送るだけ。プロフィール JSON は送らない。
 
 ```ts

@@ -29,7 +29,9 @@ import { issuerBasePath, withBasePath } from './base-path.js';
 import { reportFirstRunChecks } from './checks.js';
 import {
   type LineChannelConfig,
+  loginChannels,
   parseConfig,
+  providerChannelIds,
   type RenkeiConfig,
   type RenkeiOptions,
 } from './config.js';
@@ -128,10 +130,12 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
   // Recent-webhook ring for the /inspect view (in-memory, per-process).
   const webhookLog = createWebhookLog();
 
+  // Web logins go through Login channels only (MINI App channels serve /liff/exchange).
+  const logins = loginChannels(config);
   const channelFor = (region?: string): LineChannelConfig => {
-    const first = config.channels[0] as LineChannelConfig;
+    const first = logins[0] as LineChannelConfig;
     if (!region) return first;
-    return config.channels.find((c) => c.region === region) ?? first;
+    return logins.find((c) => c.region === region) ?? first;
   };
   const regionOf = (channelId: string) =>
     config.channels.find((c) => c.channelId === channelId)?.region;
@@ -262,6 +266,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
 
       const { identity, created } = await upsertIdentityFromLine(storage, {
         channelId: channel.channelId,
+        providerChannelIds: providerChannelIds(config, channel),
         claims,
         ...(profile ? { profile } : {}),
         ...(friend !== undefined ? { friend } : {}),
@@ -443,6 +448,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     ]);
     const { identity } = await upsertIdentityFromLine(storage, {
       channelId: channel.channelId,
+      providerChannelIds: providerChannelIds(config, channel),
       claims,
       ...(profile ? { profile } : {}),
       ...(friend !== undefined ? { friend } : {}),
@@ -522,6 +528,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     );
     const { identity } = await upsertIdentityFromLine(storage, {
       channelId: channel.channelId,
+      providerChannelIds: providerChannelIds(config, channel),
       claims,
       ...(profile ? { profile } : {}),
     });

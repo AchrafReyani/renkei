@@ -67,7 +67,7 @@ export function firstRunChecks(config: RenkeiConfig, ctx: CheckContext): FirstRu
     });
   }
 
-  const regions = new Set(config.channels.map((c) => c.region));
+  const regions = new Set(config.channels.filter((c) => c.kind === 'login').map((c) => c.region));
 
   for (const ch of config.channels) {
     if (ch.requestEmail) {

@@ -5,6 +5,8 @@
  *
  *   ISSUER                     public base URL (default http://localhost:3000)
  *   LINE_LOGIN_CHANNEL_ID / LINE_LOGIN_CHANNEL_SECRET / LINE_LOGIN_REGION
+ *   LINE_MINIAPP_CHANNEL_ID / LINE_MINIAPP_CHANNEL_SECRET   (a LINE MINI App channel of the same provider, for /liff/exchange;
+ *                                                            comma-separate several: one per stage, Developing / Review / Published)
  *   LINE_MESSAGING_CHANNEL_SECRET / LINE_MESSAGING_CHANNEL_ID  (enables POST /line/webhook)
  *   LINE_MESSAGING_CHANNEL_ACCESS_TOKEN                        (enables POST /link/start)
  *   LINE_ACCOUNTLINK_FORWARD_URL / LINE_ACCOUNTLINK_FORWARD_SECRET  (forward app-owned accountLink)
@@ -47,6 +49,39 @@ export interface EnvConfig {
   generated: { cookieKeys: boolean; jwks: boolean };
 }
 
+/**
+ * `LINE_MINIAPP_CHANNEL_ID` / `LINE_MINIAPP_CHANNEL_SECRET` as `miniapp` channels
+ * next to the Login channel (same provider, same region). Several IDs — one per
+ * MINI App stage — are comma-separated; secrets pair up by position, and a
+ * single secret applies to every ID.
+ */
+function miniAppChannels(env: EnvLike): RenkeiConfigInput['channels'] {
+  if (!env.LINE_MINIAPP_CHANNEL_ID) return [];
+  const ids = env.LINE_MINIAPP_CHANNEL_ID.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const secrets = (env.LINE_MINIAPP_CHANNEL_SECRET ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (secrets.length === 0) {
+    throw new Error(
+      'LINE_MINIAPP_CHANNEL_SECRET is not set — required with LINE_MINIAPP_CHANNEL_ID',
+    );
+  }
+  if (secrets.length !== 1 && secrets.length !== ids.length) {
+    throw new Error(
+      `LINE_MINIAPP_CHANNEL_SECRET: give one secret, or one per LINE_MINIAPP_CHANNEL_ID (${ids.length} IDs, ${secrets.length} secrets)`,
+    );
+  }
+  return ids.map((channelId, i) => ({
+    channelId,
+    channelSecret: (secrets.length === 1 ? secrets[0] : secrets[i]) as string,
+    region: env.LINE_LOGIN_REGION ?? 'jp',
+    kind: 'miniapp' as const,
+  }));
+}
+
 export function configFromEnv(env: EnvLike, options: EnvConfigOptions = {}): EnvConfig {
   const issuer = env.ISSUER ?? 'http://localhost:3000';
   const hasDatabase = options.hasDatabase ?? Boolean(env.DATABASE_URL);
@@ -78,6 +113,7 @@ export function configFromEnv(env: EnvLike, options: EnvConfigOptions = {}): Env
           (env.RENKEI_BOT_PROMPT as 'aggressive' | 'normal' | 'none' | undefined) ?? 'aggressive',
         requestEmail: env.RENKEI_REQUEST_EMAIL === 'true',
       },
+      ...miniAppChannels(env),
     ],
     clients,
     ...(env.LINE_MESSAGING_CHANNEL_SECRET

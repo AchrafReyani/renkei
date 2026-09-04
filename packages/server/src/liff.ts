@@ -13,7 +13,12 @@ import {
   verifyAccessToken,
   verifyIdToken,
 } from 'renkei-core';
-import type { LineChannelConfig, OidcClientConfig, RenkeiConfig } from './config.js';
+import {
+  type LineChannelConfig,
+  type OidcClientConfig,
+  providerChannelIds,
+  type RenkeiConfig,
+} from './config.js';
 import { applyEmailPlaceholder } from './oidc/claims.js';
 import { CLAIMS_BY_SCOPE } from './oidc/provider.js';
 
@@ -137,6 +142,8 @@ export function liffRoutes(deps: LiffDeps) {
 
       const { identity, created } = await upsertIdentityFromLine(storage, {
         channelId: channel.channelId,
+        // A MINI App channel next to the Login channel: same provider, same user, same sub.
+        providerChannelIds: providerChannelIds(config, channel),
         claims: idClaims ?? { sub: lineUserId },
         kind: 'liff',
         ...(profile ? { profile } : {}),
@@ -147,6 +154,8 @@ export function liffRoutes(deps: LiffDeps) {
         created,
         friend,
         client: client.clientId,
+        channel: channel.channelId,
+        channelKind: channel.kind,
       });
 
       const scope = (body.scope ?? 'openid profile email line').split(' ');

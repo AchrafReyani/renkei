@@ -4,9 +4,27 @@ import { z } from 'zod';
 
 const botPromptSchema = z.enum(['normal', 'aggressive', 'none']);
 
+const channelKindSchema = z.enum(['login', 'miniapp']);
+
 export const lineChannelSchema = z.object({
   channelId: z.string().min(1),
   channelSecret: z.string().min(1),
+  /**
+   * `login` (default): a LINE Login channel — web login, LIFF, session mode.
+   * `miniapp`: a LINE MINI App channel — its id_tokens / access tokens are
+   * accepted by `POST /liff/exchange`; it never serves the web redirect flow.
+   * A MINI App has one channel ID per stage (Developing / Review / Published):
+   * register each stage you use as its own `miniapp` channel.
+   */
+  kind: channelKindSchema.default('login'),
+  /**
+   * LINE provider this channel belongs to. LINE issues one user ID per
+   * provider, so a user seen through any channel of the same provider is the
+   * same identity (same `sub`). Channels with the same value — including all
+   * channels that leave it unset — are treated as one provider; set it only
+   * when one renkei mixes channels from different LINE providers.
+   */
+  provider: z.string().optional(),
   /** jp | tw | th | … Used for `line_region` routing and the `line:region` claim. */
   region: z.string().min(2).default('jp'),
   liffIds: z.array(z.string()).default([]),
@@ -141,6 +159,22 @@ export const renkeiConfigSchema = z.object({
 export type RenkeiConfigInput = z.input<typeof renkeiConfigSchema>;
 export type RenkeiConfig = z.output<typeof renkeiConfigSchema>;
 export type LineChannelConfig = z.output<typeof lineChannelSchema>;
+export type LineChannelKind = z.output<typeof channelKindSchema>;
+
+/** Login channels only — the ones that serve the web redirect flow and `line_region` routing. */
+export function loginChannels(config: RenkeiConfig): LineChannelConfig[] {
+  return config.channels.filter((c) => c.kind === 'login');
+}
+
+/**
+ * Channel IDs of every channel sharing `channel`'s provider (itself included):
+ * the set an identity lookup may match the same LINE user ID in.
+ */
+export function providerChannelIds(config: RenkeiConfig, channel: LineChannelConfig): string[] {
+  return config.channels
+    .filter((c) => (c.provider ?? '') === (channel.provider ?? ''))
+    .map((c) => c.channelId);
+}
 export type MessagingChannelConfig = z.output<typeof messagingChannelSchema>;
 export type OidcClientConfig = z.output<typeof oidcClientSchema>;
 export type SessionCookieConfig = z.output<typeof sessionCookieSchema>;
@@ -177,12 +211,27 @@ export function parseConfig(input: RenkeiConfigInput): RenkeiConfig {
   const config = parsed.data;
   const seen = new Set<string>();
   for (const ch of config.channels) {
+    // One *Login* channel per region: `line_region` routes web logins by it. MINI
+    // App channels share the region of the Login channel they sit next to.
+    if (ch.kind !== 'login') continue;
     if (seen.has(ch.region)) {
       throw new Error(
         `チャネルの region が重複しています / duplicate channel region "${ch.region}" — one LINE Login channel per region`,
       );
     }
     seen.add(ch.region);
+  }
+  if (seen.size === 0) {
+    throw new Error(
+      'LINE Login チャネルが 1 つも設定されていません / no LINE Login channel configured — every renkei needs at least one channel with kind "login"',
+    );
+  }
+  const ids = new Set<string>();
+  for (const ch of config.channels) {
+    if (ids.has(ch.channelId)) {
+      throw new Error(`チャネル ID が重複しています / duplicate channelId "${ch.channelId}"`);
+    }
+    ids.add(ch.channelId);
   }
   for (const c of config.clients) {
     if (c.tokenEndpointAuthMethod !== 'none' && !c.clientSecret) {

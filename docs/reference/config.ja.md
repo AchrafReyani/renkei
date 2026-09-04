@@ -33,6 +33,8 @@ renkei は環境変数で設定します（`.env` ファイル可）。プログ
 | 変数 | 既定値 | 説明 |
 |---|---|---|
 | `LINE_LOGIN_REGION` | `jp` | このチャネルが対象とする地域。`jp` / `tw` / `th` など。`line:region` クレームと `line_region` パラメータのルーティングに使います |
+| `LINE_MINIAPP_CHANNEL_ID` | なし | 同じプロバイダーの LINE ミニアプリチャネル。`POST /liff/exchange` で受け付け、Login チャネルと同じ `sub` に対応づける。ステージ（開発用 / 審査用 / 公開用）ごとの ID をカンマ区切りで。[ガイド](../guides/line-mini-app.ja.md) |
+| `LINE_MINIAPP_CHANNEL_SECRET` | なし | ミニアプリチャネルのシークレット。全 ID 共通なら 1 つ、ID ごとなら同じ順でカンマ区切り |
 | `RENKEI_BOT_PROMPT` | `aggressive` | ログイン時の友だち追加。`aggressive`（専用画面）/ `normal`（同意画面内）/ `none`。チャネルに LINE 公式アカウントがリンクされていないと効きません |
 | `RENKEI_REQUEST_EMAIL` | `false` | `true` で LINE に `email` スコープを要求。チャネルに**メールアドレス取得権限**が無いと LINE は黙ってスコープを落とします（renkei は起動時に警告を出します） |
 
@@ -121,6 +123,9 @@ const renkei = await createRenkei({
     issuer: 'https://auth.example.com',
     channels: [
       { channelId: '…', channelSecret: '…', region: 'jp', botPrompt: 'aggressive', requestEmail: true },
+      // 隣に置く LINE ミニアプリチャネル（同じプロバイダー → 同じ sub）。`provider` は LINE プロバイダー
+      // ごとにチャネルをまとめる値で、1 つの renkei に複数プロバイダーを混ぜるときだけ必要。
+      { channelId: '…', channelSecret: '…', region: 'jp', kind: 'miniapp' },
       { channelId: '…', channelSecret: '…', region: 'tw' },
     ],
     clients: [ /* 上と同じ */ ],
