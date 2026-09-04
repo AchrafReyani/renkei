@@ -10,7 +10,7 @@ renkei is an OpenID Connect provider (built on [node-oidc-provider](https://gith
 |---|---|
 | `GET /.well-known/openid-configuration` | discovery; issuer is `ISSUER` |
 | `GET /oidc/jwks` | public keys (RS256) |
-| `GET /oidc/auth` | authorization endpoint. Besides the standard parameters it accepts **`bot_prompt`** (`normal` / `aggressive`) and **`line_region`** (`jp` / `tw` …). `ui_locales` is forwarded to LINE's consent screen |
+| `GET /oidc/auth` | authorization endpoint. Besides the standard parameters it accepts **`bot_prompt`** (`normal` / `aggressive`) and **`line_region`** (`jp` / `tw` …; only applied when a LINE authentication actually runs — an existing renkei session answers without one, so pair it with `prompt=login` to switch regions). `ui_locales` is forwarded to LINE's consent screen |
 | `POST /oidc/token` | token endpoint: `authorization_code` and `refresh_token`. Client auth: Basic / POST / none (public, PKCE required) |
 | `GET /oidc/me` | userinfo (Bearer) |
 | `POST /oidc/token/revocation` | revocation |

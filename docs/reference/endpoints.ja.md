@@ -10,7 +10,7 @@ renkei は OpenID Connect プロバイダー（[node-oidc-provider](https://gith
 |---|---|
 | `GET /.well-known/openid-configuration` | ディスカバリ。issuer は `ISSUER` |
 | `GET /oidc/jwks` | 公開鍵（RS256） |
-| `GET /oidc/auth` | 認可エンドポイント。標準パラメータに加えて **`bot_prompt`**（`normal` / `aggressive`）と **`line_region`**（`jp` / `tw` …）を受け付けます。`ui_locales` は LINE の同意画面の言語に渡されます |
+| `GET /oidc/auth` | 認可エンドポイント。標準パラメータに加えて **`bot_prompt`**（`normal` / `aggressive`）と **`line_region`**（`jp` / `tw` …）を受け付けます。`ui_locales` は LINE の同意画面の言語に渡されます。**`line_region` は実際に LINE 認証が走るときだけ効きます**（既存の renkei セッションがあると認証せずに応答するため、地域を切り替えるときは `prompt=login` と併用してください）。 |
 | `POST /oidc/token` | トークン。`authorization_code` と `refresh_token`。クライアント認証は Basic / POST / なし（パブリック、PKCE 必須） |
 | `GET /oidc/me` | userinfo（Bearer） |
 | `POST /oidc/token/revocation` | 失効 |

@@ -174,8 +174,11 @@ describe('routing logins by region', () => {
   });
 
   /** Drive a full login and return the id_token the client receives. */
-  async function login(client: typeof APP, params: Record<string, string> = {}) {
-    const jar = new Map<string, string>();
+  async function login(
+    client: typeof APP,
+    params: Record<string, string> = {},
+    jar: Map<string, string> = new Map<string, string>(),
+  ) {
     const cookieHeader = () => [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
     const visit = async (url: string) => {
       const res = await renkei.fetch(
@@ -210,14 +213,19 @@ describe('routing logins by region', () => {
     auth.searchParams.set('nonce', `n-${Math.random()}`);
     for (const [k, v] of Object.entries(params)) auth.searchParams.set(k, v);
 
-    const toLine = await follow(auth.toString());
-    const lineUrl = toLine.location as URL;
-    expect(lineUrl.origin).toBe('https://access.line.me');
-    line.state.nonce = lineUrl.searchParams.get('nonce') ?? '';
-    const state = lineUrl.searchParams.get('state') ?? '';
-
-    const back = await follow(`${ISSUER}/line/callback?code=good&state=${state}`);
-    const code = (back.location as URL).searchParams.get('code') as string;
+    // Either renkei sends the browser to LINE, or an existing session lets the
+    // authorization finish without one — both end at the client's redirect_uri.
+    const first = await follow(auth.toString());
+    let lineUrl: URL | undefined;
+    let toClient = first.location as URL;
+    if (first.location?.origin === 'https://access.line.me') {
+      lineUrl = first.location;
+      line.state.nonce = lineUrl.searchParams.get('nonce') ?? '';
+      const state = lineUrl.searchParams.get('state') ?? '';
+      const back = await follow(`${ISSUER}/line/callback?code=good&state=${state}`);
+      toClient = back.location as URL;
+    }
+    const code = toClient.searchParams.get('code') as string;
     const token = await renkei.fetch(
       new Request(`${ISSUER}/oidc/token`, {
         method: 'POST',
@@ -238,7 +246,7 @@ describe('routing logins by region', () => {
       issuer: ISSUER,
       audience: client.clientId,
     });
-    return { payload, lineUrl };
+    return { payload, lineUrl: lineUrl as URL, jar, wentToLine: Boolean(lineUrl) };
   }
 
   it('sends the user to the LINE channel named by line_region, and stamps line:region', async () => {
@@ -283,6 +291,30 @@ describe('routing logins by region', () => {
     expect(backToJp.payload.sub).toBe(jp.payload.sub);
   });
 
+  it('reuses an existing renkei session, so line_region only bites on a fresh authentication', async () => {
+    // A first login establishes renkei's own session…
+    const first = await login(APP, { line_region: 'tw' });
+    expect(first.payload['line:region']).toBe('tw');
+    const callsAfterFirst = line.state.calls.length;
+
+    // …so a second authorization request in the same browser never reaches LINE:
+    // nobody re-authenticates, no channel is chosen, and the claims still describe
+    // the channel the session was established through.
+    const reused = await login(APP, { line_region: 'jp' }, first.jar);
+    expect(reused.wentToLine).toBe(false);
+    expect(line.state.calls.length).toBe(callsAfterFirst);
+    expect(reused.payload.sub).toBe(first.payload.sub);
+    expect(reused.payload['line:region']).toBe('tw');
+
+    // prompt=login is the standard way to demand a fresh one, and then the region routes.
+    const fresh = await login(APP, { line_region: 'jp', prompt: 'login' }, first.jar);
+    expect(fresh.wentToLine).toBe(true);
+    expect(line.state.calls.length).toBeGreaterThan(callsAfterFirst);
+    expect(fresh.lineUrl.searchParams.get('client_id')).toBe(JP.channelId);
+    expect(fresh.payload['line:region']).toBe('jp');
+    expect(fresh.payload.sub).toBe(first.payload.sub);
+  });
+
   it('the /dev page links one login per region and passes line_region through', async () => {
     const page = await (await renkei.fetch(new Request(`${ISSUER}/dev`))).text();
     expect(page).toContain('/dev/login?line_region=jp');
@@ -290,7 +322,12 @@ describe('routing logins by region', () => {
     const res = await renkei.fetch(
       new Request(`${ISSUER}/dev/login?line_region=tw`, { redirect: 'manual' }),
     );
-    expect(new URL(res.headers.get('location') ?? '').searchParams.get('line_region')).toBe('tw');
+    const to = new URL(res.headers.get('location') ?? '');
+    expect(to.searchParams.get('line_region')).toBe('tw');
+    // The region links exist to exercise routing, so they must not silently reuse a session.
+    expect(to.searchParams.get('prompt')).toBe('login');
+    const plain = await renkei.fetch(new Request(`${ISSUER}/dev/login`, { redirect: 'manual' }));
+    expect(new URL(plain.headers.get('location') ?? '').searchParams.get('prompt')).toBeNull();
   });
 
   it('exchanges a LIFF token from either region against its own channel', async () => {

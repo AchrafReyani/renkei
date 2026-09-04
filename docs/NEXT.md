@@ -11,13 +11,22 @@ a boot check naming the default channel when several regions exist, `/dev` with 
 and `line_region` passthrough, tutorial `docs/tutorials/multi-region.{ja,en}.md`, DECISIONS.md §17,
 296+10 tests. Console (Claude, standing permission): **renkei-dev-tw** created under provider renkei —
 ID `2011447387`, region **Taiwan**, company country Japan (copied from renkei-dev-jp), callbacks for
-:8787, :3000 and the demo. **Open: the live TW login.** `pnpm dev:server` on :8787 with the TW channel in
-`RENKEI_CHANNELS` (local `.env`, gitignored) redirected correctly to LINE for channel 2011447387, but the
-browser leg was never completed — the tab sits on `access.line.me`, which Claude cannot touch. Finish it
-from Chrome (or a phone) and check `line:region: "tw"`, `line:channel_id: "2011447387"` and the **same
-`sub`** as the JP login. The open question it answers: whether a Japan-registered LINE account may log in
-to a Taiwan-region channel at all — if LINE refuses, that is a finding for the tutorial's "Who can log in"
-note, not a renkei bug.
+:8787, :3000 and the demo. **Live-verified 2026-09-05** on `pnpm dev:server` :8787 (in-memory storage, both channels in `RENKEI_CHANNELS`
+in the local gitignored `.env`), Achraf driving the browser:
+- **A Japan-registered LINE account CAN log in to a Taiwan-region channel.** The TW login completed through
+  LINE's own consent screen; the fresh-session run needed QR + verification code. That answers the open
+  question and the tutorial's "Who can log in" note now states it as tested fact.
+- **The provider rule (§16) holds on real LINE data.** TW login: `line:channel_id 2011447387`,
+  `line:region tw`. JP login (private window, real LINE round-trip): `line:channel_id 2011257262`,
+  `line:region jp`, `line:friend true`. Both carried the **same** `line:user_id`
+  `U54de992ad068a07f1d4ef661a0a946bd` and the **same** `sub` `Y7D-n9zisZPozP_qtl-xvnSJgJO5wJuk` — one
+  LINE user ID per provider, one identity, one account row per channel. (That `sub` differs from the demo's
+  `j_QoA…` only because the local server had no `DATABASE_URL` and started from an empty in-memory store.)
+- **Found while verifying, fixed in the follow-up PR:** with an existing renkei session, a second
+  authorization request is answered from the session — no LINE authentication, no channel choice — so
+  `line_region=jp` came back stamped `tw`. Not a routing bug (a fresh session routes correctly, proven by
+  curl and by the private-window run), but the `/dev` region links now send `prompt=login`, and the tutorial
+  and endpoints reference say that `line_region` only applies when a LINE authentication actually runs.
 
 **Also fixed here:** `pnpm docs:build` was broken on `main` by PR #74 — the LIFF screenshot used
 `<img src="docs/images/…">`, which VitePress cannot resolve from a README page (`./docs/images/…` works).

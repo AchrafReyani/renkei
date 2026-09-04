@@ -21,7 +21,7 @@ LINE Developers Console → your provider → **Create a new channel → LINE Lo
 
 Register the same callback URL as your first channel: `https://<your-renkei>/line/callback`. Everything else (2FA, the LIFF tab, the linked Official Account) is per channel.
 
-> **Who can log in.** A channel serves the region you chose. Users whose LINE account belongs to another region may be refused at LINE's own screen, so test each region with an account from it. Nothing on renkei's side changes.
+> **Who can log in.** The region says which market the channel serves; it is not automatically a wall around the login. A Japan-registered LINE account logged in to a Taiwan-region channel in our own test (2026-09-05), consent screen and all. Don't assume the reverse for every region or channel status, and test with an account from each market you target — but a refusal, if it comes, comes from LINE's screen and changes nothing on renkei's side.
 
 ## 2. Configure both channels
 
@@ -75,6 +75,8 @@ RENKEI_CLIENTS=[
 
 **c. Neither** — the first Login channel in the list is used. An unknown region falls back to it too, rather than failing the login. The boot log states which channel that is.
 
+> **`line_region` only bites on a fresh authentication.** renkei keeps its own session, like any OpenID provider. If the browser already has one, a second authorization request is answered from that session: nobody re-authenticates, no channel is chosen, and the tokens keep describing the channel the session was established through — even when the request asked for another region. Send the standard **`prompt=login`** when you need the user authenticated through a specific region (a market switch, say). renkei's `/dev` region links do exactly that.
+
 The same parameter works on the session-cookie routes (`GET /login?line_region=tw`) and on the account-linking entry (`GET /link?line_region=tw`). With `RENKEI_DEV=true`, the `/dev` page grows one login link per region, which is the quickest way to check your wiring.
 
 ## 4. What the tokens say
@@ -96,7 +98,7 @@ Read `line:region` when your app needs to know the market; read `line:channel_id
 
 This is the part that surprises people, and it depends on the **provider**, not the region:
 
-- **Both channels under one LINE provider** (the normal case): LINE issues one user ID per provider, so the same person has the *same* `line:user_id` on both channels. renkei recognises them and keeps **one `sub`**, with one LINE-account row per channel. Nothing to configure.
+- **Both channels under one LINE provider** (the normal case): LINE issues one user ID per provider, so the same person has the *same* `line:user_id` on both channels. renkei recognises them and keeps **one `sub`**, with one LINE-account row per channel. Nothing to configure. (Verified against real channels on 2026-09-05: the same person logging in through a JP and a TW channel of one provider came back with one identical `line:user_id` and one `sub`, each token carrying its own `line:region`.)
 - **Channels under different providers**: LINE issues different user IDs, so renkei cannot tell the two apart — they are two identities with two `sub` values. That is LINE's boundary, not renkei's. If you need them merged, do it in your app, or move the channels under one provider.
 
 Set `provider` on the channels only when one renkei brokers channels from several LINE providers and you want that grouping to be explicit; channels that leave it unset are treated as one provider.
@@ -117,5 +119,5 @@ Follow / unfollow events then update friendship on the `tw` channel's accounts. 
 - [ ] Second channel created, region set, callback URL registered
 - [ ] `RENKEI_CHANNELS` (or the full list) configured; boot log shows both regions and names the default
 - [ ] `/dev` shows a login link per region, and each one reaches LINE with the right channel ID
-- [ ] An id_token from each region carries the expected `line:region` and `line:channel_id`
+- [ ] An id_token from each region carries the expected `line:region` and `line:channel_id` (use a private window, or `prompt=login`, so you are not answered from an existing session)
 - [ ] If you use webhooks: `LINE_MESSAGING_CHANNEL_REGION` matches the Login channel those users belong to
