@@ -156,6 +156,14 @@ export interface RenkeiOptions {
   logStructured?: boolean;
   /** LIFF app ID used only by the /dev/liff page. */
   liffId?: string | undefined;
+  /**
+   * Base URL the /dev page uses for its *own* server-side calls to renkei
+   * (token, jwks, userinfo) when the public issuer is not reachable from where
+   * renkei runs — inside Supabase's local container `127.0.0.1:54321` is not the
+   * gateway, `http://kong:8000` is. Defaults to the issuer. Only the URL changes;
+   * tokens are still verified against the public issuer.
+   */
+  devInternalIssuer?: string | undefined;
 }
 
 export function parseConfig(input: RenkeiConfigInput): RenkeiConfig {

@@ -1,0 +1,23 @@
+# renkei as a Supabase Edge Function. Docs: docs/guides/deploy-supabase-edge.{ja,en}.md
+# `supabase init` writes a much longer file; only what renkei needs is set here — the
+# CLI fills in the defaults for everything else.
+project_id = "renkei-supabase-edge"
+
+[api]
+enabled = true
+port = 54321
+
+[db]
+port = 54322
+major_version = 17
+
+[studio]
+enabled = false
+
+[auth]
+enabled = true
+
+[functions.renkei]
+# Browsers and LINE's redirect carry no Supabase JWT: the gateway must let
+# requests through without one. renkei's own endpoints are the OIDC layer.
+verify_jwt = false

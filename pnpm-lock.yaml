@@ -96,6 +96,12 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
+  examples/supabase-edge:
+    devDependencies:
+      esbuild:
+        specifier: ^0.27.0
+        version: 0.27.7
+
   packages/client:
     devDependencies:
       jose:

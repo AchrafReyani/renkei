@@ -24,6 +24,12 @@
       "types": "./dist/workers.d.ts",
       "import": "./dist/workers.js",
       "default": "./dist/workers.js"
+    },
+    "./supabase": {
+      "development": "./src/supabase.ts",
+      "types": "./dist/supabase.d.ts",
+      "import": "./dist/supabase.js",
+      "default": "./dist/supabase.js"
     }
   },
   "publishConfig": {
@@ -33,7 +39,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/node.ts src/workers.ts --format esm --dts --clean --sourcemap",
+    "build": "tsup src/index.ts src/node.ts src/workers.ts src/supabase.ts --format esm --dts --clean --sourcemap",
     "dev": "node --env-file=../../.env --conditions development --import tsx src/node.ts",
     "dev:harness": "node --env-file=../../.env --conditions development --import tsx src/dev-harness.ts",
     "typecheck": "tsc --noEmit",

@@ -17,7 +17,7 @@ programmatic use, pass the same settings as an object to
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `ISSUER` | `http://localhost:3000` | renkei's public URL. **Becomes the OIDC issuer and the base for every absolute URL.** No trailing slash. Behind a proxy, use the externally visible URL |
+| `ISSUER` | `http://localhost:3000` | renkei's public URL. **Becomes the OIDC issuer and the base for every absolute URL.** No trailing slash. Behind a proxy, use the externally visible URL. May carry a path (`https://x.supabase.co/functions/v1/renkei`, `https://example.com/auth`): renkei keeps it on every URL it hands out and strips it from incoming requests |
 | `PORT` | port of `ISSUER`, else `3000` | listen port |
 | `DATABASE_URL` | none | `postgres://…` selects Postgres, `sqlite:./data/renkei.db` selects SQLite (Node 22.13+ built-in `node:sqlite`: zero dependencies, no database server, single process; keep the file on a persistent disk). Unset = **in-memory** (wiped on restart, single process; development only). Not used on Cloudflare Workers, where the D1 binding `DB` is the storage ([guide](../guides/deploy-cloudflare-workers.en.md)) |
 | `RENKEI_COOKIE_KEYS` | generated per boot | cookie signing keys, comma-separated. Rotate by prepending. **Set in production** |

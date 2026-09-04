@@ -360,3 +360,60 @@ the changeset). Miniflare (workerd) is a devDependency of two packages, so CI
 downloads the workerd binary. Two version stores exist — `PRAGMA user_version`
 on Node, `renkei_meta` on D1 — hidden behind `SqliteDriver.migration`.
 
+
+## 15. Supabase Edge Functions: path-prefixed issuer, embedded migrations, RLS on renkei's tables (2026-09-04)
+
+**Decision.** The Supabase target is `renkei-server/supabase`: `serve()` (or
+`createEdgeFunction().fetch` under `Deno.serve`) boots renkei once per isolate
+from `Deno.env` and stores in Postgres — `DATABASE_URL`, else the
+`SUPABASE_DB_URL` every Edge Function receives for its project database (one
+connection per isolate, closed when idle). Three changes underneath it apply to
+every target:
+
+- **Path-prefixed issuers are supported.** Supabase serves a function at
+  `/functions/v1/<name>`, so the issuer carries a path. `createRenkei()` keeps
+  that path on every URL it builds (LINE `redirect_uri`, interaction redirects,
+  `/dev` links and cookie paths), strips it — or any trailing piece a gateway
+  leaves, Supabase hands the function `/<name>/…` — from incoming requests before
+  routing, and passes it to oidc-provider as its mount path (`originalUrl`), which
+  is how the provider prefixes discovery endpoints and its own cookie paths.
+- **The fetch→node bridge overrides `X-Forwarded-Host`**, not only `Host` and
+  `X-Forwarded-Proto`. With `proxy` on, Koa prefers the forwarded host, and
+  Supabase's Kong sends `127.0.0.1` without the port — found live: discovery
+  advertised endpoints on the wrong origin. The issuer is the only source of the
+  public URL.
+- **`renkei-storage-postgres` migrates from an embedded list**
+  (`src/migrations.ts`, generated from `migrations/` and checked in; a test keeps
+  the two equal) through drizzle's own migrator internals, so it works without a
+  filesystem — edge runtimes, bundles — and stays compatible with databases
+  migrated from disk (same `__drizzle_migrations` rows). `migratePostgres(db)` is
+  exported for other drivers (PGlite, neon).
+
+The `/dev` page's own server-side calls (token, jwks, userinfo) go through
+`RenkeiOptions.devInternalIssuer`, which the Supabase entry derives from
+`SUPABASE_URL` + the issuer's path: inside the local container the public
+`127.0.0.1:54321` is not reachable, `http://kong:8000` is (found live: the
+callback page died with `ECONNREFUSED` on the token exchange). Tokens are still
+verified against the public issuer.
+
+renkei also **enables row level security** on its three tables when running on
+Supabase (`createPostgresStorage({ rowLevelSecurity })`): Supabase's Data API
+exposes every `public` table to the `anon` key unless RLS is on, and renkei's
+tables hold identities. renkei connects as the table owner, which bypasses RLS.
+
+**Why.** The spike (§8) proved oidc-provider runs on edge-runtime through the
+bridge; what was missing was everything around the URL: the function is never
+at the origin root, and the gateway rewrites forwarded headers. Solving the
+prefix generically (rather than a Supabase-only `basePath` option) also covers
+renkei behind a reverse proxy at `/auth`, which had silently been broken.
+`SUPABASE_DB_URL` as the default removes the last configuration step: on
+Supabase the database is already there.
+
+**Cost.** Requests under a trailing piece of the issuer path (`/renkei/…` on a
+`/functions/v1/renkei` issuer) are accepted as renkei's own — harmless, and
+needed for Supabase. The RLS statements run on every boot (idempotent, three
+`ALTER TABLE`s). The example imports `npm:renkei-server`, so it only resolves
+once 0.5.0 is published; the local run bundles the workspace build into a
+gitignored `renkei-local` function (Deno injects Node globals only into `npm:`
+packages, so the bundle polyfills `Buffer`, `process`, `setImmediate` and
+`require` — none of which the published package needs).

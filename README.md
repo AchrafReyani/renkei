@@ -136,7 +136,7 @@ const me = await renkei.session(); // RenkeiClaims | null
 | `RENKEI_CLIENTS` | 下流クライアントの JSON 配列（`clientId`, `clientSecret`, `redirectUris`, `placeholderEmailDomain` …） |
 | `RENKEI_COOKIE_KEYS` | Cookie 署名鍵（カンマ区切り、ローテーション可） |
 | `RENKEI_JWKS` | トークン署名鍵（JWK の JSON 配列）。未設定なら起動ごとに生成（開発用） |
-| `DATABASE_URL` | `postgres://…` または `sqlite:./data/renkei.db`（Node 22.13+ 組み込みの SQLite、依存ゼロ）。未設定ならインメモリ（開発用）。Cloudflare Workers では代わりに D1 binding（[ガイド](docs/guides/deploy-cloudflare-workers.ja.md)） |
+| `DATABASE_URL` | `postgres://…` または `sqlite:./data/renkei.db`（Node 22.13+ 組み込みの SQLite、依存ゼロ）。未設定ならインメモリ（開発用）。Cloudflare Workers では代わりに D1 binding（[ガイド](docs/guides/deploy-cloudflare-workers.ja.md)）、Supabase Edge Functions ではプロジェクトの `SUPABASE_DB_URL` が既定（[ガイド](docs/guides/deploy-supabase-edge.ja.md)） |
 
 ## エンドポイント
 
@@ -153,7 +153,7 @@ const me = await renkei.session(); // RenkeiClaims | null
 
 ## 動作環境
 
-Node.js 22+。同じコードが **Node / Docker、Deno、Cloudflare Workers、Supabase Edge Functions** で動くことを確認済み。Cloudflare Workers は D1 ストレージ付きで正式対応（`renkei-server/workers`、[デプロイガイド](docs/guides/deploy-cloudflare-workers.ja.md)）
+Node.js 22+。同じコードが **Node / Docker、Deno、Cloudflare Workers、Supabase Edge Functions** で動くことを確認済み。Cloudflare Workers は D1 ストレージ付きで正式対応（`renkei-server/workers`、[デプロイガイド](docs/guides/deploy-cloudflare-workers.ja.md)）、Supabase Edge Functions もプロジェクトの Postgres 付きで正式対応（`renkei-server/supabase`、[デプロイガイド](docs/guides/deploy-supabase-edge.ja.md)）
 （[検証記録](docs/SPIKE-oidc-provider-runtimes.md)）。v0.1 の配布物は Docker イメージと npm パッケージ、v0.3 でエッジ向けデプロイを整備します。
 
 ## やらないこと

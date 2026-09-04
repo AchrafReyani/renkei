@@ -25,6 +25,7 @@ import {
   verifyWebhookSignature,
 } from 'renkei-core';
 import { bridge, nodePair } from './adapters/fetch-to-node.js';
+import { issuerBasePath, withBasePath } from './base-path.js';
 import { reportFirstRunChecks } from './checks.js';
 import {
   type LineChannelConfig,
@@ -100,7 +101,18 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
   });
   const lineFetch = options.fetch ?? fetch;
   const issuer = new URL(config.issuer);
-  const bridgeOpts = { host: issuer.host, protocol: issuer.protocol.replace(':', '') };
+  // A path-prefixed issuer (Supabase's /functions/v1/<name>, a proxy's /auth):
+  // outgoing URLs and redirects keep the prefix; incoming requests lose it
+  // before routing (see base-path.ts); oidc-provider learns it as its mount path.
+  const basePath = issuerBasePath(issuer);
+  const bridgeOpts = {
+    host: issuer.host,
+    protocol: issuer.protocol.replace(':', ''),
+    ...(basePath ? { mountPath: basePath } : {}),
+  };
+  const lineCallbackUrl = config.lineCallbackPath.startsWith('http')
+    ? config.lineCallbackPath
+    : `${issuer.origin}${basePath}${config.lineCallbackPath}`;
 
   let jwks = config.jwks;
   if (!jwks) {
@@ -196,7 +208,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     const scope = ['openid', 'profile', ...(channel.requestEmail ? ['email'] : [])];
     const url = buildAuthorizeUrl({
       channelId: channel.channelId,
-      redirectUri: new URL(config.lineCallbackPath, config.issuer).toString(),
+      redirectUri: lineCallbackUrl,
       state,
       nonce,
       scope,
@@ -228,7 +240,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
       const channel = config.channels.find((ch) => ch.channelId === login?.channelId);
       if (!channel) return c.text('unknown channel', 500);
 
-      const redirectUri = new URL(config.lineCallbackPath, config.issuer).toString();
+      const redirectUri = lineCallbackUrl;
       const tokens = await exchangeCode(
         { channel, code: cb.code, redirectUri, codeVerifier: login.verifier },
         { fetch: lineFetch },
@@ -271,7 +283,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
         { sub: identity.sub, uid: login.uid },
         RESULT_TTL,
       );
-      return c.redirect(`${INTERACTION_PATH}/${login.uid}/finish?t=${token}`);
+      return c.redirect(`${basePath}${INTERACTION_PATH}/${login.uid}/finish?t=${token}`);
     } catch (e) {
       const info = describeError(e);
       logger.warn('[renkei] LINE login failed', info);
@@ -295,7 +307,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
             { uid: pending.uid, error: e.code, error_description: description },
             RESULT_TTL,
           );
-          return c.redirect(`${INTERACTION_PATH}/${pending.uid}/finish?t=${token}`);
+          return c.redirect(`${basePath}${INTERACTION_PATH}/${pending.uid}/finish?t=${token}`);
         }
         // Or a browser-initiated /link flow that the user cancelled.
         const pendingLink = (await storage.payloads.find(LINK_FLOW_MODEL, e.state)) as
@@ -376,7 +388,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
       const botPrompt = pickBotPrompt(c.req.query('bot_prompt'), channel.botPrompt);
       const url = buildAuthorizeUrl({
         channelId: channel.channelId,
-        redirectUri: new URL(config.lineCallbackPath, config.issuer).toString(),
+        redirectUri: lineCallbackUrl,
         state,
         nonce,
         scope,
@@ -418,7 +430,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     const channel = config.channels.find((ch) => ch.channelId === flow.channelId);
     if (!channel) return c.text('unknown channel', 500);
 
-    const redirectUri = new URL(config.lineCallbackPath, config.issuer).toString();
+    const redirectUri = lineCallbackUrl;
     const tokens = await exchangeCode(
       { channel, code: cb.code, redirectUri, codeVerifier: flow.verifier },
       { fetch: lineFetch },
@@ -472,7 +484,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     );
     const url = buildAuthorizeUrl({
       channelId: channel.channelId,
-      redirectUri: new URL(config.lineCallbackPath, config.issuer).toString(),
+      redirectUri: lineCallbackUrl,
       state,
       nonce,
       scope: ['openid', 'profile'],
@@ -497,7 +509,7 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
     const channel = config.channels.find((ch) => ch.channelId === linkFlow.channelId);
     if (!channel) return c.text('unknown channel', 500);
 
-    const redirectUri = new URL(config.lineCallbackPath, config.issuer).toString();
+    const redirectUri = lineCallbackUrl;
     const tokens = await exchangeCode(
       { channel, code: cb.code, redirectUri, codeVerifier: linkFlow.verifier },
       { fetch: lineFetch },
@@ -713,15 +725,24 @@ export async function createRenkei(options: RenkeiOptions): Promise<Renkei> {
         `[renkei] /dev is enabled but no client is registered for ${config.issuer}/dev/callback; the page will explain instead of logging in. Add the renkei-dev client to RENKEI_CLIENTS or unset RENKEI_DEV.`,
       );
     }
-    app.route('/dev', devRoutes({ config, provider, liffId: options.liffId }));
+    app.route(
+      '/dev',
+      devRoutes({
+        config,
+        provider,
+        liffId: options.liffId,
+        internalIssuer: options.devInternalIssuer,
+      }),
+    );
   }
 
+  const publicApp = basePath ? withBasePath(app, basePath) : app;
   return {
-    app,
+    app: publicApp,
     provider,
     config,
     storage,
-    fetch: (request) => Promise.resolve(app.fetch(request)),
+    fetch: (request) => Promise.resolve(publicApp.fetch(request)),
   };
 }
 

@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { createRemoteJWKSet, decodeJwt, jwtVerify } from 'jose';
 import type Provider from 'oidc-provider';
+import { issuerBasePath } from './base-path.js';
 import type { RenkeiConfig, RenkeiConfigInput } from './config.js';
 import { OIDC_ROUTES } from './oidc/provider.js';
 
@@ -68,13 +69,18 @@ export function devRoutes({
   config,
   provider: _provider,
   liffId,
+  internalIssuer,
 }: {
   config: RenkeiConfig;
   provider: Provider;
   /** LIFF app ID for the /dev/liff page (LIFF_ID env). */
   liffId?: string | undefined;
+  /** Where this page reaches renkei from the server side; see `RenkeiOptions.devInternalIssuer`. */
+  internalIssuer?: string | undefined;
 }) {
   const dev = new Hono();
+  const base = issuerBasePath(new URL(config.issuer));
+  const internal = (internalIssuer ?? config.issuer).replace(/\/+$/, '');
   const liffClient = findDevLiffClient(config);
   const client = findDevClient(config);
   const redirectUri = `${config.issuer}/dev/callback`;
@@ -106,18 +112,18 @@ Add the <code>renkei-dev</code> client to <code>RENKEI_CLIENTS</code>, or unset 
 <p>This page is an OIDC client of renkei (<code>${client.clientId}</code>). Clicking below goes through
 <code>${OIDC_ROUTES.authorization}</code> → LINE → back here with an id_token minted by renkei.</p>
 <ul>
-<li><a href="/dev/login">ログイン（channel default bot_prompt）</a></li>
-<li><a href="/dev/login?bot_prompt=normal">ログイン（bot_prompt=normal）</a></li>
-<li><a href="/dev/login?bot_prompt=none">ログイン（bot_prompt なし）</a></li>
-<li><a href="/dev/login?scope=openid+profile+email+line">ログイン（email scope も要求）</a></li>
+<li><a href="${base}/dev/login">ログイン（channel default bot_prompt）</a></li>
+<li><a href="${base}/dev/login?bot_prompt=normal">ログイン（bot_prompt=normal）</a></li>
+<li><a href="${base}/dev/login?bot_prompt=none">ログイン（bot_prompt なし）</a></li>
+<li><a href="${base}/dev/login?scope=openid+profile+email+line">ログイン（email scope も要求）</a></li>
 </ul>
 <section style="border:1px solid #ddd;border-radius:8px;padding:1rem;margin:1.5rem 0;background:#fafafa">
 <h2 style="margin-top:0;font-size:1.1rem">メールアドレスの取得について / About your email address</h2>
 <p>LINEログイン時にメールアドレスの提供に同意いただいた場合、renkei はメールアドレスを<strong>アカウントの識別と本人確認、および重要なお知らせの送信</strong>のみに利用します。広告目的での利用や第三者への提供は行いません。同意しなくてもログインできます。</p>
 <p style="color:#555">If you consent to share your email address during LINE Login, renkei uses it <strong>only to identify your account, verify it is you, and send important notices</strong>. It is never used for advertising or shared with third parties. You can log in without consenting.</p>
 </section>
-<p>LIFF: ${liffId && liffClient ? `<a href="/dev/liff">/dev/liff</a> (open via <code>https://liff.line.me/${liffId}</code> on a phone, or here in a browser)` : 'set LIFF_ID and add a public client to enable /dev/liff'}</p>
-<p><a href="/.well-known/openid-configuration">discovery</a> · <a href="${OIDC_ROUTES.jwks}">jwks</a></p>`),
+<p>LIFF: ${liffId && liffClient ? `<a href="${base}/dev/liff">/dev/liff</a> (open via <code>https://liff.line.me/${liffId}</code> on a phone, or here in a browser)` : 'set LIFF_ID and add a public client to enable /dev/liff'}</p>
+<p><a href="${base}/.well-known/openid-configuration">discovery</a> · <a href="${base}${OIDC_ROUTES.jwks}">jwks</a></p>`),
   );
 
   // Landing page for downstream IdPs (Supabase etc.) to redirect to after login:
@@ -151,7 +157,7 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
     const id_token = liff.getIDToken();
     const access_token = liff.getAccessToken();
     $('status').textContent = 'renkei に交換中… / exchanging with renkei…';
-    const res = await fetch('/liff/exchange', {
+    const res = await fetch('${base}/liff/exchange', {
       method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ id_token, access_token, client_id: ${JSON.stringify(liffClient.clientId)} }),
     });
@@ -172,10 +178,10 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
     setCookie(c, COOKIE, JSON.stringify({ state, nonce }), {
       httpOnly: true,
       sameSite: 'Lax',
-      path: '/dev',
+      path: `${base}/dev`,
       maxAge: 600,
     });
-    const url = new URL(OIDC_ROUTES.authorization, config.issuer);
+    const url = new URL(`${config.issuer}${OIDC_ROUTES.authorization}`);
     url.searchParams.set('client_id', client.clientId);
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('redirect_uri', redirectUri);
@@ -189,13 +195,13 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
 
   dev.get('/callback', async (c) => {
     const raw = getCookie(c, COOKIE);
-    deleteCookie(c, COOKIE, { path: '/dev' });
+    deleteCookie(c, COOKIE, { path: `${base}/dev` });
     if (!raw) return c.text('no dev session', 400);
     const session = JSON.parse(raw) as { state: string; nonce: string };
     const error = c.req.query('error');
     if (error)
       return c.html(
-        page('失敗 / Failed', { error, error_description: c.req.query('error_description') }),
+        page(base, '失敗 / Failed', { error, error_description: c.req.query('error_description') }),
         400,
       );
     if (c.req.query('state') !== session.state) return c.text('state mismatch', 400);
@@ -213,29 +219,29 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
     } else {
       body.set('client_id', client.clientId);
     }
-    const tokenRes = await fetch(new URL(OIDC_ROUTES.token, config.issuer), {
+    const tokenRes = await fetch(`${internal}${OIDC_ROUTES.token}`, {
       method: 'POST',
       headers,
       body,
     });
     const tokens = (await tokenRes.json()) as Record<string, unknown>;
-    if (!tokenRes.ok) return c.html(page('トークン取得失敗 / Token error', tokens), 400);
+    if (!tokenRes.ok) return c.html(page(base, 'トークン取得失敗 / Token error', tokens), 400);
 
     const idToken = String(tokens.id_token);
-    const jwks = createRemoteJWKSet(new URL(OIDC_ROUTES.jwks, config.issuer));
+    const jwks = createRemoteJWKSet(new URL(`${internal}${OIDC_ROUTES.jwks}`));
     const { payload } = await jwtVerify(idToken, jwks, {
       issuer: config.issuer,
       audience: client.clientId,
     });
     if (payload.nonce !== session.nonce) return c.text('nonce mismatch', 400);
 
-    const userinfoRes = await fetch(new URL(OIDC_ROUTES.userinfo, config.issuer), {
+    const userinfoRes = await fetch(`${internal}${OIDC_ROUTES.userinfo}`, {
       headers: { authorization: `Bearer ${String(tokens.access_token)}` },
     });
     const userinfo = await userinfoRes.json();
 
     return c.html(
-      page('ログイン成功 / Login OK', {
+      page(base, 'ログイン成功 / Login OK', {
         id_token_header: decodeJwt(idToken) && JSON.parse(atob(idToken.split('.')[0] ?? '')),
         id_token_claims: payload,
         userinfo,
@@ -249,11 +255,11 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
   return dev;
 }
 
-function page(title: string, data: unknown) {
+function page(base: string, title: string, data: unknown) {
   const json = JSON.stringify(data, null, 2).replace(
     /[&<>]/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] ?? c,
   );
   return `<!doctype html><meta charset="utf-8"><title>${title}</title>
-<body style="font-family:system-ui;max-width:50rem;margin:3rem auto"><h1>${title}</h1><pre>${json}</pre><a href="/dev">← back</a></body>`;
+<body style="font-family:system-ui;max-width:50rem;margin:3rem auto"><h1>${title}</h1><pre>${json}</pre><a href="${base}/dev">← back</a></body>`;
 }
