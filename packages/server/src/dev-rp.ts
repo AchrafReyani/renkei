@@ -194,7 +194,13 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
     url.searchParams.set('state', state);
     url.searchParams.set('nonce', nonce);
     const region = c.req.query('line_region');
-    if (region) url.searchParams.set('line_region', region);
+    if (region) {
+      url.searchParams.set('line_region', region);
+      // renkei keeps its own session: a second authorization request would reuse it
+      // and never reach LINE, so the region would have no effect. The point of these
+      // links is to exercise routing, so ask for a fresh authentication.
+      url.searchParams.set('prompt', 'login');
+    }
     const bp = c.req.query('bot_prompt');
     if (bp) url.searchParams.set('bot_prompt', bp);
     return c.redirect(url.toString());
