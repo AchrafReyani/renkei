@@ -18,7 +18,9 @@ A MINI App is really three LIFF apps, each on its own internal channel:
 | Review | LY Corporation reviewers | same |
 | Published | end users, after review | same |
 
-Each stage's id_token carries its own channel ID in `aud`, so renkei needs to know every stage you use. The channel secret is on **Basic settings**; the console shows one for the channel — if a stage's tokens are rejected, give renkei that stage's secret separately (below).
+Each stage's id_token carries its own channel ID in `aud`, and **each stage has its own channel secret** (Basic settings → Channel secret lists Developing, Review and Published), so renkei needs the ID *and* the secret of every stage you use.
+
+To open the Developing stage on a phone, the LINE account on that phone must be the one **linked to your LINE Business ID** (console profile → *Go to Business ID Profile* → link your LINE account). The Admin / Tester role is matched by LINE account, not by console email; without the link LINE answers `400 … user need to have developer role`.
 
 ## 2. Point the MINI App at your page
 
@@ -35,8 +37,8 @@ https://<your-renkei>/dev/liff?liff_id=<Developing LIFF ID>
 Environment (Node, Docker, Workers, Supabase — same names everywhere):
 
 ```sh
-LINE_MINIAPP_CHANNEL_ID=2011444277                 # Developing; add ,2011444279 for Published, etc.
-LINE_MINIAPP_CHANNEL_SECRET=…                      # one secret for all IDs, or one per ID (comma-separated, same order)
+LINE_MINIAPP_CHANNEL_ID=2011444277,2011444279      # Developing, Published — the stages you use
+LINE_MINIAPP_CHANNEL_SECRET=<dev secret>,<pub secret>   # one per ID, same order (a single value applies to all IDs)
 ```
 
 Programmatic configuration — a channel with `kind: 'miniapp'` next to the Login channel:
@@ -72,4 +74,5 @@ Keep the LIFF access token flow in your app alongside the renkei exchange: renke
 - **`invalid_token: id_token is not for one of our channels`** — the token's `aud` (a stage channel ID) is not in `LINE_MINIAPP_CHANNEL_ID`; add that stage.
 - **`invalid_token` with a valid-looking id_token** — wrong secret for that stage; give per-ID secrets.
 - **Two different `sub` values for the same person** — the channels were configured with different `provider` values, or the MINI App channel belongs to another LINE provider (then LINE user IDs really differ and no mapping is possible).
-- **The Developing MINI App will not open** — the LINE account is not a tester of the channel (Roles tab).
+- **The Developing MINI App will not open (`400`, "developer role")** — the LINE account on the phone is not linked to the Business ID that holds the Admin / Tester role (see step 1), or is not a tester of the channel (Roles tab).
+- **No `line:friend` claim from the MINI App** — the friendship check answers for the Official Account linked to the channel; a MINI App channel without a linked OA has none. The Login channel's row keeps its value.
