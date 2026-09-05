@@ -16,7 +16,8 @@
     "dev:server": "pnpm --filter renkei-server dev",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "demo:server": "pnpm --filter renkei-server demo"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.10",

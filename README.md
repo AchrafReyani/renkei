@@ -33,9 +33,11 @@ LINE Platform ──────▶  renkei（自分でホスト）  ───�
 
 **<https://renkei-demo.onrender.com/dev>** — 「LINEでログイン」→ 友だち追加画面 → `line:*` クレーム入りの id_token がその場で見られます。自分の LINE アカウントでログインします（デモ用 DB にあなたの LINE ユーザー ID と紐づく行が 1 つ作られるだけです）。
 
-![/dev のログインフロー: ログインをクリック → LINE → line:* クレーム入りの id_token](docs/images/dev-flow.gif)
+![/dev のログインフロー: LINE ログインボタンをクリック → line:* クレーム入りの id_token](docs/images/dev-flow.gif)
 
-LINE アプリ内（LIFF）からも同じ id_token が取れます — `https://liff.line.me/2011257262-OKRFVulZ` をスマホの LINE で開くと `/liff/exchange` の結果が表示されます:
+*ローカルの `pnpm demo:server`（renkei 本体はそのまま、LINE だけスタブ、ユーザーはダミー）で撮影しています。実在のアカウントの情報は含まれていません。*
+
+LINE アプリ内（LIFF）からも同じ id_token が取れます — `https://liff.line.me/2011257262-OKRFVulZ` をスマホの LINE で開くと `/liff/exchange` の結果が表示されます（プロフィール画像 URL のみ伏せてあります。ほかは実際のペイロードです）:
 
 <img src="./docs/images/liff-phone.png" alt="LINE アプリ内の LIFF から /liff/exchange を呼んだ結果: inClient true、line:* クレーム入りの renkei id_token" width="320">
 

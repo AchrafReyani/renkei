@@ -391,10 +391,13 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
 
 - [x] `.github/social-preview.png` uploaded (2026-08-30, Claude via Chrome;
       persists after reload under Settings → General → Social preview).
-- [x] README GIF of the `/dev` flow: `docs/images/dev-flow.gif` (4 frames,
-      320 KB, recorded on renkei-demo — LINE's consent screen is skipped
-      because Chrome's LINE SSO auto-approved; it shows Achraf's `line:user_id`,
-      which NEXT.md already lists). Linked from both READMEs.
+- [x] README GIF of the `/dev` flow: `docs/images/dev-flow.gif`. **Re-recorded 2026-09-05**
+      (2 frames, 368 KB, 900 px) from `pnpm demo:server` — the real server and the real
+      `/dev` page against a stubbed LINE and a synthetic user, so it carries no real account
+      data and shows the guideline login button. The first cut was recorded on renkei-demo
+      with a real login, which put Achraf's `sub` and his **publicly fetchable
+      profile-photo URL** into a public repo. Regenerate it from the demo server, never
+      from a real login. Linked from both READMEs.
 - [x] In-app **LIFF phone shot** — `docs/images/liff-phone.png`, taken by Achraf on 2026-08-30 and
       linked from both READMEs (rescued from the forgotten PR #52 on 2026-09-04, PR #74).
 - [x] **Flip the repo public** — already PUBLIC as of 2026-08-30 (`gh repo view`).
