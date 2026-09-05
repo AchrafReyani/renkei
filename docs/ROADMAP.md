@@ -100,7 +100,10 @@ Order matters: each item is what the next needs.
       redirect chain verified, final LINE leg needs a human
 - [x] Reference: config, endpoints, claims (webhooks land with v0.2)
 - [x] LINE Developers Console prerequisites page (ja/en) — screenshots still to add
-- [x] Trademark note + button-guideline link in README; compliant button component is issue #19
+- [x] Trademark note + button-guideline link in README; the compliant button shipped as
+      `<LineLoginButton />` in `renkei-next` (2026-09-03) and as framework-free
+      `lineLoginButton()` / `lineLoginButtonCss()` in `renkei-server`, which `/dev` renders
+      (2026-09-05, #19). `examples/nextjs` (Auth.js) keeps a plain submit button on purpose
 - [x] VitePress site (`pnpm docs:build`), `ja` root, `en` under /en/, local search
 
 **hygiene** — full list in LAUNCH.md §3
