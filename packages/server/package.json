@@ -49,7 +49,8 @@
     "dev:harness": "node --env-file=../../.env --conditions development --import tsx src/dev-harness.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "start": "node dist/node.js"
+    "start": "node dist/node.js",
+    "demo": "node --conditions development --import tsx scripts/demo-server.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",

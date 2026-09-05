@@ -42,6 +42,7 @@ a done item.
 |---|---|
 | `pnpm dev:server` | renkei on :3000 with the `/dev` test relying party |
 | `pnpm --filter renkei-server dev:harness` | raw LINE Login harness (no OIDC layer) |
+| `pnpm demo:server` | renkei on :4321 with a **stubbed LINE and a synthetic user** — use this for screenshots and the README GIF, never a real login |
 | `pnpm test` / `pnpm lint` / `pnpm typecheck` / `pnpm build` | the checks |
 | `pnpm docs:build` / `pnpm docs:dev` | VitePress site (`docs/.vitepress`) |
 | `docker compose up` | renkei + Postgres from the Dockerfile |
