@@ -156,6 +156,9 @@ importers:
       renkei-server:
         specifier: workspace:*
         version: link:../server
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
 
   packages/server:
     dependencies:
@@ -180,6 +183,9 @@ importers:
       renkei-storage-sqlite:
         specifier: workspace:*
         version: link:../storage-sqlite
+      yaml:
+        specifier: ^2.9.0
+        version: 2.9.0
       zod:
         specifier: ^4.4.3
         version: 4.4.3

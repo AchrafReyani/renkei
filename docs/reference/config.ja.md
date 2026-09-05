@@ -2,8 +2,21 @@
 
 > English: [config.en.md](config.en.md)
 
-renkei は環境変数で設定します（`.env` ファイル可）。プログラムから使う場合は
-`createRenkei({ config, storage })` に同じ内容をオブジェクトで渡します（[`RenkeiConfig`](#プログラムからの設定)）。
+renkei の設定方法は 2 つあり、使われるのはどちらか一方だけです。
+
+- **`renkei.yaml`**（作業ディレクトリに置く。[後述](#renkei-yaml)）— すべてを 1 ファイルで表します。
+  シークレットは `${VAR}` 参照なので、そのままコミットできます。チャネルやクライアントが
+  複数になったらこちらを推奨します。
+- **環境変数**（`.env` ファイル可）— 以下の表のとおり。`renkei init` が書き出すのはこちらで、
+  ファイルシステムのない Cloudflare Workers・Supabase Edge Functions ではこちらのみです。
+
+`renkei.yaml` があるときは、それが設定のすべてです。renkei は `LINE_*` / `RENKEI_*` の
+環境変数を一切読まず、設定されていたものは起動時に「無視した」と名前を挙げます
+（黙って効いていることがないように）。`PORT` と `DATABASE_URL`、およびファイルが
+`${VAR}` で参照している変数はそのまま使えます。
+
+プログラムから使う場合は `createRenkei({ config, storage })` に同じ内容を
+オブジェクトで渡します（[`RenkeiConfig`](#プログラムからの設定)）。
 
 ## 必須
 
@@ -90,6 +103,96 @@ renkei に OIDC でログインしに来るアプリ／IdP の一覧。JSON 配�
 
 未設定のときは開発用に `renkei-dev`（secret `renkei-dev-secret`, redirect `${ISSUER}/dev/callback`）と
 `renkei-dev-liff`（パブリック）が作られます。
+
+## `renkei.yaml`
+
+`renkei init --yaml` が生成します（既存の `.env` があれば、それを変換します）。
+renkei は作業ディレクトリから読み込みます。`RENKEI_CONFIG=<パス>` で別のファイルを
+指定できます（`renkei.yml` も認識されます）。
+
+```yaml
+issuer: https://auth.example.com
+storage: postgres://…            # または sqlite:./data/renkei.db。なければ DATABASE_URL
+port: 3000                       # PORT が優先されます
+liff_id: 1234567890-abcdefgh     # /dev/liff ページ専用
+log_format: json                 # 1 行 1 JSON でログを出す
+dev: false                       # /dev テストページを有効化（専用クライアントは自動登録）
+
+cookie_keys: "${RENKEI_COOKIE_KEYS}"
+jwks: "${RENKEI_JWKS}"
+
+channels:
+  - id: "1234567890"             # LINE Login・日本
+    region: jp
+    secret: "${LINE_JP_CHANNEL_SECRET}"
+    bot_prompt: aggressive
+    request_email: false
+    liff_ids: ["1234567890-abcdefgh"]
+  - id: "2345678901"             # 2 つ目のリージョン
+    region: tw
+    secret: "${LINE_TW_CHANNEL_SECRET}"
+  - id: "3456789012"             # LINE MINI App のステージ
+    kind: miniapp
+    region: jp
+    secret: "${LINE_MINIAPP_CHANNEL_SECRET}"
+
+messaging:                       # 複数なら messaging_channels: [ … ]
+  channel_id: "4567890123"
+  channel_secret: "${LINE_MESSAGING_CHANNEL_SECRET}"
+  channel_access_token: "${LINE_MESSAGING_CHANNEL_ACCESS_TOKEN}"
+
+clients:
+  - client_id: my-app
+    client_secret: "${RENKEI_MY_APP_CLIENT_SECRET}"
+    redirect_uris: ["https://app.example.com/callback"]
+    line_region: tw              # このクライアントをこのチャネルに固定
+  - client_id: spa
+    token_endpoint_auth_method: none
+    redirect_uris: ["https://spa.example.com/callback"]
+
+cors_origins: ["https://liff.example.com"]
+session_cookie:
+  enabled: true
+  return_urls: ["https://app.example.com"]
+admin_token: "${RENKEI_ADMIN_TOKEN}"
+```
+
+[`RenkeiConfig`](#プログラムからの設定) の全項目を `snake_case` で書けます。camelCase も
+受け付けるので、`RENKEI_CHANNELS` や `RENKEI_CLIENTS` のエントリをそのまま貼れます。
+スキーマにない書き方が 2 つあります。チャネルの `id` / `secret`（`channel_id` /
+`channel_secret` も可）と、1 件だけの `messaging_channels:` を `messaging:`
+マッピングとして書けることです。
+
+### `${VAR}` — シークレットをファイルに置かない
+
+どの文字列でも環境変数を参照できます。`${VAR}` は未設定なら起動時に失敗し、変数名と
+該当フィールドを示します。`${VAR:-代替値}` は未設定のとき代替値を使い、`$${` は
+リテラルの `${` です。
+
+これがコミットできる理由です。**`renkei.yaml` にシークレットを書かないでください。**
+参照だけを書き、値は `.env`（開発）かプラットフォームのシークレットストア（本番）に
+置きます。`renkei add-channel` と `renkei add-client` も同じ規則で、ファイルには参照を、
+`.env` には値を書きます。
+
+`cookie_keys` と `jwks` は文字列 1 つも受け付けます。つまり `RENKEI_COOKIE_KEYS`
+（カンマ区切り）や `RENKEI_JWKS`（JSON）の中身をそのまま 1 つの参照で書けます。
+
+### CLI
+
+| | |
+|---|---|
+| `renkei init --yaml` | `renkei.yaml` とシークレット用の `.env` を書き出す。既存の `.env` があれば変換する |
+| `renkei add-channel <id> [--region tw] [--miniapp] [--secret <値>]` | チャネルを追記。`--secret-env VAR` は値を書かずに変数を参照するだけ |
+| `renkei add-client <id> --redirect <url>` | クライアントを追記（`renkei.yaml` があればそちら、なければ `RENKEI_CLIENTS`） |
+
+### 環境変数からの移行
+
+`.env` のあるディレクトリで `renkei init --yaml` を実行します。設定はサーバーと同じ
+手順で組み立てられるので、その環境変数で実際に起動していた内容がそのままファイルに
+なります。シークレットはすべて参照として書き戻され、`RENKEI_CHANNELS` /
+`RENKEI_CLIENTS` の JSON に埋もれていたものには `.env` 側に専用の変数が作られます。
+`.env` はそれ以外は変更されません。renkei を起動して「無視した環境変数」の行を確認し、
+問題なく起動したらそれらの行を `.env` から削除できます。
 
 ## トークンの有効期限（プログラム設定のみ）
 

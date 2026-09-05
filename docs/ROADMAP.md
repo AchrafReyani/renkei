@@ -186,13 +186,14 @@ Order matters: each item is what the next needs.
       a MINI App, or the whole list) and `LINE_MESSAGING_CHANNEL_REGION`; `/dev` grows a login link per
       region and passes `line_region` through; a boot check names the default channel. Identity across
       regions follows the provider rule from §16 (2026-09-05, #9)
-- [ ] Structured configuration for multi-channel setups (`renkei.yaml`, issue #11): a `channels:` list
-      with `kind` / `region` / secret per entry (secrets by env reference so the file is committable) and
-      `renkei add-channel [--miniapp]` writing it the way `add-client` writes clients. Motivation (Achraf,
-      2026-09-04): the env surface is ~20 variables now; two values still start renkei, but a flat
-      namespace hides which secret belongs to which channel, and the comma-paired
-      `LINE_MINIAPP_CHANNEL_ID` / `_SECRET` lists are where env stops being a good interface. Env stays
-      the deploy-time path for the simple cases
+- [x] Structured configuration for multi-channel setups (`renkei.yaml`, issue #11): the file is read from
+      the working directory (`RENKEI_CONFIG` overrides it) through the existing `renkeiConfigSchema`,
+      `snake_case` with camelCase accepted, `${VAR}` / `${VAR:-fallback}` expansion so secrets stay out of
+      it, and it **supersedes** the environment — the variables it replaces are named at boot rather than
+      silently applied. `renkei init --yaml` writes or converts one, `renkei add-channel [--miniapp]` and
+      `renkei add-client` append to it (reference in the YAML, value in `.env`). Node-only loader
+      (`renkei-server/config-file`); env stays the deploy-time path and the only one on Workers /
+      Supabase Edge. DECISIONS.md §18 (2026-09-05, #11)
 - [ ] zh-TW docs kickoff (community), post in LINE Developers TW channels
 
 ## v0.4 — federation guides and framework examples

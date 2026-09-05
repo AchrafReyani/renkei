@@ -65,6 +65,11 @@ renkei が発行した id_token（`line:user_id`, `line:friend`, `line:channel_i
 
 LINE Developers Console の Callback URL に `http://localhost:3000/line/callback` を登録しておいてください。
 
+チャネルやクライアントが増えてきたら `npx renkei init --yaml` で設定を **`renkei.yaml`** に
+移せます。シークレットは `.env` に残したまま `${VAR}` で参照するので、ファイルはそのまま
+コミットできます。`renkei add-channel` / `renkei add-client` がこのファイルに追記します。
+→ [`renkei.yaml` リファレンス](docs/reference/config.ja.md)
+
 ## 使い方
 
 ### 1. 自分のアプリから（標準 OIDC クライアントとして）

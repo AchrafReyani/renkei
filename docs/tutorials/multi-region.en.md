@@ -25,6 +25,29 @@ Register the same callback URL as your first channel: `https://<your-renkei>/lin
 
 ## 2. Configure both channels
 
+Two channels is the point at which a `renkei.yaml` starts paying for itself — one
+entry per channel, secrets by reference, and `renkei add-channel` writes it for you:
+
+```sh
+npx renkei init --yaml                    # converts your existing .env
+npx renkei add-channel 2011447387 --region tw --secret <Channel secret>
+```
+
+```yaml
+# renkei.yaml — the TW channel's secret is in .env as LINE_TW_CHANNEL_SECRET
+channels:
+  - id: "2011257262"                      # the first Login channel is the default
+    region: jp
+    secret: "${LINE_LOGIN_CHANNEL_SECRET}"
+  - id: "2011447387"
+    region: tw
+    secret: "${LINE_TW_CHANNEL_SECRET}"
+```
+
+→ [`renkei.yaml` reference](../reference/config.en.md#renkei-yaml). The rest of this
+tutorial uses the environment-variable spelling, which is equivalent and is the
+only one available on Cloudflare Workers and Supabase Edge Functions.
+
 `RENKEI_CHANNELS` holds every channel beyond the primary `LINE_LOGIN_*` one, as JSON:
 
 ```sh

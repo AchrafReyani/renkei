@@ -32,11 +32,12 @@
     "README.md"
   ],
   "scripts": {
-    "typecheck": "node --check bin/renkei.js && node --check lib/cli.js && node --check lib/env-file.js",
+    "typecheck": "node --check bin/renkei.js && node --check lib/cli.js && node --check lib/env-file.js && node --check lib/yaml-file.js && node --check lib/yaml-init.js",
     "test": "vitest run"
   },
   "dependencies": {
-    "renkei-server": "workspace:*"
+    "renkei-server": "workspace:*",
+    "yaml": "^2.9.0"
   },
   "publishConfig": {
     "access": "public"

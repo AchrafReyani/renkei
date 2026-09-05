@@ -478,3 +478,60 @@ YAML config should express channels once and supersede both. Identity across
 regions follows §16's provider rule — same provider means one `sub`, different
 providers mean LINE itself gives different user IDs — so nothing region-specific
 was added to the identity layer.
+
+## 18. `renkei.yaml`: one file, secrets by `${VAR}`, and it supersedes the environment (2026-09-05)
+
+**Decision.** renkei reads a `renkei.yaml` from the working directory
+(`RENKEI_CONFIG` overrides the path) and, when there is one, **that file is the
+whole configuration** — `configFromEnv` is not consulted at all. The `LINE_*` /
+`RENKEI_*` variables it supersedes are named on the boot banner instead of being
+silently dropped. Only `PORT`, `DATABASE_URL` (a fallback for `storage:`) and
+whatever the file references as `${VAR}` still reach it.
+
+The file is validated by the same `renkeiConfigSchema` as everything else. Keys
+are `snake_case`, with the camelCase spelling accepted so a `RENKEI_CHANNELS` or
+`RENKEI_CLIENTS` entry can be pasted in unchanged; the only aliases beyond that
+are a channel's `id` / `secret` and `messaging:` as a single mapping. Any string
+may reference an environment variable — `${VAR}`, `${VAR:-fallback}`, `$${` for
+a literal — and an unset `${VAR}` fails at boot naming the variable and the
+field. `renkei init --yaml`, `renkei add-channel` and `renkei add-client` write
+the reference to the file and the value to `.env`, so no secret ever lands in it.
+
+Node only: the loader lives in `renkei-server/config-file`, which the Workers and
+Supabase Edge entries never import.
+
+**Why.** The env surface had grown to about twenty variables, and #17 left a
+channel spellable two ways (`LINE_LOGIN_*` or a JSON entry in
+`RENKEI_CHANNELS`), with secrets inline in that JSON. A flat namespace cannot
+say which secret belongs to which channel, and the comma-paired
+`LINE_MINIAPP_CHANNEL_ID` / `_SECRET` lists are where env stopped being a usable
+interface. YAML says it once, per channel, in the order a person reads.
+
+Superseding rather than merging is the point of the file. Merging would have
+made three ways to spell a channel instead of two: a stale
+`LINE_LOGIN_CHANNEL_ID` in a shell would add a channel nobody wrote down. One
+source, and a line at boot listing what is being ignored, is the honest version.
+Env stays the deploy-time path — it is the only one on Workers and Supabase Edge,
+which have no filesystem, and it is still what a plain `renkei init` writes.
+
+Secrets by reference rather than inline is what makes the file worth having in
+git: the interesting part of a multi-channel setup is *which channels, in which
+regions, for which clients*, and that is exactly the part that is not secret.
+`renkei init --yaml` converts an existing `.env` by building the config through
+`configFromEnv` and writing every value back as a reference, minting a variable
+for the secrets that were buried in JSON and had none.
+
+**Cost.** A YAML parser (`yaml`, ~40 KB) on the Node path, and a second
+configuration surface to keep in step with the schema — mitigated by both going
+through `parseConfig`, so a new field is available in both the moment it is in
+the schema. `add-channel` is YAML-only: in `.env` the same operation is
+hand-editing a JSON blob, which is what this replaces. Dropped from the original
+`ARCHITECTURE.md` §5 sketch: `receive_webhooks` (the route is mounted whenever a
+Messaging channel is configured) and the `claims:` block (the `line:*` claims are
+not configurable, so downstream apps can rely on them).
+
+**Found on the way.** `npx renkei` never loaded `.env` — nothing did, outside the
+`--env-file` dev scripts — so the README quickstart (`renkei init` then
+`npx renkei`) only worked if you exported the variables yourself. `bin/renkei.js`
+now calls `process.loadEnvFile()` when a `.env` is there, which the `${VAR}`
+references depend on too.

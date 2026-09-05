@@ -65,6 +65,11 @@ you get the id_token renkei minted (`line:user_id`, `line:friend`, `line:channel
 
 Register `http://localhost:3000/line/callback` as a Callback URL on the channel first.
 
+Once there is more than one channel or client, `npx renkei init --yaml` moves the
+configuration into a **`renkei.yaml`** you can commit — secrets stay in `.env` as
+`${VAR}` references, and `renkei add-channel` / `renkei add-client` append to it.
+→ [`renkei.yaml` reference](docs/reference/config.en.md)
+
 ## Using it
 
 ### 1. From your app (as a standard OIDC client)
