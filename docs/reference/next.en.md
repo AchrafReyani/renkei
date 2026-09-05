@@ -117,6 +117,21 @@ An `<a>` that follows the [LINE Login button design guideline](https://developer
 | `disabled` | `false` | |
 | others | | any `<a>` attribute (`className`, `style`, `id`, `target`, …) passes through |
 
+**Not using React?** `renkei-server` exports the same button with no framework and no build step —
+this is what renkei's own `/dev` page renders:
+
+```ts
+import { lineLoginButton, lineLoginButtonCss } from 'renkei-server';
+
+const page = `<style>${lineLoginButtonCss()}</style>
+${lineLoginButton({ href: '/login', locale: 'en' })}`;
+```
+
+`lineLoginButton({ href, locale?, label?, size?, iconOnly?, disabled?, className? })` returns an
+`<a>` as a string and escapes what it interpolates; `lineLoginButtonCss()` returns the stylesheet,
+to emit once per page. The icon is byte-identical to the React component's — `packages/next/test`
+asserts it, because the guideline requires the icon unmodified.
+
 LINE and the LINE logo are trademarks of LY Corporation. Do not change the button's colours or icon.
 
 ### Re-exports

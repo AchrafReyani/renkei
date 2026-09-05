@@ -4,7 +4,25 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
-**Pick up here (session of 2026-09-05, evening):**
+**Pick up here (session of 2026-09-05, night):**
+**Two clean-ups done.** (1) **§0's last item**: `examples/supabase-edge` now resolves the *published*
+`npm:renkei-server@^0.5.0/supabase` — verified on the local Supabase stack (Docker + `supabase start`
+in `examples/supabase-edge`, `functions serve --env-file` with `ISSUER` pointed at `/functions/v1/renkei`
+instead of the gitignored `renkei-local` bundle). Discovery, the prefixed endpoints, the pinned JWKS and
+`/dev` all answered. §0 has no open items left. (2) **Issue #19, the `/dev` half**: `renkei-server` now
+exports `lineLoginButton()` / `lineLoginButtonCss()` — the guideline button as plain HTML + CSS, no
+framework, no build step — and `/dev` renders the real login entry points with it (one button per Login
+channel when several regions exist; the `bot_prompt` / scope knobs stay plain links, since they are test
+controls). Screenshot-checked in Chrome against the real JP+TW channels. 349 tests.
+**Design note to remember:** the button now exists twice — the React `<LineLoginButton />` in
+`renkei-next` cannot import `renkei-server` (devDependency only; the dependency runs the other way), so
+the icon and CSS are duplicated. Achraf chose *two copies + a parity test* over consolidating into
+`renkei-client`; `packages/next/test` asserts the icons are byte-equal and the guideline CSS rules match,
+because LINE's guideline requires the icon unmodified. **Deliberately not done:** `examples/nextjs`
+(the Auth.js example) keeps its plain submit button — it is a form action, not a link, and pulling in
+`renkei-next` would defeat what that example demonstrates.
+
+**Earlier pick-up note (session of 2026-09-05, evening):**
 **Structured config shipped** (§5, issue #11; DECISIONS.md §18): `renkei.yaml` read from the working
 directory (`RENKEI_CONFIG` overrides the path) through the same `renkeiConfigSchema` — `snake_case` keys
 with camelCase accepted, channel `id` / `secret` and a single `messaging:` mapping as the only extra
@@ -163,7 +181,7 @@ demo. Changesets staged: `renkei-core` minor + `renkei-server` minor → next re
 **0.4.0 is released (2026-09-03, §0)**: `renkei`, `renkei-client`, `renkei-next` on npm,
 tag `v0.4.0`, GHCR `:0.4.0`. **Next: the multi-region tutorial (§5, last v0.3 item; issue #9)** — scope it with Achraf before starting
 (needs a TW channel, or a config-only tutorial); 0.5.0 is released and the MINI App is live-verified; the `/dev` page could also adopt the
-guideline button CSS to close #19 fully. Time-gated / Achraf-only leftovers: Zenn
+guideline button CSS to close #19 fully (done 2026-09-05). Time-gated / Achraf-only leftovers: Zenn
 article after 2026-09-10 (§2), the email-permission re-check (§4, still Applied),
 the LIFF phone shot (§2, optional), Option B forward (§1, optional).
 
@@ -234,8 +252,11 @@ Same flow as 0.4.0. `renkei`, `renkei-server`, `renkei-storage-sqlite`, `renkei-
       `ghcr.io/achrafreyani/renkei:0.5.0` / `:0.5` / `:latest`.
 - [x] Claude: ticked here + ROADMAP.md; `npm view` = 0.5.0 for `renkei`, `renkei-server`,
       `renkei-storage-sqlite`, `renkei-storage-postgres`, `renkei-client`, `renkei-next`; 0.2.3 for `renkei-core`.
-- [ ] Claude (next session): confirm `examples/supabase-edge` resolves `npm:renkei-server@^0.5.0/supabase`
-      on the local stack now that it is published (the `renkei-local` bundle was the pre-publish path).
+- [x] Claude: confirmed 2026-09-05 that `examples/supabase-edge` resolves `npm:renkei-server@^0.5.0/supabase`
+      on the local stack now that it is published — the `renkei` function (not the `renkei-local` bundle)
+      booted in the edge runtime and served discovery with `issuer =
+      http://127.0.0.1:54321/functions/v1/renkei`, the path prefix kept on `authorization_endpoint` /
+      `token_endpoint` / `jwks_uri`, the pinned JWKS (`kid kmtmxofjn`) and `/dev` 200. §0 is now closed.
 
 ## 0a. Cut 0.4.0 — DONE 2026-09-03 (renkei-client + renkei-next + CLI presets)
 

@@ -4,6 +4,7 @@ import { createRemoteJWKSet, decodeJwt, jwtVerify } from 'jose';
 import type Provider from 'oidc-provider';
 import { issuerBasePath } from './base-path.js';
 import type { RenkeiConfig, RenkeiConfigInput } from './config.js';
+import { lineLoginButton, lineLoginButtonCss } from './line-button.js';
 import { OIDC_ROUTES } from './oidc/provider.js';
 
 type ClientInput = RenkeiConfigInput['clients'][number];
@@ -106,17 +107,28 @@ Add the <code>renkei-dev</code> client to <code>RENKEI_CLIENTS</code>, or unset 
   const COOKIE = 'renkei_dev_rp';
 
   dev.get('/', (c) =>
-    c.html(`<!doctype html><meta charset="utf-8"><title>renkei dev RP</title>
+    c.html(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>renkei dev RP</title>
+<style>${lineLoginButtonCss()}
+.rk-variants{list-style:none;padding:0;margin:1.25rem 0 0}
+.rk-variants li{margin:.35rem 0}
+.rk-buttons{display:flex;flex-wrap:wrap;gap:.75rem;margin:1.5rem 0 0}
+.rk-buttons figure{margin:0}
+.rk-buttons figcaption{font-size:.8rem;color:#555;margin-top:.35rem;text-align:center}</style>
 <body style="font-family:system-ui;max-width:40rem;margin:3rem auto;line-height:1.7">
 <h1>renkei — dev relying party</h1>
-<p>This page is an OIDC client of renkei (<code>${client.clientId}</code>). Clicking below goes through
+<p>This page is an OIDC client of renkei (<code>${client.clientId}</code>). The button goes through
 <code>${OIDC_ROUTES.authorization}</code> → LINE → back here with an id_token minted by renkei.</p>
-<ul>
-<li><a href="${base}/dev/login">ログイン（channel default bot_prompt）</a></li>
+${loginButtons(config, base)}
+<p style="font-size:.85rem;color:#555;margin-top:.75rem">The button follows
+<a href="https://developers.line.biz/en/docs/line-login/login-button/">LINE's design guideline</a>;
+<code>lineLoginButton()</code> from <code>renkei-server</code> renders it, and
+<code>&lt;LineLoginButton /&gt;</code> from <code>renkei-next</code> is the React version.</p>
+<h2 style="font-size:1rem;margin:2rem 0 0">Variants (for testing, not guideline buttons)</h2>
+<ul class="rk-variants">
 <li><a href="${base}/dev/login?bot_prompt=normal">ログイン（bot_prompt=normal）</a></li>
 <li><a href="${base}/dev/login?bot_prompt=none">ログイン（bot_prompt なし）</a></li>
 <li><a href="${base}/dev/login?scope=openid+profile+email+line">ログイン（email scope も要求）</a></li>
-${regionLinks(config, base)}</ul>
+</ul>
 <section style="border:1px solid #ddd;border-radius:8px;padding:1rem;margin:1.5rem 0;background:#fafafa">
 <h2 style="margin-top:0;font-size:1.1rem">メールアドレスの取得について / About your email address</h2>
 <p>LINEログイン時にメールアドレスの提供に同意いただいた場合、renkei はメールアドレスを<strong>アカウントの識別と本人確認、および重要なお知らせの送信</strong>のみに利用します。広告目的での利用や第三者への提供は行いません。同意しなくてもログインできます。</p>
@@ -269,18 +281,28 @@ const show = (o) => { $('out').textContent = JSON.stringify(o, null, 2); };
 }
 
 /**
- * With more than one Login channel, one link per region so `line_region`
- * routing can be exercised from the test page.
+ * The page's real login entry points, as guideline buttons: one per Login
+ * channel when there are several, so `line_region` routing can be exercised,
+ * otherwise the single default login. The `bot_prompt` / scope variants stay
+ * plain links — they are test knobs, and a wall of identical green buttons
+ * would be neither useful nor what the guideline is for.
  */
-function regionLinks(config: RenkeiConfig, base: string): string {
+function loginButtons(config: RenkeiConfig, base: string): string {
   const logins = config.channels.filter((c) => c.kind === 'login');
-  if (logins.length < 2) return '';
-  return logins
-    .map(
-      (ch) =>
-        `<li><a href="${base}/dev/login?line_region=${encodeURIComponent(ch.region)}">ログイン（line_region=${ch.region} — channel ${ch.channelId}）</a></li>`,
-    )
+  if (logins.length < 2) {
+    return `<div class="rk-buttons">${lineLoginButton({ href: `${base}/dev/login` })}</div>`;
+  }
+  const buttons = logins
+    .map((ch) => {
+      const href = `${base}/dev/login?line_region=${encodeURIComponent(ch.region)}`;
+      return `<figure>${lineLoginButton({ href })}<figcaption>line_region=${escapeText(ch.region)} — channel ${escapeText(ch.channelId)}</figcaption></figure>`;
+    })
     .join('\n');
+  return `<div class="rk-buttons">${buttons}</div>`;
+}
+
+function escapeText(value: string): string {
+  return value.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] ?? c);
 }
 
 function page(base: string, title: string, data: unknown) {

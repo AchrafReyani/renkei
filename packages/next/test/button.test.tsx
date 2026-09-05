@@ -62,3 +62,32 @@ describe('<LineLoginButton />', () => {
     expect(html).toContain('data-testid="line"');
   });
 });
+
+/**
+ * The button exists twice: this React component, and the framework-free
+ * `lineLoginButton()` in renkei-server that `/dev` uses. renkei-next cannot
+ * import from renkei-server at runtime (it is a devDependency only, and the
+ * dependency runs the other way), so the icon and the CSS are duplicated.
+ * These tests are the guard: LINE's guideline requires the icon *unmodified*,
+ * so the two copies drifting apart would make one of them non-compliant.
+ */
+describe('parity with renkei-server’s plain-HTML button', () => {
+  it('embeds byte-identical icons', async () => {
+    const server = await import('renkei-server');
+    expect(LINE_ICON_DATA_URI).toBe(server.LINE_ICON_DATA_URI);
+  });
+
+  it('agrees on the brand green and the guideline overlays', async () => {
+    const server = await import('renkei-server');
+    expect(LINE_GREEN).toBe(server.LINE_GREEN);
+    const serverCss = server.lineLoginButtonCss();
+    for (const rule of [
+      '.rk-line-login:hover::after{opacity:.1}',
+      '.rk-line-login:active::after{opacity:.3}',
+      '.rk-line-login__label{display:flex;align-items:center;padding:0 24px;border-left:1px solid rgba(0,0,0,.08);white-space:nowrap}',
+    ]) {
+      expect(serverCss).toContain(rule);
+      expect(renderToStaticMarkup(<LineLoginButton />)).toContain(rule);
+    }
+  });
+});

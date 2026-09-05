@@ -117,6 +117,21 @@ export default async function Page() {
 | `disabled` | `false` | |
 | その他 | | `<a>` の属性（`className`, `style`, `id`, `target` …）をそのまま透過 |
 
+**React を使わない場合**は、`renkei-server` が同じボタンをフレームワーク不要・ビルド不要で提供します。
+renkei 自身の `/dev` ページもこれを描画しています:
+
+```ts
+import { lineLoginButton, lineLoginButtonCss } from 'renkei-server';
+
+const page = `<style>${lineLoginButtonCss()}</style>
+${lineLoginButton({ href: '/login' })}`;
+```
+
+`lineLoginButton({ href, locale?, label?, size?, iconOnly?, disabled?, className? })` は `<a>` を
+文字列で返し、埋め込む値はエスケープします。`lineLoginButtonCss()` はスタイルシートを返すので、
+ページに 1 回だけ出力してください。アイコンは React 版とバイト単位で同一です（ガイドラインが
+アイコンの改変を禁じているため、`packages/next/test` で検証しています）。
+
 LINE および LINE ロゴは LY 株式会社の商標です。ボタンの配色・アイコンを変更しないでください。
 
 ### 再エクスポート
