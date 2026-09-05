@@ -6,5 +6,22 @@
   "linter": { "enabled": true, "rules": { "preset": "recommended" } },
   "javascript": {
     "formatter": { "quoteStyle": "single", "semicolons": "always", "trailingCommas": "all" }
-  }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "packages/server/src/config-file.ts",
+        "packages/server/test/config-file.test.ts",
+        "packages/renkei/lib/yaml-*.js",
+        "packages/renkei/test/yaml.test.js"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noTemplateCurlyInString": "off"
+          }
+        }
+      }
+    }
+  ]
 }

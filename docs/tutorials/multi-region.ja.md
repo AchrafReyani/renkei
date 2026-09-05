@@ -25,6 +25,29 @@ LINE Developers Console → プロバイダー → **新規チャネル作成 �
 
 ## 2. 両方のチャネルを設定する
 
+チャネルが 2 つになると `renkei.yaml` が効いてきます。1 チャネル 1 エントリ、シークレットは参照、
+しかも `renkei add-channel` が書いてくれます:
+
+```sh
+npx renkei init --yaml                    # 既存の .env を変換します
+npx renkei add-channel 2011447387 --region tw --secret <Channel secret>
+```
+
+```yaml
+# renkei.yaml — TW チャネルのシークレットは .env の LINE_TW_CHANNEL_SECRET にあります
+channels:
+  - id: "2011257262"                      # 先頭のログインチャネルが既定
+    region: jp
+    secret: "${LINE_LOGIN_CHANNEL_SECRET}"
+  - id: "2011447387"
+    region: tw
+    secret: "${LINE_TW_CHANNEL_SECRET}"
+```
+
+→ [`renkei.yaml` リファレンス](../reference/config.ja.md#renkei-yaml)。以降このチュートリアルは
+環境変数での書き方で説明します（内容は同じで、Cloudflare Workers・Supabase Edge Functions では
+こちらのみ使えます）。
+
 `RENKEI_CHANNELS` に、主となる `LINE_LOGIN_*` 以外のチャネルを JSON で並べます:
 
 ```sh

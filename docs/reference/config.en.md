@@ -2,8 +2,21 @@
 
 > 日本語: [config.ja.md](config.ja.md)
 
-renkei is configured through environment variables (a `.env` file works). For
-programmatic use, pass the same settings as an object to
+There are two ways to configure renkei, and it uses exactly one of them:
+
+- **`renkei.yaml`** in the working directory ([below](#renkei-yaml)) — one file for
+  everything, secrets by `${VAR}` reference so it can be committed. Recommended
+  once you have more than one channel or more than one client.
+- **environment variables** (a `.env` file works) — the tables below. This is
+  what a fresh `renkei init` writes, and the only option on Cloudflare Workers
+  and Supabase Edge Functions, which have no filesystem.
+
+When a `renkei.yaml` is present it is the whole configuration: renkei does not
+read the `LINE_*` / `RENKEI_*` variables at all, and names the ones you had set
+at boot so nothing is silently in effect. `PORT` and `DATABASE_URL` still work
+next to it, as does anything the file references as `${VAR}`.
+
+For programmatic use, pass the same settings as an object to
 `createRenkei({ config, storage })` ([`RenkeiConfig`](#programmatic-configuration)).
 
 ## Required
@@ -91,6 +104,99 @@ provider block / Supabase's Keycloak fields). `--replace` overwrites, `--print` 
 
 When unset, development clients `renkei-dev` (secret `renkei-dev-secret`, redirect `${ISSUER}/dev/callback`) and
 `renkei-dev-liff` (public) are created.
+
+## `renkei.yaml`
+
+`renkei init --yaml` writes one, converting an existing `.env` if there is one.
+renkei picks it up from the working directory; `RENKEI_CONFIG=<path>` points at
+another file (`renkei.yml` is also recognised).
+
+```yaml
+issuer: https://auth.example.com
+storage: postgres://…            # or sqlite:./data/renkei.db; DATABASE_URL if absent
+port: 3000                       # PORT wins over it
+liff_id: 1234567890-abcdefgh     # /dev/liff page only
+log_format: json                 # one JSON object per log line
+dev: false                       # mount the /dev test page (adds its clients automatically)
+
+cookie_keys: "${RENKEI_COOKIE_KEYS}"
+jwks: "${RENKEI_JWKS}"
+
+channels:
+  - id: "1234567890"             # LINE Login, Japan
+    region: jp
+    secret: "${LINE_JP_CHANNEL_SECRET}"
+    bot_prompt: aggressive
+    request_email: false
+    liff_ids: ["1234567890-abcdefgh"]
+  - id: "2345678901"             # a second region
+    region: tw
+    secret: "${LINE_TW_CHANNEL_SECRET}"
+  - id: "3456789012"             # a LINE MINI App stage
+    kind: miniapp
+    region: jp
+    secret: "${LINE_MINIAPP_CHANNEL_SECRET}"
+
+messaging:                       # or messaging_channels: [ … ] for several
+  channel_id: "4567890123"
+  channel_secret: "${LINE_MESSAGING_CHANNEL_SECRET}"
+  channel_access_token: "${LINE_MESSAGING_CHANNEL_ACCESS_TOKEN}"
+
+clients:
+  - client_id: my-app
+    client_secret: "${RENKEI_MY_APP_CLIENT_SECRET}"
+    redirect_uris: ["https://app.example.com/callback"]
+    line_region: tw              # pin this client to one channel
+  - client_id: spa
+    token_endpoint_auth_method: none
+    redirect_uris: ["https://spa.example.com/callback"]
+
+cors_origins: ["https://liff.example.com"]
+session_cookie:
+  enabled: true
+  return_urls: ["https://app.example.com"]
+admin_token: "${RENKEI_ADMIN_TOKEN}"
+```
+
+Every field of [`RenkeiConfig`](#programmatic-configuration) is available, in
+`snake_case`. The camelCase spelling works too, so an entry can be pasted
+straight out of `RENKEI_CHANNELS` or `RENKEI_CLIENTS`. Two shorthands the schema
+does not have: a channel's `id` / `secret` (`channel_id` / `channel_secret` also
+work), and `messaging:` as a single mapping instead of a one-entry
+`messaging_channels:` list.
+
+### `${VAR}` — keeping secrets out of the file
+
+Any string may reference an environment variable. `${VAR}` fails at boot, naming
+the variable and the field, if it is not set; `${VAR:-fallback}` uses the
+fallback instead; `$${` is a literal `${`.
+
+This is what makes the file committable: **put no secret in `renkei.yaml`** —
+reference one, and keep the value in `.env` (development) or in your platform's
+secret store (production). `renkei add-channel` and `renkei add-client` follow
+the same rule: the file gets the reference, `.env` gets the value.
+
+`cookie_keys` and `jwks` also accept a single string, so each can be one
+reference holding exactly what `RENKEI_COOKIE_KEYS` (comma-separated) and
+`RENKEI_JWKS` (JSON) hold.
+
+### CLI
+
+| | |
+|---|---|
+| `renkei init --yaml` | write `renkei.yaml` + a `.env` of secrets; converts an existing `.env` if there is one |
+| `renkei add-channel <id> [--region tw] [--miniapp] [--secret <value>]` | append a channel; `--secret-env VAR` references a variable without writing it |
+| `renkei add-client <id> --redirect <url>` | append a client (writes to `renkei.yaml` when there is one, else to `RENKEI_CLIENTS`) |
+
+### Migrating from environment variables
+
+Run `renkei init --yaml` in the directory with your `.env`. It builds the config
+the way the server does, so the file says exactly what those variables were
+already booting, and writes every secret back as a reference — including the
+ones that were buried inside `RENKEI_CHANNELS` / `RENKEI_CLIENTS` JSON, which
+get a variable of their own in `.env`. Your `.env` is not otherwise touched.
+Start renkei, check the line naming the superseded variables, and once it boots
+clean those lines can come out of `.env`.
 
 ## Token lifetimes (programmatic only)
 

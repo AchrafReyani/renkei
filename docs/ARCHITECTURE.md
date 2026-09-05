@@ -180,37 +180,53 @@ webhook_event       id · channel_id · type · payload · received_at · proces
 - Secrets are referenced, not stored, when a secret manager is configured;
   plain env vars for the simple case.
 
-## 5. Configuration (sketch)
+## 5. Configuration
+
+Shipped 2026-09-05 (issue #11). Two sources, and renkei uses exactly one:
+`renkei.yaml` in the working directory when there is one, otherwise environment
+variables. Full reference: [config.en.md](reference/config.en.md).
 
 ```yaml
-# renkei.yaml
+# renkei.yaml — `renkei init --yaml` writes it (converting an existing .env)
 issuer: https://auth.example.com
 storage: postgres://…
+cookie_keys: "${RENKEI_COOKIE_KEYS}"
+jwks: "${RENKEI_JWKS}"
 channels:
   - id: "1234567890"          # LINE Login, Japan
     region: jp
-    secret: ${LINE_JP_SECRET}
+    secret: "${LINE_JP_CHANNEL_SECRET}"
     liff_ids: ["1234567890-abcdefgh"]
     bot_prompt: aggressive
   - id: "2345678901"          # LINE Login, Taiwan
     region: tw
-    secret: ${LINE_TW_SECRET}
+    secret: "${LINE_TW_CHANNEL_SECRET}"
+  - id: "3456789012"          # a LINE MINI App stage
+    kind: miniapp
+    region: jp
+    secret: "${LINE_MINIAPP_CHANNEL_SECRET}"
 messaging:
-  channel_id: "3456789012"
-  channel_secret: ${LINE_MSG_SECRET}
-  receive_webhooks: true       # or false if your bot forwards
+  channel_id: "4567890123"
+  channel_secret: "${LINE_MESSAGING_CHANNEL_SECRET}"
 clients:                        # downstream OIDC clients
   - client_id: supabase
-    client_secret: ${SUPABASE_CLIENT_SECRET}
+    client_secret: "${SUPABASE_CLIENT_SECRET}"
     redirect_uris: ["https://xyz.supabase.co/auth/v1/callback"]
-claims:
-  email: from_id_token         # only option that works
-  extra: [line:user_id, line:friend, line:channel_id, line:region]
 ```
 
+Every value may reference an environment variable as `${VAR}`, so no secret is
+ever in the file and it can be committed. `renkei add-channel` and
+`renkei add-client` append to it, writing the reference to the file and the
+value to `.env`.
+
 Region routing: `/oidc/authorize?…&line_region=tw` or per-client default.
-Strict validation with `zod`; misconfiguration fails at boot with a Japanese
-and English message.
+Strict validation with `zod` — the same schema for both sources; misconfiguration
+fails at boot with a Japanese and English message naming the file and the field.
+
+Two things the original sketch had that renkei does not: `receive_webhooks`
+(the Messaging channel's webhook route is mounted whenever one is configured)
+and a `claims:` block. The `line:*` claims are not configurable — they are
+emitted for the `line` scope, always, so a downstream app can rely on them.
 
 ## 6. Security notes / threat model (to expand before v1.0)
 

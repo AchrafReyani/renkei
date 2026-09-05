@@ -34,3 +34,11 @@ CLAUDE.local.md
 # Cloudflare Workers (examples/cloudflare-workers)
 .dev.vars
 .wrangler/
+
+# A renkei.yaml is meant to be committed — but one written here while trying the
+# CLI out is somebody's local setup, not this repo's. `pnpm dev:server` runs in
+# packages/server, so that is where it would land.
+/renkei.yaml
+/renkei.yml
+/packages/server/renkei.yaml
+/packages/server/renkei.yml

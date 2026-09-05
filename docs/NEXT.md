@@ -4,7 +4,42 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
-**Pick up here (session of 2026-09-05, later half):**
+**Pick up here (session of 2026-09-05, evening):**
+**Structured config shipped** (§5, issue #11; DECISIONS.md §18): `renkei.yaml` read from the working
+directory (`RENKEI_CONFIG` overrides the path) through the same `renkeiConfigSchema` — `snake_case` keys
+with camelCase accepted, channel `id` / `secret` and a single `messaging:` mapping as the only extra
+spellings, and `${VAR}` / `${VAR:-fallback}` / `$${` expansion so **no secret is ever in the file**.
+When a file is present it is the *whole* configuration: `configFromEnv` is not consulted, and the
+superseded `LINE_*` / `RENKEI_*` variables that are set get named on the boot banner (only `PORT`,
+`DATABASE_URL` and the file's own `${VAR}`s still reach it). Loader is `renkei-server/config-file`,
+Node-only — verified the `yaml` dependency stays out of the Workers and Supabase Edge bundles.
+CLI: `renkei init --yaml` (templates, or **converts an existing `.env`** by building the config through
+`configFromEnv` and writing every value back as a reference — secrets buried in `RENKEI_CHANNELS` /
+`RENKEI_CLIENTS` JSON get a variable of their own in `.env`), `renkei add-channel <id> [--region tw]
+[--miniapp] [--secret … | --secret-env VAR]`, and `add-client` appending to the file's `clients:` when
+there is one. Edits go through the `yaml` Document API, so comments survive. 339 tests (was 306).
+**Also fixed:** `npx renkei` never loaded `.env` — nothing did outside the `--env-file` dev scripts — so
+the README quickstart (`renkei init` → `npx renkei`) only worked if you exported the variables yourself.
+`bin/renkei.js` now calls `process.loadEnvFile()`.
+**Verified locally:** a realistic `.env` (2 Login regions + 2 MINI App stages + messaging + 2 clients +
+session mode + admin token) converted to `renkei.yaml` and booted — discovery 200, all four channels,
+both clients, `/session` 401, and the ignored-variable line naming exactly the superseded ones.
+**Live-verified 2026-09-05 against the real channel**, Achraf driving the browser: the repo's own `.env`
+converted to a `renkei.yaml` in a scratch dir, `src/node.ts` booted from it on :8787 (`RENKEI_CONFIG`,
+in-memory storage), banner reporting `config: <path>` and `ignored: RENKEI_CHANNELS, RENKEI_DEV`. `/dev`
+showed one login link per region; the JP login completed through LINE and `/dev/callback` returned
+`line:channel_id 2011257262`, `line:region jp`, `line:friend true`,
+`line:user_id U54de992ad068a07f1d4ef661a0a946bd`, `aud renkei-dev` (the `/dev` clients that `dev: true`
+in the file registered at boot), `iss http://localhost:8787` from `issuer: "${ISSUER}"`. The token
+exchange succeeding is the proof that `${LINE_LOGIN_CHANNEL_SECRET}` expanded correctly — a wrong value
+is a 401, not a login. (`sub b2r0o…` rather than the usual `Y7D-n…` only because the store was empty;
+`line:linked false` for the same reason.) Separately checked without a second login: the
+`LINE_TW_CHANNEL_SECRET` the conversion **minted** out of the `RENKEI_CHANNELS` JSON is byte-equal to the
+`channelSecret` that was inside it, and every line of the original `.env` survives the conversion.
+**Not done:** a real TW-region login from a `renkei.yaml` (would need another LINE authentication, since
+the `/dev` region links send `prompt=login`).
+
+**Earlier pick-up note (session of 2026-09-05, later half):**
 **Multi-region shipped** (§5, issue #9): `RENKEI_CHANNELS` (further channels as JSON — a second region, a
 MINI App, or the whole list on its own; `LINE_LOGIN_*` then optional), `LINE_MESSAGING_CHANNEL_REGION`,
 a boot check naming the default channel when several regions exist, `/dev` with one login link per region
@@ -456,9 +491,9 @@ six env vars"), breadth (TW/TH, MINI App) after.
 - [x] **Multi-region tutorial** — shipped 2026-09-05 (issue #9; DECISIONS.md §17). A TW Login channel
       *is* creatable under the same provider (the console asks for the service region and the company's
       country separately), so `renkei-dev-tw` (2011447387) exists; the live login is the open item above.
-- [ ] **Structured config** (`renkei.yaml` + `renkei add-channel`, issue #11) — next feature. The
-      tutorial now shows the pain first-hand: a channel can be spelled two ways (`LINE_LOGIN_*` or an
-      entry in `RENKEI_CHANNELS`), and secrets sit inline in JSON. YAML should express channels once,
-      with secrets by env reference, and supersede both spellings. Candidate from the #51
-      findings: model account linkage as a flag on the LINE account row instead
-      of overloading `kind` (needs a migration).
+- [x] **Structured config** (`renkei.yaml` + `renkei add-channel`, issue #11) — shipped 2026-09-05
+      (see the top of this file; DECISIONS.md §18). The file supersedes the environment rather than
+      merging with it, so a channel is spelled once. **Live-verified against the real JP channel**
+      (CLI → converted file → boot → LINE login → id_token with all `line:*` claims).
+- [ ] Candidate from the #51 findings: model account linkage as a flag on the LINE
+      account row instead of overloading `kind` (needs a migration).

@@ -1,27 +1,49 @@
-// `renkei init` and `renkei add-client`. Pure functions over a working
-// directory and an output sink so the tests can drive them without a shell.
+// `renkei init`, `renkei add-channel` and `renkei add-client`. Pure functions
+// over a working directory and an output sink so the tests can drive them
+// without a shell.
+//
+// Two config shapes are supported and every command writes to exactly one of
+// them: a renkei.yaml in the working directory if there is one, otherwise .env.
+// `configTarget()` decides, once, per command.
 import { randomBytes } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { generateDevJwks, oidcClientSchema } from 'renkei-server';
-import { readEnvFile, setEnvLine } from './env-file.js';
+import { configFromEnv, generateDevJwks, oidcClientSchema } from 'renkei-server';
+import { parseEnv, readEnvFile, setEnvLine } from './env-file.js';
+import {
+  clientSecretVarName,
+  configTarget,
+  readDocument,
+  secretVarName,
+  upsertInSequence,
+  writeDocument,
+} from './yaml-file.js';
+import { convertedYaml, templateEnv, templateYaml } from './yaml-init.js';
 
 export const HELP = `renkei — self-hosted identity broker for LINE
 
-usage: renkei                          start the server (reads .env / environment)
-       renkei init [--issuer URL] [--db URL] [--print]
-                                       write a ready-to-run .env (keys, SQLite storage);
-                                       you only paste the LINE channel ID and secret
+usage: renkei                          start the server (renkei.yaml if there is one, else .env)
+       renkei init [--yaml] [--issuer URL] [--db URL] [--print]
+                                       write a ready-to-run config; you only paste the
+                                       LINE channel ID and secret. --yaml writes a
+                                       committable renkei.yaml + a .env of secrets
+                                       (converting an existing .env if there is one)
+       renkei add-channel <channel-id> [--region jp] [--miniapp] [--provider <name>]
+                           [--secret <value>] [--secret-env <VAR>] [--liff-id <id>]
+                           [--bot-prompt aggressive|normal|none] [--replace] [--print]
+                                       add a LINE channel to renkei.yaml (secret by
+                                       \${VAR} reference; the value goes to .env)
        renkei add-client <id> --redirect <url> [--preset authjs|supabase|public|next]
                            [--placeholder-email-domain <domain>] [--region jp]
                            [--replace] [--print]
-                                       register an OIDC client in RENKEI_CLIENTS and
-                                       print the config to paste into that app
+                                       register an OIDC client (in renkei.yaml if there
+                                       is one, else RENKEI_CLIENTS in .env) and print
+                                       the config to paste into that app
        renkei --version
 
-Required env: LINE_LOGIN_CHANNEL_ID, LINE_LOGIN_CHANNEL_SECRET
-Recommended:  ISSUER, DATABASE_URL, RENKEI_COOKIE_KEYS, RENKEI_JWKS, RENKEI_CLIENTS
+Config:       renkei.yaml when present (RENKEI_CONFIG overrides the path), else
+              LINE_LOGIN_CHANNEL_ID / LINE_LOGIN_CHANNEL_SECRET and friends in .env
 Docs:         https://github.com/AchrafReyani/renkei`;
 
 const DEFAULT_ISSUER = 'http://localhost:3000';
@@ -41,6 +63,7 @@ export async function run(argv, io = {}) {
   const [command, ...rest] = argv;
   try {
     if (command === 'init') return await init(rest, { ...io, stdout: out });
+    if (command === 'add-channel') return await addChannel(rest, { ...io, stdout: out });
     if (command === 'add-client') return await addClient(rest, { ...io, stdout: out });
     out(HELP);
     return command === undefined ? 0 : 1;
@@ -59,11 +82,13 @@ export async function init(argv, io) {
     options: {
       issuer: { type: 'string', default: DEFAULT_ISSUER },
       db: { type: 'string', default: DEFAULT_DB },
+      yaml: { type: 'boolean', default: false },
       print: { type: 'boolean', default: false },
     },
   });
   const issuer = normalizeIssuer(values.issuer);
   const envPath = resolve(io.cwd ?? process.cwd(), '.env');
+  if (values.yaml) return await initYaml(values, { ...io, envPath, issuer });
   if (!values.print && existsSync(envPath)) {
     throw new Error(
       `${envPath} already exists — not overwriting a file that may hold secrets. ` +
@@ -122,6 +147,195 @@ async function generateJwks() {
   return [{ ...jwk, kid: `k${Date.now().toString(36)}` }];
 }
 
+/**
+ * `renkei init --yaml`: a committable renkei.yaml plus the .env of secrets it
+ * refers to. With a .env already there, the file is *converted* from it rather
+ * than templated — the server's own `configFromEnv` builds the config, so the
+ * YAML says exactly what those variables were already booting.
+ *
+ * @param {{ issuer: string, db: string, print: boolean }} values
+ * @param {Io & { stdout: (line: string) => void, envPath: string, issuer: string }} io
+ */
+async function initYaml(values, io) {
+  const cwd = io.cwd ?? process.cwd();
+  const target = configTarget(cwd);
+  if (!values.print && target.kind === 'yaml') {
+    throw new Error(
+      `${target.path} already exists — not overwriting it. ` +
+        'Use `renkei add-channel` / `renkei add-client` to add to it.',
+    );
+  }
+  const yamlPath = resolve(cwd, 'renkei.yaml');
+  const date = (io.now ?? (() => new Date()))().toISOString().slice(0, 10);
+  const existing = existsSync(io.envPath) ? parseEnv(readFileSync(io.envPath, 'utf8')) : undefined;
+
+  if (existing?.LINE_LOGIN_CHANNEL_ID || existing?.RENKEI_CHANNELS) {
+    const { config } = configFromEnv(existing, { hasDatabase: Boolean(existing.DATABASE_URL) });
+    const { text, secrets } = convertedYaml(config, existing, date);
+    if (values.print) {
+      io.stdout(text);
+      for (const [name, value] of Object.entries(secrets)) io.stdout(`${name}=${value}`);
+      return 0;
+    }
+    writeFileSync(yamlPath, text);
+    // Secrets that were buried inside RENKEI_CLIENTS / RENKEI_CHANNELS JSON have
+    // no variable of their own yet; the file references one, so .env must define it.
+    let envText = readFileSync(io.envPath, 'utf8');
+    for (const [name, value] of Object.entries(secrets)) envText = setEnvLine(envText, name, value);
+    if (Object.keys(secrets).length) writeFileSync(io.envPath, envText);
+
+    io.stdout(`Wrote ${yamlPath}, converted from ${io.envPath}.`);
+    io.stdout('');
+    if (Object.keys(secrets).length) {
+      io.stdout('Secrets that had no variable of their own (they were inside JSON) got one:');
+      for (const name of Object.keys(secrets)) io.stdout(`  ${name}`);
+      io.stdout('They are in .env now; renkei.yaml only references them.');
+      io.stdout('');
+    }
+    io.stdout('renkei.yaml is now the whole configuration: the LINE_* / RENKEI_* variables it');
+    io.stdout('supersedes are ignored from the next boot, and renkei names them when it starts.');
+    io.stdout('Once it boots clean, the superseded lines can come out of .env.');
+    return 0;
+  }
+
+  const jwks = await (io.jwks ?? generateJwks)();
+  const cookieKeys = randomBytes(32).toString('base64url');
+  const text = templateYaml({ issuer: io.issuer, db: values.db, date });
+  if (values.print) {
+    io.stdout(text);
+    return 0;
+  }
+  if (existsSync(io.envPath)) {
+    throw new Error(
+      `${io.envPath} exists but configures no LINE channel — fill in LINE_LOGIN_CHANNEL_ID first ` +
+        '(then `renkei init --yaml` converts it), or move it aside.',
+    );
+  }
+  writeFileSync(yamlPath, text);
+  writeFileSync(io.envPath, templateEnv({ date, cookieKeys, jwks: JSON.stringify(jwks) }));
+  io.stdout(`Wrote ${yamlPath} (commit this) and ${io.envPath} (do not).`);
+  io.stdout('');
+  io.stdout('Next:');
+  io.stdout('  1. Paste LINE_LOGIN_CHANNEL_ID and LINE_LOGIN_CHANNEL_SECRET into .env');
+  io.stdout(`  2. Register ${io.issuer}/line/callback as a Callback URL on that channel`);
+  io.stdout(`  3. npx renkei   →   ${io.issuer}/dev`);
+  return 0;
+}
+
+// ── add-channel ─────────────────────────────────────────────────────────────
+
+const BOT_PROMPTS = /** @type {const} */ (['aggressive', 'normal', 'none']);
+
+/**
+ * `renkei add-channel <channel-id>` — a second region, a MINI App stage, a
+ * channel from another provider. YAML only: in .env the same thing is a JSON
+ * blob in RENKEI_CHANNELS, which is what renkei.yaml exists to replace.
+ *
+ * The secret never lands in the YAML. `--secret <value>` writes the value to
+ * .env under a derived name and the reference into the file; `--secret-env VAR`
+ * only writes the reference, for a secret that reaches the process another way.
+ *
+ * @param {string[]} argv @param {Io & { stdout: (line: string) => void }} io
+ */
+export async function addChannel(argv, io) {
+  const { values, positionals } = parseArgs({
+    args: argv,
+    allowPositionals: true,
+    options: {
+      region: { type: 'string' },
+      miniapp: { type: 'boolean', default: false },
+      provider: { type: 'string' },
+      secret: { type: 'string' },
+      'secret-env': { type: 'string' },
+      'liff-id': { type: 'string', multiple: true, default: [] },
+      'bot-prompt': { type: 'string' },
+      replace: { type: 'boolean', default: false },
+      print: { type: 'boolean', default: false },
+    },
+  });
+  const channelId = positionals[0];
+  if (!channelId) {
+    throw new Error(
+      'usage: renkei add-channel <channel-id> [--region tw] [--miniapp] [--secret …]',
+    );
+  }
+  if (values.secret && values['secret-env']) {
+    throw new Error('give --secret (the value) or --secret-env (the variable name), not both');
+  }
+  if (values['bot-prompt'] && !BOT_PROMPTS.includes(/** @type {any} */ (values['bot-prompt']))) {
+    throw new Error(`--bot-prompt must be one of ${BOT_PROMPTS.join(', ')}`);
+  }
+
+  const cwd = io.cwd ?? process.cwd();
+  const target = configTarget(cwd);
+  if (target.kind !== 'yaml') {
+    throw new Error(
+      'no renkei.yaml here — `renkei add-channel` writes to it. Run `renkei init --yaml` first ' +
+        '(it converts an existing .env), or add the channel to RENKEI_CHANNELS by hand.',
+    );
+  }
+
+  // A MINI App has one channel per stage, so its variable is named after the
+  // channel; a Login channel gets one per region, which is how it is addressed.
+  const region = values.region ?? 'jp';
+  const secretVar = values['secret-env'] ?? secretVarName(region, values.miniapp, channelId);
+
+  /** @type {Record<string, unknown>} */
+  const entry = { id: channelId };
+  if (values.miniapp) entry.kind = 'miniapp';
+  entry.region = region;
+  if (values.provider) entry.provider = values.provider;
+  entry.secret = '${' + secretVar + '}';
+  if (values['bot-prompt']) entry.bot_prompt = values['bot-prompt'];
+  if (values['liff-id'].length) entry.liff_ids = values['liff-id'];
+
+  const doc = readDocument(target.path);
+  const result = upsertInSequence(
+    doc,
+    'channels',
+    entry,
+    (c) => String(c?.id ?? c?.channel_id ?? c?.channelId) === channelId,
+    values.replace,
+  );
+  if (result === 'exists') {
+    throw new Error(
+      `channel "${channelId}" is already in ${target.path} — pass --replace to overwrite it.`,
+    );
+  }
+
+  const envPath = resolve(cwd, '.env');
+  if (values.print) {
+    io.stdout(doc.toString({ lineWidth: 0 }));
+  } else {
+    writeDocument(target.path, doc);
+    if (values.secret) {
+      const text = existsSync(envPath) ? readFileSync(envPath, 'utf8') : '';
+      writeFileSync(envPath, setEnvLine(text, secretVar, values.secret));
+    }
+    io.stdout(
+      `${result === 'replaced' ? 'Replaced' : 'Added'} channel ${channelId} (${
+        values.miniapp ? 'MINI App' : 'LINE Login'
+      }, region ${region}) in ${target.path}.`,
+    );
+  }
+  io.stdout('');
+  if (values.secret) {
+    io.stdout(`Its secret is in .env as ${secretVar}; the file only references it.`);
+  } else if (values['secret-env']) {
+    io.stdout(`Set ${secretVar} in the environment renkei runs in — the file only references it.`);
+  } else {
+    io.stdout(`Add the channel secret to .env:   ${secretVar}=<Channel secret>`);
+  }
+  if (!values.miniapp) {
+    io.stdout('');
+    io.stdout('On that channel in the LINE Developers Console:');
+    io.stdout('  LINE Login tab → Callback URL: <your issuer>/line/callback');
+    io.stdout(`  A login reaches it with ?line_region=${region} (or a client pinned to it).`);
+  }
+  io.stdout('Restart renkei to pick it up.');
+  return 0;
+}
+
 // ── add-client ──────────────────────────────────────────────────────────────
 
 const PRESETS = /** @type {const} */ (['authjs', 'supabase', 'public', 'next']);
@@ -162,12 +376,18 @@ export async function addClient(argv, io) {
   }
 
   const cwd = io.cwd ?? process.cwd();
+  const target = configTarget(cwd);
   const envPath = resolve(cwd, '.env');
   const env = readEnvFile(envPath);
-  if (!values.print && !existsSync(envPath)) {
-    throw new Error(`${envPath} not found — run \`renkei init\` first, or use --print.`);
+  if (!values.print && !existsSync(target.path)) {
+    throw new Error(`${target.path} not found — run \`renkei init\` first, or use --print.`);
   }
-  const issuer = normalizeIssuer(values.issuer ?? env.ISSUER ?? DEFAULT_ISSUER);
+  const issuer = normalizeIssuer(
+    values.issuer ??
+      (target.kind === 'yaml' ? issuerFromYaml(target.path, env) : undefined) ??
+      env.ISSUER ??
+      DEFAULT_ISSUER,
+  );
 
   /** @type {Record<string, unknown>} */
   const client = { clientId, redirectUris: values.redirect };
@@ -183,25 +403,88 @@ export async function addClient(argv, io) {
   if (values.region) client.lineRegion = values.region;
   const parsed = oidcClientSchema.parse(client);
 
-  const existing = parseClients(env.RENKEI_CLIENTS);
-  const at = existing.findIndex((c) => c && c.clientId === clientId);
-  if (at >= 0 && !values.replace) {
-    throw new Error(
-      `client "${clientId}" is already in RENKEI_CLIENTS — pass --replace to overwrite it.`,
-    );
-  }
-  const clients = at >= 0 ? existing.with(at, parsed) : [...existing, parsed];
-  const line = JSON.stringify(clients);
-
-  if (values.print) {
-    io.stdout(`RENKEI_CLIENTS=${line}`);
+  if (target.kind === 'yaml') {
+    addClientToYaml(target.path, envPath, parsed, values, io);
   } else {
-    writeFileSync(envPath, setEnvLine(readFileSync(envPath, 'utf8'), 'RENKEI_CLIENTS', line));
-    io.stdout(`Added client "${clientId}" to ${envPath} (restart renkei to pick it up).`);
+    addClientToEnv(envPath, env, parsed, values, io);
   }
   io.stdout('');
   for (const l of snippet(preset, parsed, issuer)) io.stdout(l);
   return 0;
+}
+
+/** RENKEI_CLIENTS in .env: the whole list is one JSON value, rewritten each time. */
+function addClientToEnv(envPath, env, client, values, io) {
+  const existing = parseClients(env.RENKEI_CLIENTS);
+  const at = existing.findIndex((c) => c && c.clientId === client.clientId);
+  if (at >= 0 && !values.replace) {
+    throw new Error(
+      `client "${client.clientId}" is already in RENKEI_CLIENTS — pass --replace to overwrite it.`,
+    );
+  }
+  const line = JSON.stringify(at >= 0 ? existing.with(at, client) : [...existing, client]);
+  if (values.print) {
+    io.stdout(`RENKEI_CLIENTS=${line}`);
+    return;
+  }
+  writeFileSync(envPath, setEnvLine(readFileSync(envPath, 'utf8'), 'RENKEI_CLIENTS', line));
+  io.stdout(`Added client "${client.clientId}" to ${envPath} (restart renkei to pick it up).`);
+}
+
+/**
+ * The `clients:` list in renkei.yaml. As with channels, the generated secret
+ * goes to .env and the file gets the `${VAR}` reference — that is what keeps
+ * renkei.yaml committable.
+ */
+function addClientToYaml(yamlPath, envPath, client, values, io) {
+  const secretVar = client.clientSecret ? clientSecretVarName(client.clientId) : undefined;
+  /** @type {Record<string, unknown>} */
+  const entry = { client_id: client.clientId };
+  if (secretVar) entry.client_secret = '${' + secretVar + '}';
+  entry.redirect_uris = client.redirectUris;
+  if (client.tokenEndpointAuthMethod !== 'client_secret_basic') {
+    entry.token_endpoint_auth_method = client.tokenEndpointAuthMethod;
+  }
+  if (client.lineRegion) entry.line_region = client.lineRegion;
+  if (client.placeholderEmailDomain) entry.placeholder_email_domain = client.placeholderEmailDomain;
+
+  const doc = readDocument(yamlPath);
+  const result = upsertInSequence(
+    doc,
+    'clients',
+    entry,
+    (c) => (c?.client_id ?? c?.clientId) === client.clientId,
+    values.replace,
+  );
+  if (result === 'exists') {
+    throw new Error(
+      `client "${client.clientId}" is already in ${yamlPath} — pass --replace to overwrite it.`,
+    );
+  }
+  if (values.print) {
+    io.stdout(doc.toString({ lineWidth: 0 }));
+    return;
+  }
+  writeDocument(yamlPath, doc);
+  if (secretVar) {
+    const text = existsSync(envPath) ? readFileSync(envPath, 'utf8') : '';
+    writeFileSync(envPath, setEnvLine(text, secretVar, client.clientSecret));
+  }
+  io.stdout(
+    `${result === 'replaced' ? 'Replaced' : 'Added'} client "${client.clientId}" in ${yamlPath}` +
+      `${secretVar ? `, its secret in ${envPath} as ${secretVar}` : ''} (restart renkei to pick it up).`,
+  );
+}
+
+/** The issuer a renkei.yaml declares, so the printed snippet points at the right renkei. */
+function issuerFromYaml(path, env) {
+  const value = readDocument(path).get('issuer');
+  if (typeof value !== 'string') return undefined;
+  // The file may name it by reference; the .env next to it is where that lives.
+  return value.replace(
+    /\$\{([A-Za-z_][A-Za-z0-9_]*)(?::-([^}]*))?\}/g,
+    (_m, name, fallback) => env[name] ?? fallback ?? '',
+  );
 }
 
 /** @param {string | undefined} raw */
