@@ -14,8 +14,8 @@ Once public, this mirrors a GitHub Project board.
 - [x] Apply for **email** permission — applied 2026-08-26, awaiting review;
       set `requestEmail: true` on the channel once approved
 - [x] Publish placeholder `renkei@0.0.0` to npm — published 2026-08-26 (passkey 2FA; publish interactively)
-- [ ] Register `renkei` GitHub org (free) — transfer repo there at launch or
-      keep under personal account; decide at launch
+- [ ] Register a GitHub org and transfer the repo — decided 2026-09-17 (Achraf); `renkei` is taken,
+      candidates `renkei-oss` / `renkei-id` / `renkei-auth` / `renkeijs`. Steps in NEXT.md
 - [x] Week-1 spike: `oidc-provider` on Deno/Workers — PASS on all three
       (2026-08-26, SPIKE-oidc-provider-runtimes.md)
 - [x] Verify the same on Supabase `edge-runtime` — PASS via fetch→(req,res)
