@@ -14,7 +14,12 @@ touches it, and the linked group lifts it to the group version), `renkei`, `renk
 have no changes and stay on 0.5.0. So `pnpm -r publish` is **five** passkeys this time, and
 `renkei-core` publishes again.
 **0.6.0 is released** (npm + GHCR, §0 ticked). Housekeeping done with it: issues #1, #2, #3, #4, #5, #12 closed
-(shipped long ago), §3 dogfooding ticked. **Zenn article published 2026-09-17** (§2). §4 email permission checked 2026-09-17: still *Applied*.
+(shipped long ago), §3 dogfooding ticked. **Logo shipped 2026-09-17** (Achraf asked for a minimal, child-drawable mark): an open ring with a square in its
+gap — `docs/images/logo/` (source SVGs + 1024 px avatar), white on `#111318`; docs favicon + nav logo via
+`docs/public/` (`vite.publicDir`, since `srcDir` is the repo root), both READMEs. Achraf set it on Zenn and
+npm (npm avatars come from Gravatar). Repos have no avatar on GitHub — only the social preview, which
+still predates the logo. Deliberately not LINE green as the dominant colour.
+**Zenn article published 2026-09-17** (§2). §4 email permission checked 2026-09-17: still *Applied*.
 **Open for Achraf:** §4 email permission (Claude can check the console in Chrome once it is logged in). Next code item: §5's
 last candidate (account linkage as a flag on the account row, needs a migration) — or v0.4 of the ROADMAP.
 

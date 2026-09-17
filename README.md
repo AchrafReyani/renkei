@@ -1,6 +1,8 @@
+<p align="center"><img src="./docs/images/logo/renkei-avatar-white-on-dark-rounded.svg" width="112" height="112" alt="renkei"></p>
+
 # renkei（連携）
 
-> English: [README.en.md](README.en.md) · ドキュメント: [docs/](docs/) · 状況: **v0.1 開発中**（公開前）
+> English: [README.en.md](README.en.md) · ドキュメント: [docs/](docs/) · 状況: **v0.6.0**（0.x — 設定・API は変わりうる）
 
 **LINEログインの「その先」を全部引き受ける、セルフホスト型IDブローカー。**
 
