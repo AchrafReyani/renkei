@@ -13,10 +13,10 @@ touches it, and the linked group lifts it to the group version), `renkei`, `renk
 `renkei-storage-sqlite` and `renkei-storage-postgres` to **0.6.0**; `renkei-client` and `renkei-next`
 have no changes and stay on 0.5.0. So `pnpm -r publish` is **five** passkeys this time, and
 `renkei-core` publishes again.
-**Housekeeping spotted, not done:** GitHub issues #1, #2, #3 (v0.2), #4, #5 (v0.3 SDKs) and #12
-(storage-sqlite) are still open although the work shipped — close them with a pointer to the release.
-§3's dogfooding window (earliest launch 2026-09-10) has passed with no login bug filed; §2's Zenn
-article is unblocked.
+**0.6.0 is released** (npm + GHCR, §0 ticked). Housekeeping done with it: issues #1, #2, #3, #4, #5, #12 closed
+(shipped long ago), §3 dogfooding ticked. **Open for Achraf:** §2 Zenn article (unblocked since 2026-09-10),
+§4 email permission (Claude can check the console in Chrome once it is logged in). Next code item: §5's
+last candidate (account linkage as a flag on the account row, needs a migration) — or v0.4 of the ROADMAP.
 
 **Earlier pick-up note (session of 2026-09-05, night):**
 **Two clean-ups done.** (1) **§0's last item**: `examples/supabase-edge` now resolves the *published*
@@ -253,19 +253,24 @@ the LIFF phone shot (§2, optional), Option B forward (§1, optional).
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.6.0 — IN PROGRESS 2026-09-17 (MINI App + multi-region + renkei.yaml + login button)
+## 0. Cut 0.6.0 — DONE 2026-09-17 (MINI App + multi-region + renkei.yaml + login button)
 
 Same flow as 0.5.0. Achraf's terminal is `cmd.exe` — `&&`, never `;`.
 
 - [x] Claude: `release/0.6.0` — `pnpm changeset version` → lint / typecheck / 349 tests / build / docs:build
-      green → DCO commit → PR.
-- [ ] Claude: squash-merge the release PR once CI is green.
-- [ ] Achraf, in cmd on `main` after `git pull`: `pnpm -r publish --access public` (five passkeys:
+      green → DCO commit → PR #80 → squash-merge (`0f27dfe`). The PR also fixed the DCO CI check: it ran
+      awk in paragraph mode, so any commit body with a blank line failed even with the trailer present.
+- [x] Claude: squash-merged PR #80.
+- [x] Achraf, in cmd on `main`: `pnpm -r publish --access public` — done 2026-09-17. First attempt failed with
+      `E404 PUT …/renkei-core` — that is npm's answer to an **expired token**, not a missing package; `npm login`
+      then rerun. The registry answered 202 for some packages and took a minute or two to flip `latest`. (five passkeys:
       `renkei-core`, `renkei-storage-sqlite`, `renkei-storage-postgres`, `renkei-server`, `renkei`;
       `renkei-client` / `renkei-next` are already at their published 0.5.0 and get skipped).
-- [ ] Claude: tag and push `v0.6.0`; watch `release.yml` push `ghcr.io/achrafreyani/renkei:0.6.0` / `:0.6` / `:latest`.
-- [ ] Claude: `npm view` = 0.6.0 for the five; bump `examples/supabase-edge` to `npm:renkei-server@^0.6.0/supabase`;
-      tick here + ROADMAP.md; close the shipped-but-open issues.
+- [x] Claude: tagged and pushed `v0.6.0`; `release.yml` run 35181153679 succeeded and pushed
+      `ghcr.io/achrafreyani/renkei:0.6.0` / `:0.6` / `:latest`.
+- [x] Claude: `npm view` = 0.6.0 for `renkei-core`, `renkei-storage-sqlite`, `renkei-storage-postgres`, `renkei-server`,
+      `renkei`; 0.5.0 for `renkei-client` / `renkei-next`. `examples/supabase-edge` pinned to `^0.6.0`; ticked here +
+      ROADMAP.md; issues #1, #2, #3, #4, #5, #12 closed as shipped.
 
 ## 0a. Cut 0.5.0 — DONE 2026-09-04 (Workers + Supabase Edge targets)
 
@@ -434,12 +439,13 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
 
 ## 3. Dogfooding (two weeks, calendar time)
 
-- [~] renkei already brokers LINE login on the job-matching-platform in prod
+- [x] renkei already brokers LINE login on the job-matching-platform in prod
       (see the [[jobmatch-renkei-integration]] memory). Just let it run and log
       bugs as issues. **Start date: 2026-08-27** (the day v0.2.0 shipped)
       **Earliest launch date: 2026-09-10** (confirmed by Achraf 2026-08-30).
       Tick this and ROADMAP.md "Dogfooded in one real app" on/after 2026-09-10
       if no unresolved login bug is open against renkei.
+      **Ticked 2026-09-17:** the window closed on 2026-09-10 with no login bug filed.
 
 ## 4. LINE email permission
 

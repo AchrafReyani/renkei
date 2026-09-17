@@ -78,7 +78,8 @@ Order matters: each item is what the next needs.
 - [x] Dockerfile (node:22-alpine, pnpm deploy --prod, 301 MB) — verified standalone 2026-08-26;
       GHCR publish workflow written (`release.yml`, runs on `v*` tags — first
       exercised on `v0.2.0`, 2026-08-27: `:0.2.0` / `:0.2` / `:latest`;
-      `v0.2.1`, `v0.2.2`, `v0.2.3` and `v0.3.0` on 2026-08-30; `v0.4.0` on 2026-09-03; `v0.5.0` on 2026-09-04)
+      `v0.2.1`, `v0.2.2`, `v0.2.3` and `v0.3.0` on 2026-08-30; `v0.4.0` on 2026-09-03; `v0.5.0` on 2026-09-04;
+      `v0.6.0` on 2026-09-17)
 - [x] `docker-compose.yml` with Postgres — verified: migrations run at boot, healthz 200
 - [x] npm publish via Changesets (`changeset version` on a PR, then `pnpm -r publish`
       interactively — passkey 2FA); 0.2.0 published 2026-08-27, 0.2.1 (patches
@@ -87,7 +88,9 @@ Order matters: each item is what the next needs.
       first publish of `renkei-storage-sqlite`) published 2026-08-30; 0.4.0 (`renkei`,
       first publishes of `renkei-client` and `renkei-next`) published 2026-09-03; 0.5.0 (`renkei`,
       `renkei-server`, `renkei-storage-sqlite`, `renkei-storage-postgres`, `renkei-client`, `renkei-next`;
-      Workers + Supabase Edge targets) published 2026-09-04.
+      Workers + Supabase Edge targets) published 2026-09-04; 0.6.0 (`renkei-core` — its first bump since 0.2.3 —,
+      `renkei-storage-sqlite`, `renkei-storage-postgres`, `renkei-server`, `renkei`; MINI App, multi-region,
+      `renkei.yaml`, guideline login button) published 2026-09-17.
       `renkei` CLI = `npx renkei` ready
 - [x] Demo instance running (Render free tier, cold-start disclaimer in README) — 2026-08-26
 
@@ -114,8 +117,8 @@ Order matters: each item is what the next needs.
 - [x] Discussions enabled with a 「はじめに / Welcome」 thread
 
 **proof**
-- [~] Dogfooded in one real app for two weeks — job-matching-platform in prod,
-      clock started 2026-08-27 (v0.2.0); earliest launch 2026-09-10
+- [x] Dogfooded in one real app for two weeks — job-matching-platform in prod,
+      clock started 2026-08-27 (v0.2.0); window closed 2026-09-10 with no login bug filed (ticked 2026-09-17)
 
 ## v0.2 — account linking
 

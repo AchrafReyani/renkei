@@ -4,8 +4,8 @@
 //
 // To build storage yourself or inject a logger:
 //
-//   import { createEdgeFunction } from 'npm:renkei-server@^0.5.0/supabase';
+//   import { createEdgeFunction } from 'npm:renkei-server@^0.6.0/supabase';
 //   Deno.serve(createEdgeFunction({ storage: (env) => … }).fetch);
-import { serve } from 'npm:renkei-server@^0.5.0/supabase';
+import { serve } from 'npm:renkei-server@^0.6.0/supabase';
 
 serve();
