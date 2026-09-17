@@ -1,5 +1,12 @@
 # renkei-storage-postgres
 
+## 0.6.0
+
+### Patch Changes
+
+- Updated dependencies [6ded8f0]
+  - renkei-core@0.6.0
+
 ## 0.5.0
 
 ### Minor Changes
