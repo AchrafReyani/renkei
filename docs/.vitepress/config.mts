@@ -33,6 +33,10 @@ export default defineConfig({
     'docs/:dir/:name.en.md': 'en/:dir/:name.md',
   },
   ignoreDeadLinks: true,
+  // Static files (favicon, nav logo). srcDir is the repo root, so Vite's default
+  // `public/` would be a top-level directory; keep it under docs/ instead.
+  vite: { publicDir: 'docs/public' },
+  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }]],
   title: 'renkei',
   description: 'LINEログインの「その先」を全部引き受ける、セルフホスト型IDブローカー',
   cleanUrls: true,
@@ -128,6 +132,7 @@ export default defineConfig({
     },
   },
   themeConfig: {
+    logo: '/logo.svg',
     socialLinks: [{ icon: 'github', link: 'https://github.com/AchrafReyani/renkei' }],
     search: { provider: 'local' },
     footer: {

@@ -1,6 +1,8 @@
+<p align="center"><img src="./docs/images/logo/renkei-avatar-white-on-dark-rounded.svg" width="112" height="112" alt="renkei"></p>
+
 # renkei (連携)
 
-> 日本語: [README.md](README.md) · Docs: [docs/](docs/) · Status: **v0.1 in progress** (pre-release)
+> 日本語: [README.md](README.md) · Docs: [docs/](docs/) · Status: **v0.6.0** (0.x — config and API may still change)
 
 **A self-hosted identity broker that owns everything after the LINE login.**
 
