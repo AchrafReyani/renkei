@@ -4,7 +4,21 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
-**Pick up here (session of 2026-09-05, night):**
+**Pick up here (session of 2026-09-17):**
+**Cutting 0.6.0** (§0 below). Everything merged since the 0.5.0 cut is unpublished: the LINE MINI App
+channels (#71 — merged *after* PR #70, so npm 0.5.0 has no MINI App support even though the demo does),
+multi-region (#75, #76), `renkei.yaml` (#77) and the guideline login button (#78). `pnpm changeset
+version` bumped `renkei-core` 0.2.3 → **0.6.0** (its first bump since 0.2.3 — the MINI App changeset
+touches it, and the linked group lifts it to the group version), `renkei`, `renkei-server`,
+`renkei-storage-sqlite` and `renkei-storage-postgres` to **0.6.0**; `renkei-client` and `renkei-next`
+have no changes and stay on 0.5.0. So `pnpm -r publish` is **five** passkeys this time, and
+`renkei-core` publishes again.
+**Housekeeping spotted, not done:** GitHub issues #1, #2, #3 (v0.2), #4, #5 (v0.3 SDKs) and #12
+(storage-sqlite) are still open although the work shipped — close them with a pointer to the release.
+§3's dogfooding window (earliest launch 2026-09-10) has passed with no login bug filed; §2's Zenn
+article is unblocked.
+
+**Earlier pick-up note (session of 2026-09-05, night):**
 **Two clean-ups done.** (1) **§0's last item**: `examples/supabase-edge` now resolves the *published*
 `npm:renkei-server@^0.5.0/supabase` — verified on the local Supabase stack (Docker + `supabase start`
 in `examples/supabase-edge`, `functions serve --env-file` with `ISSUER` pointed at `/functions/v1/renkei`
@@ -239,7 +253,21 @@ the LIFF phone shot (§2, optional), Option B forward (§1, optional).
 Cloud-session note: a fresh clone has **no `.env` and nothing running**. LINE
 secrets, the demo's Render env and the LINE console are all Achraf's side.
 
-## 0. Cut 0.5.0 — DONE 2026-09-04 (Workers + Supabase Edge targets)
+## 0. Cut 0.6.0 — IN PROGRESS 2026-09-17 (MINI App + multi-region + renkei.yaml + login button)
+
+Same flow as 0.5.0. Achraf's terminal is `cmd.exe` — `&&`, never `;`.
+
+- [x] Claude: `release/0.6.0` — `pnpm changeset version` → lint / typecheck / 349 tests / build / docs:build
+      green → DCO commit → PR.
+- [ ] Claude: squash-merge the release PR once CI is green.
+- [ ] Achraf, in cmd on `main` after `git pull`: `pnpm -r publish --access public` (five passkeys:
+      `renkei-core`, `renkei-storage-sqlite`, `renkei-storage-postgres`, `renkei-server`, `renkei`;
+      `renkei-client` / `renkei-next` are already at their published 0.5.0 and get skipped).
+- [ ] Claude: tag and push `v0.6.0`; watch `release.yml` push `ghcr.io/achrafreyani/renkei:0.6.0` / `:0.6` / `:latest`.
+- [ ] Claude: `npm view` = 0.6.0 for the five; bump `examples/supabase-edge` to `npm:renkei-server@^0.6.0/supabase`;
+      tick here + ROADMAP.md; close the shipped-but-open issues.
+
+## 0a. Cut 0.5.0 — DONE 2026-09-04 (Workers + Supabase Edge targets)
 
 Same flow as 0.4.0. `renkei`, `renkei-server`, `renkei-storage-sqlite`, `renkei-storage-postgres`,
 `renkei-client` and `renkei-next` are on **0.5.0** on `main`; `renkei-core` stays 0.2.3 and is skipped by
@@ -258,7 +286,7 @@ Same flow as 0.4.0. `renkei`, `renkei-server`, `renkei-storage-sqlite`, `renkei-
       http://127.0.0.1:54321/functions/v1/renkei`, the path prefix kept on `authorization_endpoint` /
       `token_endpoint` / `jwks_uri`, the pinned JWKS (`kid kmtmxofjn`) and `/dev` 200. §0 is now closed.
 
-## 0a. Cut 0.4.0 — DONE 2026-09-03 (renkei-client + renkei-next + CLI presets)
+## 0b. Cut 0.4.0 — DONE 2026-09-03 (renkei-client + renkei-next + CLI presets)
 
 Same flow as 0.3.0. Changesets on `main`: `renkei-client` minor, `renkei-next` minor,
 `renkei` patch ×2 → the linked group puts **`renkei`, `renkei-client` and

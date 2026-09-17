@@ -38,8 +38,12 @@ jobs:
           fetch-depth: 0
       - name: Every commit in this PR must carry a Signed-off-by trailer
         run: |
-          missing=$(git log --format='%H %s%n%b' ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} \
-            | awk 'BEGIN{RS="";FS="\n"} !/Signed-off-by:/ {print $1}')
+          # One line per commit, not per paragraph: a body with blank lines must
+          # not split the trailer away from the subject.
+          missing=$(git rev-list ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} \
+            | while read -r sha; do
+                git log -1 --format=%B "$sha" | grep -q '^Signed-off-by:' || git log -1 --format='%H %s' "$sha"
+              done)
           if [ -n "$missing" ]; then
             echo "Commits without DCO sign-off (use: git commit -s):"
             echo "$missing"

@@ -1,5 +1,30 @@
 # renkei-server
 
+## 0.6.0
+
+### Minor Changes
+
+- 5752a28: The LINE Login button, framework-free. `lineLoginButton({ href, locale?, label?, size?, iconOnly?, disabled?, className? })` returns an `<a>` as an HTML string and `lineLoginButtonCss()` the stylesheet it needs, both following LINE's design guideline — brand green `#06C755`, the official icon embedded unmodified, the 10 % / 30 % black hover and press overlays, and a disabled state that is genuinely unreachable rather than merely grey. No framework, no build step, so a hand-written login page can be compliant out of the box.
+  
+  renkei's own `/dev` page now uses it: the real login entry points are guideline buttons (one per Login channel when several regions are configured, so `line_region` routing is still reachable), while the `bot_prompt` and scope knobs stay plain links — they are test controls, and a wall of identical green buttons is not what the guideline is for. Closes #19 for `/dev`; `examples/nextjs` keeps its plain submit button, since it demonstrates Auth.js and pulling in `renkei-next` would defeat that.
+  
+  The React component in `renkei-next/button` is unchanged. It cannot import this one (`renkei-server` is a devDependency there, and the dependency runs the other way), so the icon and CSS exist twice — `packages/next/test` now asserts the two icons are byte-equal and the guideline CSS rules match, because the guideline requires the icon unmodified and a silent drift would make one copy non-compliant.
+- 6ded8f0: LINE MINI App channel support. Channels take `kind: 'login' | 'miniapp'` and an optional `provider`; `LINE_MINIAPP_CHANNEL_ID` / `LINE_MINIAPP_CHANNEL_SECRET` register a MINI App's stage channels (comma-separated) next to the Login channel. `POST /liff/exchange` accepts MINI App id_tokens and access tokens, and identities are now provider-scoped: `upsertIdentityFromLine()` takes `providerChannelIds`, and a LINE user ID already known on a sibling channel of the same provider reuses that identity's `sub` instead of creating a second one (channels with the same `provider` value, or none, are one provider). `/dev/liff?liff_id=` swaps the LIFF app the test page initialises. Guide: docs/guides/line-mini-app.
+- e7fc959: Multi-region configuration. `RENKEI_CHANNELS` takes further LINE channels as JSON — a second region, a MINI App, or the whole list on its own (then `LINE_LOGIN_*` may be omitted and the first Login channel is the default) — so several regions no longer need programmatic configuration. `LINE_MESSAGING_CHANNEL_REGION` says which Login channel's users a Messaging channel's webhook events concern. With several regions configured, the boot checks name the channel a login without `line_region` will use, and the `/dev` page gains one login link per region and passes `line_region` through. Tutorial: docs/tutorials/multi-region.
+- e69ca6f: Structured configuration: `renkei.yaml`. renkei now reads a config file from the working directory (`RENKEI_CONFIG` overrides the path) and, when there is one, it is the whole configuration — the `LINE_*` / `RENKEI_*` variables it supersedes are named on the boot banner instead of quietly taking effect, while `PORT`, `DATABASE_URL` and anything the file references keep working. The file goes through the same `renkeiConfigSchema`, takes `snake_case` keys (camelCase too, so a `RENKEI_CHANNELS` entry can be pasted in unchanged) and expands `${VAR}` / `${VAR:-fallback}` from the environment, so no secret has to live in it and it can be committed. The loader is `renkei-server/config-file`, a Node-only entry the Workers and Supabase Edge builds do not import.
+  
+  The CLI writes it: `renkei init --yaml` creates a `renkei.yaml` plus the `.env` of secrets it references — converting an existing `.env` if there is one, including the secrets that were buried inside `RENKEI_CHANNELS` / `RENKEI_CLIENTS` JSON, which get a variable of their own. `renkei add-channel <id> [--region tw] [--miniapp] [--secret … | --secret-env VAR]` appends a channel, and `renkei add-client` appends to the file's `clients:` when there is one (otherwise `RENKEI_CLIENTS`, as before); both put the reference in the YAML and the value in `.env`, and comments in the file survive the edit.
+  
+  Also fixed: `npx renkei` never loaded `.env`, so the quickstart (`renkei init` then `npx renkei`) only worked if you exported the variables yourself.
+
+### Patch Changes
+
+- c57d2a9: The `/dev` page's per-region login links now send `prompt=login`. renkei keeps its own session, so a second authorization request in the same browser is answered from it without any LINE authentication — which meant the region links silently re-issued the previous region's claims instead of exercising the routing they exist to test. The multi-region tutorial and the endpoints reference now spell out that `line_region` only applies when a LINE authentication actually runs.
+- Updated dependencies [6ded8f0]
+  - renkei-core@0.6.0
+  - renkei-storage-postgres@0.6.0
+  - renkei-storage-sqlite@0.6.0
+
 ## 0.5.0
 
 ### Minor Changes
