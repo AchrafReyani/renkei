@@ -4,7 +4,20 @@
 open items. Work through them **with Achraf, one at a time**. Most remaining
 steps need his passkey, phone, the GitHub UI, the LINE console or Render.
 
-**Pick up here (session of 2026-09-17):**
+**Pick up here (next session; 2026-09-17 ended at main after PR #84):**
+**First item: the GitHub org.** Achraf decided to move the repo under an org. The handle `renkei` is taken
+(a personal account from 2017); free on 2026-09-17: `renkei-oss`, `renkei-id`, `renkei-auth`, `renkeijs`
+(`renkei-dev`, `renkei-project` taken). Steps: (1) **Achraf** creates the org — Free plan,
+https://github.com/organizations/plan — Claude must not create accounts. (2) Claude transfers the repo
+(Settings → Danger zone), checks the two rulesets survived, updates the 27 files that hard-code
+`github.com/AchrafReyani/renkei` and the 4 with `ghcr.io/achrafreyani` in one PR (the image path becomes
+`ghcr.io/<org>/renkei` at the next tag; old images stay under the user), and the `repository` fields
+land on npm at the next release. (3) **Achraf** grants the org in the Render GitHub app so the demo keeps
+auto-deploying; social preview + GHCR package visibility to re-check after the move. Old URLs redirect.
+**Done 2026-09-17:** 0.6.0 released (§0), Zenn article #1 published (§2), logo + social preview
+(PRs #83, #84), issues #1–#5, #12 closed, dogfooding ticked (§3), email permission still Applied (§4).
+
+**Earlier pick-up note (session of 2026-09-17):**
 **Cutting 0.6.0** (§0 below). Everything merged since the 0.5.0 cut is unpublished: the LINE MINI App
 channels (#71 — merged *after* PR #70, so npm 0.5.0 has no MINI App support even though the demo does),
 multi-region (#75, #76), `renkei.yaml` (#77) and the guideline login button (#78). `pnpm changeset
