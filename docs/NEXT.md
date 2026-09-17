@@ -14,8 +14,8 @@ touches it, and the linked group lifts it to the group version), `renkei`, `renk
 have no changes and stay on 0.5.0. So `pnpm -r publish` is **five** passkeys this time, and
 `renkei-core` publishes again.
 **0.6.0 is released** (npm + GHCR, §0 ticked). Housekeeping done with it: issues #1, #2, #3, #4, #5, #12 closed
-(shipped long ago), §3 dogfooding ticked. **Open for Achraf:** §2 Zenn article (unblocked since 2026-09-10),
-§4 email permission (Claude can check the console in Chrome once it is logged in). Next code item: §5's
+(shipped long ago), §3 dogfooding ticked. **Zenn article published 2026-09-17** (§2). §4 email permission checked 2026-09-17: still *Applied*.
+**Open for Achraf:** §4 email permission (Claude can check the console in Chrome once it is logged in). Next code item: §5's
 last candidate (account linkage as a flag on the account row, needs a migration) — or v0.4 of the ROADMAP.
 
 **Earlier pick-up note (session of 2026-09-05, night):**
@@ -434,8 +434,12 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
 - [x] In-app **LIFF phone shot** — `docs/images/liff-phone.png`, taken by Achraf on 2026-08-30 and
       linked from both READMEs (rescued from the forgotten PR #52 on 2026-09-04, PR #74).
 - [x] **Flip the repo public** — already PUBLIC as of 2026-08-30 (`gh repo view`).
-- [ ] Run LAUNCH.md §2 (publish the Zenn article — draft is
-      `drafts/zenn-account-linking.md`) — not before **2026-09-10** (§3).
+- [x] Run LAUNCH.md §2 — **published 2026-09-17**: https://zenn.dev/renkei/articles/f9e2a1a2b5cf9d
+      (Claude filled the editor from `drafts/zenn-account-linking.md` — title without the v0.2 tag, real
+      links + a v0.6.0 line in place of the placeholder; Achraf ticked Zenn's two author attestations and
+      published). Note: the account had no articles, so this is Zenn article **#1** — the LAUNCH.md launch
+      article was never written. Remaining LAUNCH.md §2 channels (Qiita cross-post +3d, X thread, Hatena)
+      are Achraf's.
 
 ## 3. Dogfooding (two weeks, calendar time)
 
@@ -450,7 +454,7 @@ at 0.2.1 (the group is `linked`, not `fixed`) — `pnpm -r publish` skips them.
 ## 4. LINE email permission
 
 - [ ] Check the Login channel (Basic settings → Email address permission).
-      *Last checked 2026-08-30 (Claude, console): still 申請済み (Applied).* Claude can check this
+      *Last checked 2026-09-17 (Claude, console): still Applied.* Claude can check this
       in Chrome once Achraf has logged the console in (see quirks). When
       **Approved**: set `RENKEI_REQUEST_EMAIL=true`, log in once with email
       consent, confirm `email` in the id_token, note in DEV_SETUP.md. Until

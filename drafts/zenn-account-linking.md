@@ -1,9 +1,9 @@
 ---
-title: "LINEログインの「その先」——アカウント連携をセルフホストで完結させる（renkei v0.2）"
+title: "LINEログインの「その先」——アカウント連携をセルフホストで完結させる（renkei）"
 emoji: "🔗"
 type: "tech"
 topics: ["line", "oidc", "typescript", "認証", "個人開発"]
-published: false
+published: true
 ---
 
 > この記事は OSS「renkei（連携）」の作者による解説です。renkei は LINE 向けの
@@ -137,8 +137,14 @@ HTML 画面で覗けます。**一覧 API は無し・状態変更も無し**—
 - 既存アカウントへの後付け連携は、**検証＋転送**でアプリに委ねる（方式 B）。
 - すべて Web Crypto でランタイム非依存。
 
-renkei はまだ 0.x で、実アプリ（自分の求人マッチングサービス）で dogfooding しながら
-育てています。リポジトリと日本語ドキュメントはこちら 👉
-（README / チュートリアル / エンドポイントリファレンスへのリンクを貼る）
+renkei はまだ 0.x（この記事の時点で v0.6.0）で、実アプリ（自分の求人マッチングサービス）で
+dogfooding しながら育てています。v0.2 以降、Postgres 無しの SQLite ストレージ、`npx renkei init`
+での初期化、Cloudflare Workers / Supabase Edge Functions へのデプロイ、LINE ミニアプリ、
+複数リージョン、`renkei.yaml` が加わりました。リポジトリと日本語ドキュメントはこちら 👉
+
+- リポジトリ / README: https://github.com/AchrafReyani/renkei
+- チュートリアル「アカウント連携」: https://github.com/AchrafReyani/renkei/blob/main/docs/tutorials/account-linking.ja.md
+- エンドポイントリファレンス: https://github.com/AchrafReyani/renkei/blob/main/docs/reference/endpoints.ja.md
+- 設定リファレンス（`renkei.yaml` / 環境変数）: https://github.com/AchrafReyani/renkei/blob/main/docs/reference/config.ja.md
 
 フィードバック・Issue・「自分の LINE 連携こう組んでる」的な話、歓迎です。
